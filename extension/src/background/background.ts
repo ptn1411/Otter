@@ -188,12 +188,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
               func: () => {
                 const form = document.querySelector("form");
                 const submitBtn = (form ? form.querySelector('button[type="submit"]') : null)
-                  || document.querySelector('button[aria-label*="Gửi"]')
-                  || document.querySelector('button[aria-label*="Send"]')
-                  || document.querySelector('button[data-testid*="send"]');
+                  || document.querySelector('button[data-testid="send-button"]')
+                  || document.querySelector('button[data-testid*="send" i]')
+                  || document.querySelector('button[aria-label*="Gửi" i]')
+                  || document.querySelector('button[aria-label*="Send" i]');
 
-                if (submitBtn && !(submitBtn as HTMLButtonElement).disabled) {
+                if (submitBtn) {
                   const btn = submitBtn as HTMLButtonElement;
+                  try {
+                    btn.removeAttribute("disabled");
+                    btn.removeAttribute("aria-disabled");
+                  } catch {}
                   btn.focus();
                   btn.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true }));
                   btn.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true }));

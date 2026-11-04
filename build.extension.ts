@@ -30,6 +30,16 @@ if (!buildResult.success) {
   process.exit(1);
 }
 
+// 1.1 Bọc content.js trong IIFE an toàn để ngăn lỗi "Identifier ... has already been declared" khi extension reload hoặc chạy lại trên tab hiện hữu
+const contentDist = path.join(distDir, "content.js");
+try {
+  let contentCode = await fs.readFile(contentDist, "utf8");
+  contentCode = `(() => {\n  if (window.__otterContentInjected) return;\n  window.__otterContentInjected = true;\n${contentCode}\n})();`;
+  await fs.writeFile(contentDist, contentCode, "utf8");
+} catch (err: any) {
+  console.warn("[!] Không thể bọc IIFE content.js:", err.message);
+}
+
 // 2. Helper copy folder recursive
 async function copyDir(src: string, dest: string) {
   await fs.mkdir(dest, { recursive: true });

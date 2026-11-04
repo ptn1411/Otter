@@ -162,9 +162,19 @@ export async function submitChatGPTComposer(timeoutMs = 4000): Promise<boolean> 
     await new Promise((r) => setTimeout(r, 100));
   }
 
-  // Fallback: Dispatch phím Enter trên ô nhập
+  // Fallback: Nếu nút Send không sáng sau timeout, kích hoạt gửi qua Main World script
+  console.warn("[Otter Injector] Không thấy nút Send bật sáng sau timeout, fallback gửi qua Main World & Enter...");
+  if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
+    try {
+      const resp = await chrome.runtime.sendMessage({ type: "submit-chatgpt-main-world" }).catch(() => null);
+      if (resp?.ok) {
+        console.log("[Otter Injector] ✅ Đã gửi thành công qua Main World fallback!");
+        return true;
+      }
+    } catch {}
+  }
+
   if (promptInput) {
-    console.warn("[Otter Injector] Không thấy nút Send bật sáng sau timeout, fallback gửi phím Enter...");
     promptInput.focus();
     promptInput.dispatchEvent(new KeyboardEvent("keydown", {
       key: "Enter",
@@ -236,9 +246,21 @@ export async function injectPromptToChatGPT(
     // Kịch bản ProseMirror contenteditable
     let inserted = false;
 
-    // Chiến lược 1: Clipboard DataTransfer paste (chuẩn nhất cho ProseMirror)
+    // 1. Đặt selection / range vào editor (bắt buộc để ProseMirror và execCommand nhận diện đúng ngữ cảnh)
+    promptInput.focus();
     try {
-      promptInput.focus();
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(promptInput);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    } catch {}
+
+    // 2. Chiến lược 1: Clipboard DataTransfer paste (chuẩn nhất cho ProseMirror)
+    try {
       const clipboardData = new DataTransfer();
       clipboardData.setData("text/plain", text);
       const pasteEvent = new ClipboardEvent("paste", {
@@ -247,39 +269,41 @@ export async function injectPromptToChatGPT(
         cancelable: true,
       });
       promptInput.dispatchEvent(pasteEvent);
-      await new Promise((r) => setTimeout(r, 50));
+      await new Promise((r) => setTimeout(r, 60));
 
       const inner = promptInput.innerText || promptInput.textContent || "";
-      if (inner.trim().length > 0) {
+      if (inner.includes(text.slice(0, 30))) {
         inserted = true;
       }
     } catch {
       inserted = false;
     }
 
-    // Chiến lược 2: execCommand insertText
+    // 3. Chiến lược 2: execCommand insertText
     if (!inserted) {
       try {
         promptInput.focus();
         inserted = document.execCommand("insertText", false, text);
-        await new Promise((r) => setTimeout(r, 30));
+        await new Promise((r) => setTimeout(r, 50));
       } catch {
         inserted = false;
       }
     }
 
-    // Chiến lược 3: beforeinput + InputEvent
+    // 4. Chiến lược 3: beforeinput + InputEvent
     if (!inserted) {
       try {
         promptInput.dispatchEvent(new InputEvent("beforeinput", {
           bubbles: true,
           cancelable: true,
+          composed: true,
           inputType: "insertText",
           data: text
         }));
         promptInput.innerText = text;
         promptInput.dispatchEvent(new InputEvent("input", {
           bubbles: true,
+          composed: true,
           inputType: "insertText",
           data: text
         }));
@@ -289,10 +313,10 @@ export async function injectPromptToChatGPT(
       }
     }
 
-    // Dispatch các event báo cho React
-    promptInput.dispatchEvent(new InputEvent("input", { bubbles: true, data: text, inputType: "insertText" }));
-    promptInput.dispatchEvent(new Event("input", { bubbles: true }));
-    promptInput.dispatchEvent(new Event("change", { bubbles: true }));
+    // Luôn dispatch các sự kiện input/change để React Hook Form / Zustand cập nhật state nút Send
+    promptInput.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true, data: text, inputType: "insertText" }));
+    promptInput.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    promptInput.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
   }
 
   console.log("[Otter Injector] Đã chèn văn bản thành công vào editor");
