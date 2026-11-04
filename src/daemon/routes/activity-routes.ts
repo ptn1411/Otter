@@ -109,7 +109,14 @@ export async function handleActivityRoutes(
 
     if (browserAction === "read" && (req.method === "POST" || req.method === "GET")) {
       try {
-        const res = await browserBridge.execute("read_page");
+        let urlPattern = url.searchParams.get("urlPattern") || undefined;
+        if (req.method === "POST") {
+          try {
+            const body: any = await req.json();
+            if (body?.urlPattern) urlPattern = body.urlPattern;
+          } catch {}
+        }
+        const res = await browserBridge.execute("read_page", { urlPattern });
         if (!res) {
           return errorResponse("Không thể đọc trang (trang đang tải hoặc chưa sẵn sàng)", 500);
         }
@@ -123,7 +130,7 @@ export async function handleActivityRoutes(
     if (browserAction === "click" && req.method === "POST") {
       try {
         const body: any = await req.json();
-        const res = await browserBridge.execute("click", { index: Number(body.index) });
+        const res = await browserBridge.execute("click", { index: Number(body.index), urlPattern: body.urlPattern });
         handleMcpActivity({ type: "browser_action", action: "click", index: body.index });
         return jsonResponse(res);
       } catch (err: any) {
@@ -134,7 +141,7 @@ export async function handleActivityRoutes(
     if (browserAction === "type" && req.method === "POST") {
       try {
         const body: any = await req.json();
-        const res = await browserBridge.execute("type", { index: Number(body.index), text: body.text, pressEnter: Boolean(body.pressEnter) });
+        const res = await browserBridge.execute("type", { index: Number(body.index), text: body.text, pressEnter: Boolean(body.pressEnter), urlPattern: body.urlPattern });
         handleMcpActivity({ type: "browser_action", action: "type", index: body.index, text: body.text });
         return jsonResponse(res);
       } catch (err: any) {

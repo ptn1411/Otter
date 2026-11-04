@@ -211,6 +211,17 @@
         "operationId": "browserReadPage",
         "summary": "Đọc nội dung và cấu trúc trang web hiện tại đang mở trên Chrome",
         "description": "BẮT BUỘC GỌI HÀM NÀY khi người dùng yêu cầu đọc trang, phân tích trang, tìm trend hoặc lên kịch bản từ trang đang mở. KHÔNG ĐƯỢC yêu cầu người dùng gửi link hay ảnh chụp màn hình vì hàm này tự động đọc trực tiếp từ trình duyệt.",
+        "parameters": [
+          {
+            "name": "urlPattern",
+            "in": "query",
+            "required": false,
+            "description": "Tùy chọn: Lọc tên miền URL của tab cần đọc (ví dụ: 'facebook.com', 'chatgpt.com')",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Dữ liệu trang web",
@@ -260,6 +271,10 @@
                   "index": {
                     "type": "integer",
                     "description": "Chỉ số phần tử [index] lấy từ browserReadPage"
+                  },
+                  "urlPattern": {
+                    "type": "string",
+                    "description": "Tùy chọn: Lọc tên miền URL của tab cần tương tác (ví dụ: 'facebook.com')"
                   }
                 },
                 "required": [
@@ -314,6 +329,10 @@
                   "pressEnter": {
                     "type": "boolean",
                     "description": "Có nhấn phím Enter sau khi gõ không"
+                  },
+                  "urlPattern": {
+                    "type": "string",
+                    "description": "Tùy chọn: Lọc tên miền URL của tab cần tương tác (ví dụ: 'facebook.com')"
                   }
                 },
                 "required": [
