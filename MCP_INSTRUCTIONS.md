@@ -127,8 +127,21 @@ Khi người dùng đưa ra một yêu cầu, AI Agent nên tuân theo các kị
 ```
 
 ### 3. Kết nối với Cursor / Cline / Roo Code:
-- Thêm MCP server loại `SSE` với URL: `http://localhost:9998/sse`
-- Hoặc Streamable HTTP URL: `http://localhost:9998/mcp`
+- Thêm MCP server loại `SSE` với URL: `http://localhost:1993/sse`
+- Hoặc Streamable HTTP URL: `http://localhost:1993/mcp`
+
+### 4. Kết nối với Antigravity IDE & Gemini CLI (`mcp_config.json`):
+Thêm server vào `~/.gemini/antigravity/mcp_config.json` hoặc `~/.gemini/config/mcp_config.json`:
+```json
+{
+  "mcpServers": {
+    "otter": {
+      "type": "http",
+      "url": "http://localhost:1993/mcp"
+    }
+  }
+}
+```
 
 ---
 
