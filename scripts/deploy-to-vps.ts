@@ -108,9 +108,22 @@ console.log("[*] Giải nén tools trên VPS...");
 sshCmd(`cd ${REMOTE_DIR} && tar -xzf tools.tar.gz && rm tools.tar.gz`);
 
 // 5. Cấu hình quyền và Symlink trên VPS
-console.log("\n[5/5] Cấu hình phân quyền & tạo Symlink...");
+console.log("\n[5/6] Cấu hình phân quyền & tạo Symlink...");
 sshCmd(`cd ${REMOTE_DIR} && ln -sf otter-windows-x64.exe otter.exe && chmod +x otter-* setup.sh 2>/dev/null || true`);
 sshCmd(`chown -R www-data:www-data ${REMOTE_DIR} && chmod -R u=rwX,go=rX ${REMOTE_DIR}`);
+
+// 6. Cập nhật Backend License Server (/opt/otter-server)
+console.log("\n[6/6] Cập nhật Backend License Server (/opt/otter-server)...");
+try {
+  const srcArchive = path.join(LOCAL_DEPLOY, "src_bundle.tar.gz");
+  execSync(`tar -czf "${srcArchive}" src`, { stdio: "inherit" });
+  scpUpload(srcArchive, "/opt/otter-server/src_bundle.tar.gz");
+  sshCmd("cd /opt/otter-server && tar -xzf src_bundle.tar.gz && rm src_bundle.tar.gz && systemctl restart otter-license.service");
+  await fs.unlink(srcArchive).catch(() => {});
+  console.log("[+] Đã cập nhật src/ và khởi động lại otter-license.service thành công!");
+} catch (err: any) {
+  console.warn(`[!] Lỗi cập nhật license server: ${err.message}`);
+}
 
 console.log("\n========================================================");
 console.log(" [✓] DEPLOY LÊN VPS THÀNH CÔNG!");
