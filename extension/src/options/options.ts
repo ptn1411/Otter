@@ -108,8 +108,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.querySelectorAll<HTMLButtonElement>(".btn-copy").forEach(btn => {
     btn.addEventListener("click", async () => {
       const targetId = btn.getAttribute("data-target");
-      let textToCopy = "";
-      if (targetId) {
+      const dataCopy = btn.getAttribute("data-copy");
+      let textToCopy = dataCopy || "";
+      if (!textToCopy && targetId) {
         const targetEl = document.getElementById(targetId);
         textToCopy = targetEl?.textContent?.trim() || "";
       }
@@ -823,7 +824,108 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (statusEl) { statusEl.textContent = `🩺 Doctor ${data.ok ? "OK" : t("manage_doctor_fail")}: ${(data.checks || []).map((c: any) => `${c.name}:${c.ok ? "✓" : "✗"}`).join(" ")}`; statusEl.style.color = data.ok ? "#10b981" : "#ef4444"; }
     } catch (err: any) { if (statusEl) { statusEl.textContent = `❌ ${err.message}`; statusEl.style.color = "#ef4444"; } }
   });
-  document.getElementById("manage-refresh")?.addEventListener("click", () => { void loadPlansManage(); void loadSkillsManage(); void loadFleetManage(); void loadChromeProfilesManage(); void loadPageLoopsManage(); });
+  document.getElementById("manage-refresh")?.addEventListener("click", () => {
+    void loadPlansManage();
+    void loadSkillsManage();
+    void loadFleetManage();
+    void loadChromeProfilesManage();
+    void loadPageLoopsManage();
+    void loadBrowserEngineManage();
+  });
+
+  // Động cơ điều khiển trình duyệt Dual-Engine (Extension vs CDP)
+  async function loadBrowserEngineManage(): Promise<void> {
+    const extStatusEl = document.getElementById("engine-ext-status");
+    const cdpStatusEl = document.getElementById("engine-cdp-status");
+    const modeSelect = document.getElementById("manage-engine-mode-select") as HTMLSelectElement | null;
+    const msgEl = document.getElementById("manage-engine-msg");
+    if (!extStatusEl || !cdpStatusEl) return;
+
+    try {
+      const data = await manageFetch("/api/activity/v1/browser/engine");
+      if (data) {
+        if (modeSelect && data.mode) {
+          modeSelect.value = data.mode;
+        }
+        const extOk = data.extension?.connected;
+        const extCount = data.extension?.socketsCount || 0;
+        extStatusEl.innerHTML = extOk
+          ? `<span style="color:#10b981;">🟢 Đang kết nối (${extCount} tab/socket)</span>`
+          : `<span style="color:#ef4444;">🔴 Chưa có tab kết nối</span>`;
+
+        const cdpOk = data.cdp?.available;
+        const cdpPort = data.cdp?.port || 9222;
+        cdpStatusEl.innerHTML = cdpOk
+          ? `<span style="color:#10b981;">🟢 Sẵn sàng (Port ${cdpPort} &mdash; Siêu tốc)</span>`
+          : `<span style="color:#f59e0b;">🟡 Chưa mở (Port ${cdpPort})</span>`;
+      }
+    } catch (e: any) {
+      if (msgEl) msgEl.textContent = `Không thể kết nối daemon để lấy trạng thái động cơ: ${e.message}`;
+    }
+  }
+
+  // Lưu chế độ hoạt động động cơ
+  document.getElementById("manage-engine-save-btn")?.addEventListener("click", async () => {
+    const modeSelect = document.getElementById("manage-engine-mode-select") as HTMLSelectElement | null;
+    const msgEl = document.getElementById("manage-engine-msg");
+    if (!modeSelect) return;
+    try {
+      await manageFetch("/api/activity/v1/browser/engine", "POST", { mode: modeSelect.value });
+      if (msgEl) {
+        msgEl.textContent = `✅ Đã lưu chế độ: ${modeSelect.value.toUpperCase()}`;
+        msgEl.style.color = "#10b981";
+      }
+      void loadBrowserEngineManage();
+    } catch (err: any) {
+      if (msgEl) {
+        msgEl.textContent = `❌ Lỗi lưu chế độ: ${err.message}`;
+        msgEl.style.color = "#ef4444";
+      }
+    }
+  });
+
+  // Đo Benchmark tốc độ giữa Extension và CDP
+  document.getElementById("manage-engine-benchmark-btn")?.addEventListener("click", async () => {
+    const resultEl = document.getElementById("engine-benchmark-result");
+    if (resultEl) resultEl.textContent = "⏳ Đang đo tốc độ phản hồi...";
+    try {
+      const data = await manageFetch("/api/activity/v1/browser/engine", "POST", { benchmark: true });
+      if (resultEl && data?.benchmark) {
+        const b = data.benchmark;
+        const extMs = b.extension?.latencyMs >= 0 ? `${b.extension.latencyMs}ms` : "N/A";
+        const cdpMs = b.cdp?.latencyMs >= 0 ? `${b.cdp.latencyMs}ms` : "N/A";
+        resultEl.innerHTML = `⚡ <b>Extension:</b> ${extMs} | <b>CDP:</b> ${cdpMs} &mdash; <i>${b.recommendation || ""}</i>`;
+      }
+    } catch (err: any) {
+      if (resultEl) resultEl.textContent = `Lỗi đo: ${err.message}`;
+    }
+  });
+
+  // Mở Chrome kèm CDP Port 9222
+  document.getElementById("manage-launch-cdp-btn")?.addEventListener("click", async () => {
+    const msgEl = document.getElementById("manage-engine-msg");
+    if (msgEl) {
+      msgEl.textContent = "⏳ Đang yêu cầu daemon khởi chạy Chrome với CDP Port 9222...";
+      msgEl.style.color = "#38bdf8";
+    }
+    try {
+      await manageFetch("/api/chrome/open", "POST", {
+        userDataDir: "cdp-profile",
+        extraArgs: ["--remote-debugging-port=9222"],
+        url: "https://chatgpt.com"
+      });
+      if (msgEl) {
+        msgEl.textContent = "🚀 Đã khởi chạy Chrome kèm CDP Port 9222 thành công!";
+        msgEl.style.color = "#10b981";
+      }
+      setTimeout(() => void loadBrowserEngineManage(), 2500);
+    } catch (err: any) {
+      if (msgEl) {
+        msgEl.textContent = `❌ Lỗi mở Chrome CDP: ${err.message}`;
+        msgEl.style.color = "#ef4444";
+      }
+    }
+  });
 
   // Chrome theo profile (Phase: mở Chrome từ Management): liệt kê
   // profile từ daemon đang chọn, mỗi profile một nút Mở.
@@ -1665,6 +1767,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderManageTools();
       void loadPlansManage();
       void loadSkillsManage();
+      void loadBrowserEngineManage();
     }
   };
 
@@ -1686,5 +1789,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderManageTools();
     void loadPlansManage();
     void loadSkillsManage();
+    void loadBrowserEngineManage();
   }
 });

@@ -865,6 +865,53 @@ QUY TẮC THỰC HIỆN BẮT BUỘC (LÀM TỪNG BƯỚC MỘT):
       </form>
     </div>
 
+    <!-- CARD: DUAL-ENGINE TRÌNH DUYỆT (EXTENSION VS CDP) -->
+    <div class="card-box" id="card-browser-engine">
+      <div class="card-header">
+        <div class="card-title"><span>🚀</span> <span data-i18n="manage_engine_title">Động cơ điều khiển trình duyệt (Dual-Engine: Extension vs CDP)</span></div>
+        <button type="button" id="manage-engine-benchmark-btn" style="min-height:unset; padding:6px 14px; font-size:12px;">⚡ Đo Benchmark</button>
+      </div>
+      <p style="margin:0;font-size:13px;color:var(--text-soft)">
+        Otter hỗ trợ 2 động cơ: <b>Extension MV3</b> (kết nối qua tiện ích) và <b>CDP (Chrome DevTools Protocol)</b> trực tiếp qua cổng 9222 (tốc độ ~2ms, không sợ background tab timeout, không bị Service Worker ngắt).
+      </p>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-top:6px;">
+        <div style="padding:12px; border:1px solid var(--border); border-radius:10px; background:var(--field);">
+          <div style="font-size:12px; color:var(--text-soft);">Động cơ 1: Chrome Extension</div>
+          <div style="font-size:14px; font-weight:700; margin-top:4px;" id="engine-ext-status">—</div>
+        </div>
+        <div style="padding:12px; border:1px solid var(--border); border-radius:10px; background:var(--field);">
+          <div style="font-size:12px; color:var(--text-soft);">Động cơ 2: Chrome CDP (Port 9222)</div>
+          <div style="font-size:14px; font-weight:700; margin-top:4px;" id="engine-cdp-status">—</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:10px;">
+        <label style="font-size:13px; font-weight:600;">Chế độ hoạt động:
+          <select id="manage-engine-mode-select" style="min-height:unset; padding:6px 10px; font-size:13px; font-weight:bold;">
+            <option value="auto">🔄 Tự động (Auto: Ưu tiên Extension, fallback CDP)</option>
+            <option value="extension">🔌 Chỉ dùng Extension</option>
+            <option value="cdp">🚀 Chỉ dùng CDP trực tiếp (Port 9222)</option>
+          </select>
+        </label>
+        <button type="button" id="manage-engine-save-btn" style="min-height:unset; padding:6px 14px; font-size:12px;">Lưu chế độ</button>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:center;">
+        <button type="button" id="manage-launch-cdp-btn" class="secondary" style="min-height:unset; padding:6px 14px; font-size:12px; border:1px solid var(--border);">🌐 Mở Chrome với CDP Port 9222</button>
+        <span id="engine-benchmark-result" style="font-size:13px; color:#38bdf8;"></span>
+      </div>
+
+      <div class="note-box" style="margin-top:10px; padding:12px 16px;">
+        <div style="font-size:12px; font-weight:700; color:var(--accent); margin-bottom:4px;">💡 Cách bật CDP thủ công từ Shortcut / CMD:</div>
+        <div class="cmd-box" style="margin:4px 0;">
+          <code class="cmd-text">chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\chrome-cdp"</code>
+          <button type="button" class="btn-copy" data-copy='chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\chrome-cdp"'>📋 Copy</button>
+        </div>
+      </div>
+      <p id="manage-engine-msg" style="margin:4px 0 0; font-size:13px;"></p>
+    </div>
+
     <div class="card-box">
       <div class="card-title"><span>🌐</span> <span>Mở Chrome theo profile</span></div>
       <p style="margin:0;font-size:13px;color:var(--text-soft)">Mở Chrome trên máy chạy daemon đang chọn, với đúng profile cần làm (mỗi profile = một login ChatGPT + một cấu hình server riêng). Nút này gọi daemon qua HTTP, không phải extension tự mở.</p>
