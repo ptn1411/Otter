@@ -663,20 +663,34 @@ export async function checkAndReplyMessengerOnce(
 
     const summary: string = page.summaryText;
 
-    // 1. Kiểm tra nếu có khung chat Messenger đang mở
+    // 1. Kiểm tra nếu có khung chat Messenger đang mở (từ page.messenger hoặc summary regex)
+    const hasStructuredMessenger = Boolean(page.messenger?.isOpen);
     const chatDockMatch = summary.match(/=== KHUNG CHAT TIN NHẮN MESSENGER ĐANG MỞ ===\n- Đang nhắn tin với: ([^\n]+)/);
-    if (chatDockMatch) {
-      const recipientName = chatDockMatch[1].trim();
-      const msgSectionMatch = summary.match(/- Tin nhắn trong cuộc trò chuyện:\n([\s\S]*?)- Ô nhập tin nhắn trả lời:/);
-      const inputIndexMatch = summary.match(/- Ô nhập tin nhắn trả lời: browser_type\(\{\s*index:\s*(\d+)/);
-      const inputIndex = inputIndexMatch ? Number(inputIndexMatch[1]) : 4;
 
-      if (msgSectionMatch) {
-        const rawLines = msgSectionMatch[1].split("\n").map(l => l.trim()).filter(Boolean);
+    if (hasStructuredMessenger || chatDockMatch) {
+      const recipientName = (page.messenger?.recipient || chatDockMatch?.[1] || "Khách hàng").trim();
+
+      // Hỗ trợ cả 2 thứ tự của ô nhập (trước hoặc sau danh sách tin nhắn)
+      const inputIndexMatch = summary.match(/- Ô nhập tin nhắn trả lời: browser_type\(\{\s*index:\s*(\d+)/);
+      const inputIndex = page.messenger?.inputIndex ?? (inputIndexMatch ? Number(inputIndexMatch[1]) : 30);
+
+      // Trích xuất danh sách tin nhắn: ưu tiên page.messenger.messages
+      let rawLines: string[] = [];
+      if (Array.isArray(page.messenger?.messages) && page.messenger.messages.length > 0) {
+        rawLines = page.messenger.messages.map((m: any) => `${m.sender}: ${m.text}`);
+      } else {
+        // Fallback regex hỗ trợ cả ô nhập ở trước lẫn ở sau
+        const msgSectionMatch = summary.match(/- Tin nhắn trong cuộc trò chuyện:\n([\s\S]*?)(?:\n- Ô nhập tin nhắn trả lời:|\n===|$)/);
+        if (msgSectionMatch) {
+          rawLines = msgSectionMatch[1].split("\n").map(l => l.trim()).filter(Boolean);
+        }
+      }
+
+      if (rawLines.length > 0) {
         const lastLine = rawLines[rawLines.length - 1] || "";
 
-        // Nếu tin nhắn cuối cùng là từ khách (không bắt đầu bằng "Bạn:")
-        if (lastLine && !lastLine.startsWith("Bạn:")) {
+        // Nếu tin nhắn cuối cùng là từ khách (không bắt đầu bằng "Bạn:" hoặc "Shop:")
+        if (lastLine && !lastLine.startsWith("Bạn:") && !lastLine.startsWith("Shop:")) {
           const colonIdx = lastLine.indexOf(":");
           const customerText = colonIdx > 0 ? lastLine.slice(colonIdx + 1).trim() : lastLine;
 
@@ -828,7 +842,15 @@ export async function checkAndReplyMessengerOnce(
       }
     }
 
-    // 2. Nếu khung chat chưa mở, kiểm tra nút Messenger trên thanh điều hướng có tin nhắn chưa đọc không
+    // 2. Nếu khung chat chưa mở, kiểm tra xem Dropdown danh sách tin nhắn có đang mở và chứa tin chưa đọc không
+    const dropdownMatch = summary.match(/\[(\d+)\] Khách: ([^|]+) \| Tin gần nhất: "[^"]*" \| Thao tác mở: browser_click\(\{\s*index:\s*(\d+)\s*\}\)/);
+    if (dropdownMatch) {
+      const clickIdx = Number(dropdownMatch[3]);
+      await browserBridge.execute("click", { index: clickIdx, urlPattern: "facebook.com" });
+      return { action: "opened_chat_dock_from_dropdown", recipient: dropdownMatch[2].trim(), index: clickIdx };
+    }
+
+    // 3. Nếu dropdown cũng chưa mở, kiểm tra nút Messenger trên thanh điều hướng có tin nhắn chưa đọc không
     const elements: any[] = page.elements || [];
     const unreadMsgBtn = elements.find((e: any) => {
       const a = (e.ariaLabel || "").toLowerCase();

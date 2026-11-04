@@ -1,4 +1,5 @@
 import { openCommandModal } from "./command-palette";
+import { findPromptComposer } from "./chatgpt-injector";
 import { t, onLanguageChange } from "../i18n";
 
 /**
@@ -10,23 +11,7 @@ import { t, onLanguageChange } from "../i18n";
 export let activeFolderPath: string | null = null;
 export let activeFilePath: string | null = null;
 
-function findPromptComposer(): HTMLElement | null {
-  const primary =
-    document.querySelector<HTMLElement>("#prompt-textarea") ||
-    document.querySelector<HTMLElement>('[data-testid="composer-text-input"]') ||
-    document.querySelector<HTMLElement>('[data-testid="prompt-textarea"]');
-  if (primary) return primary;
 
-  const formInput = document.querySelector<HTMLElement>("form [contenteditable='true'], form textarea");
-  if (formInput) return formInput;
-
-  const allEditables = Array.from(document.querySelectorAll<HTMLElement>("[contenteditable='true']"));
-  if (allEditables.length > 0) {
-    return allEditables[allEditables.length - 1];
-  }
-
-  return document.querySelector<HTMLElement>("textarea[tabindex='0']");
-}
 
 function setComposerText(text: string) {
   const composer = findPromptComposer();

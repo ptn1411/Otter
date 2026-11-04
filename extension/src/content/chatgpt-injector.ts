@@ -6,14 +6,23 @@
  */
 
 const PROMPT_SELECTORS = [
-  'div#prompt-textarea[contenteditable="true"]',
-  '#prompt-textarea[contenteditable="true"]',
-  'div.ProseMirror[contenteditable="true"]',
+  '#prompt-textarea',
+  'div#prompt-textarea',
+  '[data-testid="composer-text-input"]',
+  '[data-id="prompt-textarea"]',
+  '[data-testid="prompt-textarea"]',
+  '[data-testid="composer-input"]',
+  'div.ProseMirror',
+  '.ProseMirror',
+  'form [contenteditable="true"]',
+  'form [role="textbox"]',
+  '#composer-background [contenteditable="true"]',
+  '[data-testid="composer-container"] [contenteditable="true"]',
+  'div[class*="composer"] [contenteditable="true"]',
   'textarea[data-id="prompt-textarea"]',
   'textarea[placeholder*="Send a message"]',
-  'textarea[aria-label="Message ChatGPT"]',
-  '#prompt-textarea',
-  '.ProseMirror'
+  'textarea[aria-label*="Message ChatGPT"]',
+  'textarea[tabindex="0"]'
 ];
 
 const SUBMIT_SELECTORS = [
@@ -40,7 +49,10 @@ export function isGenerating(): boolean {
   for (const sel of STOP_SELECTORS) {
     try {
       const el = document.querySelector(sel);
-      if (el && ((el as HTMLElement).offsetWidth || (el as HTMLElement).offsetHeight)) {
+      if (el && el.isConnected) {
+        if (!document.hidden && !((el as HTMLElement).offsetWidth || (el as HTMLElement).offsetHeight)) {
+          continue;
+        }
         return true;
       }
     } catch {}
@@ -48,17 +60,30 @@ export function isGenerating(): boolean {
   return !!document.querySelector(".result-streaming");
 }
 
-function findPromptInput(): HTMLElement | null {
+export function findPromptComposer(): HTMLElement | null {
   for (const sel of PROMPT_SELECTORS) {
     try {
       const el = document.querySelector<HTMLElement>(sel);
-      if (el && ((el as HTMLElement).offsetWidth || (el as HTMLElement).offsetHeight)) {
+      if (el && el.isConnected) {
         return el;
       }
     } catch {}
   }
-  return null;
+
+  // Fallback: Tìm contenteditable cuối cùng trên trang (không phải overlay popup của extension)
+  const allEditables = Array.from(
+    document.querySelectorAll<HTMLElement>("[contenteditable='true'], [role='textbox']")
+  ).filter(e => !e.closest("#otter-command-palette-overlay") && !e.closest("#otter-radial-menu-container"));
+
+  if (allEditables.length > 0) {
+    return allEditables[allEditables.length - 1];
+  }
+
+  // Fallback: Textarea
+  return document.querySelector<HTMLElement>("form textarea, textarea[tabindex='0'], textarea");
 }
+
+export const findPromptInput = findPromptComposer;
 
 function findSubmitButton(): HTMLButtonElement | null {
   const form = document.querySelector<HTMLFormElement>("form");

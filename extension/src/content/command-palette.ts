@@ -7,7 +7,7 @@ import { t, getLanguage, onLanguageChange, Language } from "../i18n";
 import { parseTemplateVariables, renderTemplate, showVariablePromptModal } from "./template-engine";
 import { exportCurrentChatToMarkdown, downloadMarkdownFile, showExportToast } from "./export-markdown";
 import { triggerPickFolder, triggerPickFile } from "./folder-picker";
-import { submitChatGPTComposer } from "./chatgpt-injector";
+import { submitChatGPTComposer, findPromptComposer } from "./chatgpt-injector";
 
 export interface CommandItem {
   id: string;
@@ -898,7 +898,7 @@ export function renderQuickActionChips() {
     icon: cmd.icon,
     label: cmd.slash,
     title: `${cmd.title}: ${cmd.description || cmd.promptTemplate}`,
-    action: () => insertCommandPrompt(cmd, "", true)
+    action: () => insertCommandPrompt(cmd, "", false)
   }));
 
   // Render Inner Orbit (R = 95px, Arc: -145 deg -> -35 deg, nhãn badge ở phía dưới)
@@ -1020,23 +1020,7 @@ export function renderQuickActionChips() {
 }
 
 
-function findPromptComposer(): HTMLElement | null {
-  const primary =
-    document.querySelector<HTMLElement>("#prompt-textarea") ||
-    document.querySelector<HTMLElement>('[data-testid="composer-text-input"]') ||
-    document.querySelector<HTMLElement>('[data-testid="prompt-textarea"]');
-  if (primary) return primary;
 
-  const formInput = document.querySelector<HTMLElement>("form [contenteditable='true'], form textarea");
-  if (formInput) return formInput;
-
-  const allEditables = Array.from(document.querySelectorAll<HTMLElement>("[contenteditable='true']"));
-  if (allEditables.length > 0) {
-    return allEditables[allEditables.length - 1];
-  }
-
-  return document.querySelector<HTMLElement>("textarea[tabindex='0']");
-}
 
 /**
  * Điền prompt mẫu vào ô soạn thảo của ChatGPT Web
@@ -1131,7 +1115,7 @@ export function insertCommandPrompt(cmd: CommandItem, slashPrefix = "", autoSubm
   }
 
   showVariablePromptModal(cmd.title, variables, (values) => {
-    insertPromptIntoComposer(renderTemplate(cmd.promptTemplate, values), slashPrefix, true);
+    insertPromptIntoComposer(renderTemplate(cmd.promptTemplate, values), slashPrefix, false);
     trackUse();
   });
 }
@@ -1320,7 +1304,7 @@ export function openCommandModal() {
         };
 
         row.onclick = () => {
-          insertCommandPrompt(item, "", true);
+          insertCommandPrompt(item, "", false);
           overlay.remove();
           modalOverlay = null;
         };

@@ -303,7 +303,7 @@ export class BrowserController {
         // --- 5. Trích xuất nâng cao cho Facebook Feed (nếu là facebook.com) ---
         let fbSummary = '';
         let fbPosts: any[] = [];
-        const isFacebook = location.hostname.includes('facebook.com');
+        const isFacebook = location.hostname.includes('facebook.com') || location.hostname.includes('messenger.com');
 
         if (isFacebook) {
           try {
@@ -414,28 +414,100 @@ export class BrowserController {
         // --- 5.1. Trích xuất tin nhắn Messenger & Thông báo Facebook ---
         let messengerSummary = '';
         let notificationsSummary = '';
+        let messengerData: {
+          isOpen: boolean;
+          recipient: string;
+          inputIndex: number | null;
+          messages: Array<{ sender: string; text: string }>;
+        } | undefined = undefined;
+
         if (isFacebook) {
           try {
-            const chatBoxEl = document.querySelector<HTMLElement>('div[role="textbox"][aria-label*="Viết cho"], div[role="textbox"][aria-label*="Message"]');
-            const msgLogEl = document.querySelector('[role="log"][aria-label*="Tin nhắn trong cuộc trò chuyện"]');
+            // Hỗ trợ cả khung chat nổi trên Facebook lẫn Messenger toàn trang (messenger.com hoặc /messages/t/...)
+            const chatBoxEl = document.querySelector<HTMLElement>(
+              'div[role="textbox"][aria-label*="Viết cho" i], ' +
+              'div[role="textbox"][aria-label*="Message" i], ' +
+              'div[role="textbox"][aria-label*="Tin nhắn" i], ' +
+              'div[role="textbox"][aria-label*="Nhập tin nhắn" i], ' +
+              'div[role="textbox"][aria-label*="Nhắn tin" i], ' +
+              'div[role="textbox"][contenteditable="true"]'
+            );
+            const msgLogEl = document.querySelector(
+              '[role="log"][aria-label*="Tin nhắn trong cuộc trò chuyện" i], ' +
+              '[role="log"][aria-label*="Messages" i], ' +
+              '[role="log"], ' +
+              '[role="grid"][aria-label*="Tin nhắn" i]'
+            );
+
             if (chatBoxEl || msgLogEl) {
-              const recipient = (chatBoxEl?.getAttribute('aria-label') || '').replace(/^Viết cho\s*/i, '').trim() ||
-                                (msgLogEl?.getAttribute('aria-label') || '').replace(/^Tin nhắn trong cuộc trò chuyện với\s*/i, '').trim() || 'Người dùng';
+              let recipient = (chatBoxEl?.getAttribute('aria-label') || '').replace(/^Viết cho\s*/i, '').replace(/^Nhắn tin cho\s*/i, '').trim() ||
+                              (msgLogEl?.getAttribute('aria-label') || '').replace(/^Tin nhắn trong cuộc trò chuyện với\s*/i, '').replace(/^Messages in conversation with\s*/i, '').trim();
 
-              const msgArias = Array.from(document.querySelectorAll('[aria-label*="Lúc "][aria-label*=": "]'))
-                .map(el => el.getAttribute('aria-label') || '')
-                .filter(a => a.length > 5);
+              if (!recipient || recipient.toLowerCase() === 'tin nhắn' || recipient.toLowerCase() === 'message') {
+                const headerEl = document.querySelector('[data-testid="chat-header"] strong, div[role="dialog"] h2, div[aria-label*="Đoạn chat với" i] [role="heading"], div[role="main"] h1, div[role="main"] h2');
+                recipient = (headerEl?.textContent || '').trim() || 'Người dùng';
+              }
 
-              const lastMsgs = msgArias.slice(-15).map(m =>
-                m.replace(/^Lúc\s+[^,]+,\s*/i, '').replace(/^Lúc\s+\d{2}:\d{2},\s*/i, '')
-              ).join('\n  ');
+              // Thu thập tất cả các bong bóng tin nhắn (hỗ trợ cả định dạng mới: "Nhập, Tin nhắn do [Tên] gửi lúc ...: [Nội dung]", "Lúc ...", v.v.)
+              const parseMsgAria = (raw: string): { sender: string; text: string } | null => {
+                if (!raw || raw.length < 3) return null;
+                // Format: "Nhập, Tin nhắn do [Tên] gửi lúc [Thứ... 10:32sáng]: [Nội dung]"
+                let m = raw.match(/^(?:Nhập,\s*)?(?:Tin nhắn do|Tin nhắn của)\s+(.+?)\s+gửi lúc\s+.*?\d{1,2}:\d{2}\s*(?:sáng|ch|trưa|tối|am|pm)?:\s*([\s\S]*)/i);
+                if (m) return { sender: m[1].trim(), text: m[2].trim() };
+
+                // English: "Enter, Message from [Name] at [Time]: [Content]"
+                m = raw.match(/^(?:Enter,\s*)?Message (?:from|sent by)\s+(.+?)\s+(?:at|sent at)\s+.*?\d{1,2}:\d{2}\s*(?:am|pm)?:\s*([\s\S]*)/i);
+                if (m) return { sender: m[1].trim(), text: m[2].trim() };
+
+                // Legacy: "Lúc [Time], [Name]: [Content]"
+                m = raw.match(/^Lúc\s+.*?\d{1,2}:\d{2}(?:[,\s]+([^:]+))?:\s*([\s\S]*)/i);
+                if (m) return { sender: (m[1] || 'Khách').trim(), text: m[2].trim() };
+
+                return null;
+              };
+
+              const allAriaEls = Array.from(document.querySelectorAll<HTMLElement>(
+                '[aria-label*="Tin nhắn" i], [aria-label*="lúc " i], [aria-label*="Message" i]'
+              ));
+
+              const parsedTurns: Array<{ sender: string; text: string }> = [];
+              const seenTurns = new Set<string>();
+
+              for (const el of allAriaEls) {
+                const aria = el.getAttribute('aria-label') || '';
+                const parsed = parseMsgAria(aria);
+                if (parsed && parsed.text) {
+                  // Key chống trùng lặp do Facebook Comet render nhiều tầng bọc có cùng aria-label
+                  const key = `${parsed.sender}:${parsed.text.slice(0, 80)}`;
+                  if (!seenTurns.has(key)) {
+                    seenTurns.add(key);
+                    parsedTurns.push(parsed);
+                  }
+                }
+              }
+
+              // Chỉ lấy tối đa 10 tin nhắn gần nhất và rút gọn mỗi tin không quá 250 ký tự để không làm tràn buffer
+              const recentTurns = parsedTurns.slice(-10);
+              const formattedTurns = recentTurns.map(t => {
+                const cleanText = t.text.length > 250 ? t.text.slice(0, 250) + '...' : t.text;
+                return `${t.sender}: ${cleanText}`;
+              }).join('\n  ');
 
               const inputIdx = chatBoxEl ? (interactiveElements.indexOf(chatBoxEl) + 1 || null) : null;
 
+              // QUAN TRỌNG: Đặt "- Ô nhập tin nhắn trả lời:" Ở TRÊN danh sách tin nhắn
+              // để kể cả khi summary bị cắt ngắn (slice), regex daemon vẫn bắt được inputIdx 100%!
               messengerSummary = `=== KHUNG CHAT TIN NHẮN MESSENGER ĐANG MỞ ===\n` +
                 `- Đang nhắn tin với: ${recipient}\n` +
-                `- Tin nhắn trong cuộc trò chuyện:\n  ${lastMsgs || '(Chưa có tin nhắn cũ hoặc tin chào tự động)'}\n` +
-                `- Ô nhập tin nhắn trả lời: browser_type({ index: ${inputIdx || 'n/a'}, text: "..." })\n\n`;
+                `- Ô nhập tin nhắn trả lời: browser_type({ index: ${inputIdx || 'n/a'}, text: "..." })\n` +
+                `- Tin nhắn trong cuộc trò chuyện:\n  ${formattedTurns || '(Chưa có tin nhắn cũ hoặc tin chào tự động)'}\n\n`;
+
+              messengerData = {
+                isOpen: true,
+                recipient,
+                inputIndex: inputIdx,
+                messages: recentTurns
+              };
             }
 
             // 5.2. Trích xuất danh sách hội thoại Messenger Dropdown (nếu đang mở)
@@ -497,7 +569,8 @@ export class BrowserController {
           elementsCount: elementsData.length,
           elements: elementsData,
           feedPosts: isFacebook ? fbPosts : undefined,
-          summaryText: (messengerSummary + notificationsSummary + fbSummary + textSummary).slice(0, 3800)
+          messenger: isFacebook ? messengerData : undefined,
+          summaryText: (messengerSummary + notificationsSummary + fbSummary + textSummary).slice(0, 5000)
         };
       }
     });
@@ -2581,7 +2654,10 @@ export class BrowserController {
       const pattern = preferredUrlPattern.trim().toLowerCase();
       try {
         const allTabs = await chrome.tabs.query({});
-        const matched = allTabs.find(t => t.id && t.url && t.url.toLowerCase().includes(pattern));
+        const matched = allTabs.find(t => t.id && t.url && (
+          t.url.toLowerCase().includes(pattern) ||
+          (pattern === "facebook.com" && t.url.toLowerCase().includes("messenger.com"))
+        ));
         if (matched?.id) {
           controlledTabId = matched.id;
           return matched.id;
