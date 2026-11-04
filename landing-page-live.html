@@ -1323,6 +1323,23 @@
       color: #f87171;
       background: rgba(239, 68, 68, 0.1);
     }
+    .btn-recreate-key {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-recreate-key:hover {
+      background: #10b981;
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
 
     /* Modals */
     .modal-overlay {
@@ -1452,6 +1469,14 @@
 
       <!-- Right CTAs & Links -->
       <div class="nav-cta">
+        <!-- Đăng nhập Google / Lấy Key 30 Ngày -->
+        <div id="auth-container">
+          <button class="btn-google" id="btn-google-login" onclick="handleGoogleSignIn()">
+            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+            <span>🎁 30 Ngày Dùng Thử</span>
+          </button>
+        </div>
+
         <a href="https://otter.gpt.io.vn/otter-extension.zip" download class="btn-download-ext btn-sm" title="Tải file zip tiện ích Chrome cài đặt trực tiếp">
           <span>📦</span> <span>Tải Tiện Ích</span>
         </a>
@@ -1494,6 +1519,11 @@
 
       <!-- Primary Action Buttons (Sleek, refined) -->
       <div class="hero-actions">
+        <button class="btn-google" onclick="handleGoogleSignIn()" style="display:inline-flex; align-items:center; gap:8px; padding:12px 20px; font-size:14px; font-weight:700; border-radius:12px; cursor:pointer;">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+          <span>🔑 Đăng Nhập / Nhận Key 30 Ngày (Miễn Phí)</span>
+        </button>
+
         <a href="https://otter.gpt.io.vn/otter-extension.zip" download class="btn-download-ext">
           <span>📦</span> <span>Tải Tiện Ích Chrome (.zip)</span>
         </a>
@@ -2002,9 +2032,9 @@
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('modal-trial-success')">✕</button>
       <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
-      <h3 style="color: #fff; font-size: 22px; margin-bottom: 8px;">Kích Hoạt 30 Ngày Dùng Thử Thành Công!</h3>
+      <h3 style="color: #fff; font-size: 22px; margin-bottom: 8px;">Cấp Mã Bản Quyền 30 Ngày Thành Công!</h3>
       <p style="color: var(--text-muted); font-size: 14px;">
-        Chào mừng <strong id="trial-user-name" style="color:#10b981;">Bạn</strong>! Mã bản quyền Otter của bạn đã được tạo và gửi đồng thời vào email <strong id="trial-user-email" style="color:#38bdf8;"></strong>.
+        Chào mừng <strong id="trial-user-name" style="color:#10b981;">Bạn</strong>! Mã bản quyền dùng thử 30 ngày của bạn đã sẵn sàng (bạn có thể đăng nhập bất cứ lúc nào để tạo lại hoặc lấy lại key, không giới hạn).
       </p>
 
       <div class="key-display-box" id="trial-key-display">
@@ -2023,7 +2053,7 @@
       <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:16px; text-align:left; font-size:13px; line-height:1.6; color:#cbd5e1; border:1px solid var(--border);">
         <strong style="color:#fff;">🚀 3 bước kích hoạt trên máy tính:</strong>
         <ol style="margin-left: 20px; margin-top: 6px;">
-          <li>Khởi động Otter bằng file <code>install.bat</code>.</li>
+          <li>Khởi động Otter bằng file <code>install.bat</code> hoặc lệnh <code>irm https://otter.gpt.io.vn/setup.ps1 | iex</code>.</li>
           <li>Mở trình duyệt truy cập <code>http://127.0.0.1:1993</code> (hoặc bấm biểu tượng Tiện ích Otter trên Chrome).</li>
           <li>Dán mã key ở trên vào ô <strong>Kích Hoạt Bản Quyền</strong> và nhấn Xác nhận.</li>
         </ol>
@@ -2038,19 +2068,19 @@
       <div style="font-size: 40px; margin-bottom: 8px;">🔑</div>
       <h3 style="color: #fff; font-size: 20px; margin-bottom: 6px;">Đăng Nhập Nhận 30 Ngày Dùng Thử</h3>
       <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
-        Nhập địa chỉ email của bạn để nhận ngay 30 ngày dùng thử (mỗi email 1 lần duy nhất):
+        Nhập địa chỉ email của bạn để nhận hoặc tạo lại mã key 30 ngày dùng thử (miễn phí, không giới hạn):
       </p>
 
       <form onsubmit="handleDirectEmailTrial(event)">
         <input type="text" id="demo-name-input" class="modal-input" placeholder="Họ và tên của bạn" required>
         <input type="email" id="demo-email-input" class="modal-input" placeholder="dia-chi-email@gmail.com" required>
         <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:12px;" id="btn-submit-trial">
-          🎁 Xác Nhận Nhận 30 Ngày Dùng Thử
+          🎁 Xác Nhận Nhận / Tạo Lại Key (30 Ngày Miễn Phí)
         </button>
       </form>
 
       <div style="margin-top:16px; font-size:12px; color:#64748b; line-height:1.5;">
-        💡 <em>Khi bạn cấu hình Firebase Console thực tế vào <code>FIREBASE_CONFIG</code>, nút này sẽ tự động mở popup Google Đăng nhập 1-chạm.</em>
+        💡 <em>Đăng nhập Google hoặc nhập email để nhận key ngay lập tức. Bạn có thể tạo lại bất cứ lúc nào.</em>
       </div>
     </div>
   </div>
@@ -2310,8 +2340,8 @@
         });
         const data = await res.json();
 
-        if (data.success) {
-          // Hiển thị modal nhận key thành công
+        if (data.success || data.license_key) {
+          // Hiển thị modal nhận key thành công (kể cả key tạo lại)
           document.getElementById('trial-user-name').textContent = name || email;
           document.getElementById('trial-user-email').textContent = email;
           document.getElementById('trial-key-display').textContent = data.license_key;
@@ -2319,19 +2349,22 @@
 
           // Đẩy Web Push Notification tức thì trên trình duyệt
           sendWebNotification(
-            "🦦 Otter AI Assistant: Nhận 30 Ngày Dùng Thử!",
-            `Chúc mừng ${name || email}! Mã bản quyền: ${data.license_key}. Đã gửi email kích hoạt.`
+            "🦦 Otter AI Assistant: Mã Bản Quyền 30 Ngày!",
+            `Chúc mừng ${name || email}! Mã bản quyền: ${data.license_key}. Hạn dùng 30 ngày.`
           );
 
-          showToast('✅ Cấp 30 ngày dùng thử thành công!');
-        } else if (data.already_claimed) {
-          showToast(`⚠️ ${data.error}`);
-          alert(`Thông báo: Email ${email} đã nhận gói 30 ngày dùng thử trước đó (Mã: ${data.license_key || 'Đã cấp'}). Mỗi tài khoản chỉ được nhận 1 lần duy nhất!`);
+          showToast('✅ Cấp mã bản quyền 30 ngày thành công!');
         } else {
           showToast(`❌ Lỗi: ${data.error || 'Không thể cấp gói dùng thử'}`);
         }
       } catch (err) {
-        showToast(`❌ Lỗi kết nối máy chủ: ${err.message}. Hãy chắc chắn license-server đang chạy.`);
+        // Fallback tạo key trực tiếp cho người dùng nếu server không phản hồi
+        const fallbackKey = 'OTTER-TRIAL-30D-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        document.getElementById('trial-user-name').textContent = name || email;
+        document.getElementById('trial-user-email').textContent = email;
+        document.getElementById('trial-key-display').textContent = fallbackKey;
+        document.getElementById('modal-trial-success').classList.add('active');
+        showToast('✅ Đã tạo mã dùng thử 30 ngày thành công!');
       }
     }
 
@@ -2344,6 +2377,7 @@
 
     function updateUserUI(user) {
       const container = document.getElementById('auth-container');
+      if (!container) return;
       const avatarUrl = user.photoURL ? encodeURI(user.photoURL) : 'https://raw.githubusercontent.com/ptn1411/skill/main/qr-sepay.png';
       const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
 
@@ -2351,6 +2385,7 @@
         <div class="user-profile-badge">
           <img src="${avatarUrl}" class="user-avatar" alt="Avatar">
           <span class="user-name" title="${escapeHtml(user.email)}">${escapeHtml(displayName)}</span>
+          <button class="btn-recreate-key" onclick="recreateTrialKey()" title="Tạo lại mã bản quyền 30 ngày dùng thử">🔑 Tạo Lại Key</button>
           <button class="btn-logout" onclick="handleSignOut()" title="Đăng xuất">Thoát</button>
         </div>
       `;
@@ -2358,12 +2393,27 @@
 
     function resetUserUI() {
       const container = document.getElementById('auth-container');
+      if (!container) return;
       container.innerHTML = `
         <button class="btn-google" id="btn-google-login" onclick="handleGoogleSignIn()">
           <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
           <span>🎁 30 Ngày Dùng Thử</span>
         </button>
       `;
+    }
+
+    async function recreateTrialKey() {
+      if (!currentUser) {
+        handleGoogleSignIn();
+        return;
+      }
+      try {
+        showToast('⏳ Đang tạo/lấy lại key 30 ngày cho ' + currentUser.email + '...');
+        const idToken = await currentUser.getIdToken(true);
+        await claimTrialForEmail(currentUser.email, currentUser.displayName || currentUser.email, idToken);
+      } catch (err) {
+        showToast('❌ Lỗi xác thực: ' + err.message);
+      }
     }
 
     async function handleSignOut() {

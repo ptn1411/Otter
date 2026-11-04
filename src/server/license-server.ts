@@ -435,46 +435,7 @@ export async function claimTrialLicense(
     return { success: false, error: "Địa chỉ email không hợp lệ" };
   }
 
-  // 1. Kiểm tra trong bảng trial_claims
-  const existingClaim = db.query(
-    "SELECT * FROM trial_claims WHERE email = ?"
-  ).get(email) as any;
-
-  if (existingClaim) {
-    return {
-      success: false,
-      already_claimed: true,
-      error: "Email này đã nhận gói 30 ngày dùng thử trước đó. Mỗi email chỉ được nhận 1 lần duy nhất.",
-      license_key: existingClaim.license_key,
-      duration_days: 30,
-    };
-  }
-
-  // 2. Kiểm tra trong bảng licenses (tránh trường hợp đã được cấp qua kênh khác)
-  const existingTrialLic = db.query(
-    "SELECT * FROM licenses WHERE LOWER(email) = ? AND package_type = 'trial'"
-  ).get(email) as any;
-
-  if (existingTrialLic) {
-    try {
-      db.run(
-        `INSERT OR IGNORE INTO trial_claims (email, license_key, claimed_at, ip_address, device_info)
-         VALUES (?, ?, ?, ?, ?)`,
-        [email, existingTrialLic.license_key, existingTrialLic.issued_at, options.ip_address || "127.0.0.1", options.name || ""]
-      );
-    } catch {}
-
-    return {
-      success: false,
-      already_claimed: true,
-      error: "Email này đã nhận gói 30 ngày dùng thử trước đó. Mỗi email chỉ được nhận 1 lần duy nhất.",
-      license_key: existingTrialLic.license_key,
-      duration_days: 30,
-      expires_at: existingTrialLic.expires_at,
-    };
-  }
-
-  // 3. Cấp mới gói trial 30 ngày
+  // Cấp mới / tạo lại gói trial 30 ngày (không giới hạn 1 email 1 lần, người dùng có thể tạo lại key bất cứ lúc nào)
   const licResult = await issueLicense(db, {
     email,
     package_type: "trial",
@@ -488,12 +449,14 @@ export async function claimTrialLicense(
     return { success: false, error: "Không thể tạo mã bản quyền dùng thử" };
   }
 
-  // 4. Lưu vào bảng trial_claims để khóa vĩnh viễn không cho nhận lần 2
-  db.run(
-    `INSERT INTO trial_claims (email, license_key, claimed_at, ip_address, device_info)
-     VALUES (?, ?, ?, ?, ?)`,
-    [email, licResult.license_key, new Date().toISOString(), options.ip_address || "127.0.0.1", options.name || options.device_info || ""]
-  );
+  // Lưu hoặc cập nhật vào bảng trial_claims
+  try {
+    db.run(
+      `INSERT OR REPLACE INTO trial_claims (email, license_key, claimed_at, ip_address, device_info)
+       VALUES (?, ?, ?, ?, ?)`,
+      [email, licResult.license_key, new Date().toISOString(), options.ip_address || "127.0.0.1", options.name || options.device_info || ""]
+    );
+  } catch {}
 
   return {
     success: true,
