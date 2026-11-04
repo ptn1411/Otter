@@ -1752,6 +1752,341 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+  // =========================================================================
+  // 17. GPM STUDIO TAB (Quản lý Profile & Kịch Bản GPM Automate V3)
+  // =========================================================================
+  let gpmProfilesCache: any[] = [];
+
+  async function checkGpmHealthStatus() {
+    const loginDot = document.getElementById("gpm-status-login-dot");
+    const loginText = document.getElementById("gpm-status-login-text");
+    const autoDot = document.getElementById("gpm-status-automate-dot");
+    const autoText = document.getElementById("gpm-status-automate-text");
+
+    try {
+      const data = await manageFetch("/api/activity/v1/gpm/status");
+      if (loginDot && loginText) {
+        if (data.gpmLogin) {
+          loginDot.className = "live-dot active";
+          loginText.textContent = "Online";
+          loginText.style.color = "#10b981";
+        } else {
+          loginDot.className = "live-dot inactive";
+          loginText.textContent = "Offline (Chưa mở GPM Login)";
+          loginText.style.color = "#ef4444";
+        }
+      }
+
+      if (autoDot && autoText) {
+        if (data.gpmAutomate) {
+          autoDot.className = "live-dot active";
+          autoText.textContent = "Online";
+          autoText.style.color = "#10b981";
+        } else {
+          autoDot.className = "live-dot inactive";
+          autoText.textContent = "Offline (Chưa mở GPM Automate)";
+          autoText.style.color = "#ef4444";
+        }
+      }
+    } catch {
+      if (loginDot && loginText) {
+        loginDot.className = "live-dot inactive";
+        loginText.textContent = "Lỗi kết nối Otter Daemon";
+        loginText.style.color = "#ef4444";
+      }
+    }
+  }
+
+  async function loadGpmProfilesList() {
+    const tbody = document.getElementById("gpm-profiles-tbody");
+    if (!tbody) return;
+
+    try {
+      const search = (document.getElementById("gpm-profile-search") as HTMLInputElement)?.value?.trim() || "";
+      const query = search ? `?search=${encodeURIComponent(search)}` : "";
+      const res = await manageFetch(`/api/activity/v1/gpm/profiles${query}`);
+      const profiles: any[] = res.profiles || [];
+      gpmProfilesCache = profiles;
+
+      if (profiles.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="padding:16px; text-align:center; color:var(--text-soft);">Không tìm thấy profile nào trong GPM Login.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = profiles.map(p => {
+        const isRunning = p.is_running || Boolean(p.remote_debugging_port);
+        const statusBadge = isRunning
+          ? `<span style="display:inline-flex; align-items:center; gap:6px; color:#10b981; font-weight:600;"><span class="live-dot active"></span> Đang chạy</span>`
+          : `<span style="color:var(--text-soft);">Đã đóng</span>`;
+        const cdpBadge = p.remote_debugging_port
+          ? `<span style="background:rgba(56, 189, 248, 0.15); color:#38bdf8; padding:2px 8px; border-radius:4px; font-family:monospace; font-weight:700;">:${p.remote_debugging_port}</span>`
+          : `<span style="color:var(--text-soft);">—</span>`;
+
+        return `
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+            <td style="padding:10px; font-weight:600; color:#fff;">${manageEscape(p.name)}</td>
+            <td style="padding:10px; font-family:monospace; font-size:11.5px; color:var(--text-soft);">${manageEscape(p.id)}</td>
+            <td style="padding:10px; font-size:12px; color:var(--text-soft);">${manageEscape(p.raw_proxy || "Không dùng proxy")}</td>
+            <td style="padding:10px;">${statusBadge}</td>
+            <td style="padding:10px;">${cdpBadge}</td>
+            <td style="padding:10px; text-align:right;">
+              ${isRunning
+                ? `<button type="button" class="btn-gpm-stop" data-id="${p.id}" style="min-height:unset; padding:5px 12px; font-size:12px; background:#ef4444; color:#fff; border:none; border-radius:6px; cursor:pointer;">⏹️ Đóng</button>`
+                : `<button type="button" class="btn-gpm-start" data-id="${p.id}" style="min-height:unset; padding:5px 12px; font-size:12px; background:#0284c7; color:#fff; border:none; border-radius:6px; cursor:pointer;">🚀 Mở (+ Otter)</button>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      // Bind start / stop handlers
+      tbody.querySelectorAll<HTMLButtonElement>(".btn-gpm-start").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-id");
+          if (!id) return;
+          btn.disabled = true;
+          btn.textContent = "Đang mở...";
+          try {
+            const startRes = await manageFetch("/api/activity/v1/gpm/profiles/start", "POST", { profileId: id });
+            if (startRes.success) {
+              await loadGpmProfilesList();
+            } else {
+              alert("Lỗi mở profile: " + (startRes.message || "Không rõ"));
+            }
+          } catch (e: any) {
+            alert("Lỗi kết nối: " + e.message);
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      });
+
+      tbody.querySelectorAll<HTMLButtonElement>(".btn-gpm-stop").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-id");
+          if (!id) return;
+          btn.disabled = true;
+          btn.textContent = "Đang đóng...";
+          try {
+            await manageFetch("/api/activity/v1/gpm/profiles/stop", "POST", { profileId: id });
+            await loadGpmProfilesList();
+          } catch (e: any) {
+            alert("Lỗi đóng profile: " + e.message);
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      });
+
+    } catch (err: any) {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding:16px; text-align:center; color:#ef4444;">Không thể kết nối GPM Login: ${manageEscape(err.message)}</td></tr>`;
+    }
+  }
+
+  function initGpmStudioTab() {
+    document.getElementById("gpm-refresh-btn")?.addEventListener("click", () => {
+      void checkGpmHealthStatus();
+      void loadGpmProfilesList();
+    });
+
+    let searchTimeout: any = null;
+    document.getElementById("gpm-profile-search")?.addEventListener("input", () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        void loadGpmProfilesList();
+      }, 300);
+    });
+
+    const xpathInput = document.getElementById("gpm-xpath-input") as HTMLInputElement;
+    const xpathNegate = document.getElementById("gpm-xpath-negate") as HTMLInputElement;
+    const xpathLiveTest = document.getElementById("gpm-xpath-livetest") as HTMLInputElement;
+    const testXpathBtn = document.getElementById("gpm-test-xpath-btn");
+    const resultBox = document.getElementById("gpm-xpath-result-box");
+    const conditionText = document.getElementById("gpm-xpath-condition-text");
+    const elementsInfo = document.getElementById("gpm-xpath-elements-info");
+    const copyCondBtn = document.getElementById("gpm-copy-has-element-btn");
+
+    testXpathBtn?.addEventListener("click", async () => {
+      const xpath = xpathInput?.value?.trim();
+      if (!xpath) {
+        alert("Vui lòng nhập biểu thức XPath cần kiểm tra!");
+        return;
+      }
+      if (testXpathBtn) (testXpathBtn as HTMLButtonElement).textContent = "Đang kiểm tra...";
+
+      try {
+        const res = await manageFetch("/api/activity/v1/gpm/xpath/test", "POST", {
+          xpath,
+          negate: Boolean(xpathNegate?.checked),
+          liveTest: Boolean(xpathLiveTest?.checked)
+        });
+
+        if (resultBox && conditionText && elementsInfo) {
+          resultBox.style.display = "block";
+          if (!res.isValid) {
+            conditionText.textContent = `❌ Cú pháp XPath không hợp lệ: ${res.error}`;
+            conditionText.style.color = "#ef4444";
+            elementsInfo.textContent = "";
+          } else {
+            conditionText.textContent = res.hasElementCondition;
+            conditionText.style.color = "#34d399";
+
+            if (res.liveEvaluation) {
+              if (res.liveEvaluation.error) {
+                elementsInfo.textContent = `Lỗi DOM live: ${res.liveEvaluation.error}`;
+              } else {
+                const count = res.liveEvaluation.count || 0;
+                const samples = (res.liveEvaluation.sampleTexts || []).join(" | ");
+                elementsInfo.textContent = `✅ Tìm thấy ${count} phần tử trên tab đang mở. Xem trước: [${samples || "trống"}]`;
+              }
+            } else {
+              elementsInfo.textContent = `Cú pháp hợp lệ theo chuẩn GPM Automate V3.`;
+            }
+          }
+        }
+      } catch (e: any) {
+        alert("Lỗi kiểm tra XPath: " + e.message);
+      } finally {
+        if (testXpathBtn) (testXpathBtn as HTMLButtonElement).textContent = "🧪 Thử Nghiệm XPath";
+      }
+    });
+
+    copyCondBtn?.addEventListener("click", async () => {
+      const cond = conditionText?.textContent?.trim();
+      if (cond && !cond.startsWith("❌")) {
+        await navigator.clipboard.writeText(cond);
+        const original = copyCondBtn.textContent;
+        copyCondBtn.textContent = "Đã sao chép!";
+        copyCondBtn.style.color = "#10b981";
+        setTimeout(() => {
+          copyCondBtn.textContent = original;
+          copyCondBtn.style.color = "";
+        }, 2000);
+      }
+    });
+
+    const actionTypeSelect = document.getElementById("gpm-script-action-type") as HTMLSelectElement;
+    const scriptXpathInput = document.getElementById("gpm-script-xpath") as HTMLInputElement;
+    const scriptValInput = document.getElementById("gpm-script-val") as HTMLInputElement;
+    const scriptDelayInput = document.getElementById("gpm-script-delay") as HTMLInputElement;
+    const scriptCommentInput = document.getElementById("gpm-script-comment") as HTMLInputElement;
+    const genScriptBtn = document.getElementById("gpm-gen-script-btn");
+    const copyScriptBtn = document.getElementById("gpm-copy-script-btn");
+    const scriptPreview = document.getElementById("gpm-script-preview");
+
+    let currentGeneratedJson = "";
+
+    async function generateScriptBlock() {
+      const actionType = Number(actionTypeSelect?.value) || 48;
+      const xpath = scriptXpathInput?.value?.trim() || undefined;
+      const val = scriptValInput?.value?.trim() || "";
+      const delay = scriptDelayInput?.value?.trim() || "$delay";
+      const comment = scriptCommentInput?.value?.trim() || "Thực hiện hành động";
+
+      const rawInput: Record<string, string> = {};
+      if (xpath) rawInput["XPATH"] = xpath;
+      if (actionType === 48) rawInput["CLICK_TYPE"] = "0";
+      if (actionType === 50) rawInput["TEXT"] = val;
+      if (actionType === 11) rawInput["URL"] = val;
+      if (actionType === 53) rawInput["SCROLL_NUM"] = val || "1";
+      if (actionType === 68) rawInput["JS_CODE"] = val || "return true;";
+      if (actionType === 118) rawInput["TIMEOUT"] = val || "10";
+
+      try {
+        const res = await manageFetch("/api/activity/v1/gpm/script/generate", "POST", {
+          actionType,
+          xpath,
+          rawInput,
+          comment,
+          delay,
+          wrapInBlock: true
+        });
+
+        if (res.success && res.pasteReadyJson) {
+          currentGeneratedJson = res.pasteReadyJson;
+          if (scriptPreview) {
+            scriptPreview.textContent = currentGeneratedJson;
+          }
+        }
+      } catch (e: any) {
+        alert("Lỗi sinh kịch bản: " + e.message);
+      }
+    }
+
+    genScriptBtn?.addEventListener("click", () => {
+      void generateScriptBlock();
+    });
+
+    copyScriptBtn?.addEventListener("click", async () => {
+      if (!currentGeneratedJson) {
+        await generateScriptBlock();
+      }
+      if (currentGeneratedJson) {
+        await navigator.clipboard.writeText(currentGeneratedJson);
+        const original = copyScriptBtn.textContent;
+        copyScriptBtn.textContent = "Đã sao chép! Dán Ctrl+V vào GPM Editor";
+        copyScriptBtn.style.background = "#10b981";
+        setTimeout(() => {
+          copyScriptBtn.textContent = original;
+          copyScriptBtn.style.background = "#7c3aed";
+        }, 2500);
+      }
+    });
+
+    const runWorkflowBtn = document.getElementById("gpm-run-test-workflow-btn");
+    const engineSelect = document.getElementById("gpm-test-engine-select") as HTMLSelectElement;
+    const runnerLogs = document.getElementById("gpm-runner-logs");
+
+    function logRunner(msg: string, color = "#e2e8f0") {
+      if (!runnerLogs) return;
+      const time = new Date().toLocaleTimeString();
+      const div = document.createElement("div");
+      div.style.color = color;
+      div.textContent = `[${time}] ${msg}`;
+      runnerLogs.appendChild(div);
+      runnerLogs.scrollTop = runnerLogs.scrollHeight;
+    }
+
+    runWorkflowBtn?.addEventListener("click", async () => {
+      const engine = engineSelect?.value || "extension";
+      if (!runnerLogs) return;
+      runnerLogs.innerHTML = "";
+      logRunner(`🚀 Bắt đầu chạy kịch bản kiểm thử quy trình qua Engine: ${engine.toUpperCase()}...`, "#38bdf8");
+
+      try {
+        logRunner("Bước 1: Mở trang web https://www.google.com...", "#fbbf24");
+        await manageFetch("/api/activity/v1/browser/open", "POST", { url: "https://www.google.com" });
+        logRunner("✅ Bước 1: Đã mở thành công URL https://www.google.com", "#10b981");
+
+        await new Promise(r => setTimeout(r, 1500));
+
+        logRunner("Bước 2: Dò tìm ô nhập liệu //textarea[@name='q'] trên trang...", "#fbbf24");
+        const xpathRes = await manageFetch("/api/activity/v1/gpm/xpath/test", "POST", {
+          xpath: "//textarea[@name='q']",
+          liveTest: true
+        });
+        if (xpathRes.isValid) {
+          logRunner(`✅ Bước 2: XPath hợp lệ: ${xpathRes.hasElementCondition}`, "#10b981");
+        } else {
+          logRunner(`⚠️ Bước 2: XPath chưa thấy: ${xpathRes.error}`, "#ef4444");
+        }
+
+        logRunner("Bước 3: Tự động biên dịch sang block GPM Automate V3...", "#fbbf24");
+        const scriptRes = await manageFetch("/api/activity/v1/gpm/script/generate", "POST", {
+          actionType: 50,
+          xpath: "//textarea[@name='q']",
+          rawInput: { XPATH: "//textarea[@name='q']", TEXT: "Otter AI Assistant" },
+          comment: "Tìm kiếm Otter AI trên Google"
+        });
+        if (scriptRes.success) {
+          logRunner("🎉 Hoàn tất kịch bản kiểm thử! Block JSON .NET đã sẵn sàng trong clipboard.", "#34d399");
+        }
+      } catch (err: any) {
+        logRunner(`❌ Lỗi thực thi quy trình: ${err.message}`, "#ef4444");
+      }
+    });
+  }
+
   // Wire up tab activation
   onTabActivated = (tabId: string) => {
     if (tabId === "tab-tasks") {
@@ -1762,6 +2097,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     if (tabId === "tab-dashboard") {
       loadDashboardIframe();
+    }
+    if (tabId === "tab-gpm") {
+      void checkGpmHealthStatus();
+      void loadGpmProfilesList();
     }
     if (tabId === "tab-manage") {
       renderManageTools();
@@ -1774,6 +2113,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initScheduledTasksTab();
   initDashboardTab();
   initManualTab();
+  initGpmStudioTab();
 
   // Load initial tab data
   if (document.getElementById("tab-tasks")?.classList.contains("active")) {
@@ -1781,6 +2121,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     startTasksPolling();
   } else if (document.getElementById("tab-dashboard")?.classList.contains("active")) {
     loadDashboardIframe();
+  } else if (document.getElementById("tab-gpm")?.classList.contains("active")) {
+    void checkGpmHealthStatus();
+    void loadGpmProfilesList();
   }
 
   // Load management data on first open, and when the stored tab is Manage.

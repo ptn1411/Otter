@@ -175,3 +175,4 @@ export function registerGpmTools(mcp: McpServer, onActivity?: (event: any) => vo
     }
   );
 }
+

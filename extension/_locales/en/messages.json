@@ -719,6 +719,10 @@
     "message": "MCP tools registered by the daemon (see MCP_INSTRUCTIONS.md section 4). The agent calls them over MCP; no extra setup here.",
     "description": "manage_tools_desc"
   },
+  "manage_engine_title": {
+    "message": "🚀 Browser Control Engine (Dual-Engine: Extension vs CDP)",
+    "description": "manage_engine_title"
+  },
   "manage_tools_title": {
     "message": "MCP tool groups",
     "description": "manage_tools_title"

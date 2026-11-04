@@ -719,6 +719,10 @@
     "message": "Các tool MCP do daemon đăng ký (xem MCP_INSTRUCTIONS.md mục 4). Agent gọi qua MCP, không cần cấu hình thêm ở extension.",
     "description": "manage_tools_desc"
   },
+  "manage_engine_title": {
+    "message": "🚀 Động cơ điều khiển trình duyệt (Dual-Engine: Extension vs CDP)",
+    "description": "manage_engine_title"
+  },
   "manage_tools_title": {
     "message": "Nhóm công cụ MCP",
     "description": "manage_tools_title"

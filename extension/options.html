@@ -90,6 +90,7 @@
     <button type="button" class="tab-btn" id="tab-btn-guide" data-tab="tab-guide" data-i18n="tab_guide">📖 Cài Đặt & Kết Nối</button>
     <button type="button" class="tab-btn" id="tab-btn-license" data-tab="tab-license" data-i18n="tab_license">💎 Gói & Bản Quyền</button>
     <button type="button" class="tab-btn" id="tab-btn-settings" data-tab="tab-settings" data-i18n="tab_settings">🔌 Máy Chủ MCP</button>
+    <button type="button" class="tab-btn" id="tab-btn-gpm" data-tab="tab-gpm">🤖 GPM Studio</button>
     <button type="button" class="tab-btn" id="tab-btn-manage" data-tab="tab-manage" data-i18n="tab_manage">🎛️ Quản Lý Tổng</button>
   </div>
 
@@ -1027,6 +1028,184 @@ QUY TẮC THỰC HIỆN BẮT BUỘC (LÀM TỪNG BƯỚC MỘT):
       </p>
       <div id="fb-sales-comments-container" style="display:grid; gap:14px;">
         <div style="color:var(--text-soft); font-size:13px;">Đang tải kịch bản bình luận...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: GPM STUDIO (GPM LOGIN + GPM AUTOMATE + CDP DUAL ENGINE) -->
+  <div class="tab-pane" id="tab-gpm">
+    <!-- Header Summary & Quick Controls -->
+    <div class="card-box" style="border-color: rgba(16, 185, 129, 0.4); background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(56, 189, 248, 0.04) 100%);">
+      <div class="card-header">
+        <div class="card-title">
+          <span style="font-size:22px;">🤖</span>
+          <span>GPM Studio — Trung Tâm Điều Khiển Profile & Tự Động Hóa</span>
+        </div>
+        <button type="button" id="gpm-refresh-btn" style="min-height:unset; padding:6px 14px; font-size:12px; cursor:pointer;">🔄 Làm Mới Trạng Thái</button>
+      </div>
+      <p style="margin:0 0 12px; font-size:13px; color:var(--text-soft); line-height:1.5;">
+        Cầu nối tích hợp giữa GPM Login Local API, GPM Automate MCP và Dual-Engine (Extension vs CDP). Cho phép mở profile tự động kèm tiện ích Otter, dò XPath trực tiếp trên DOM thật, sinh node kịch bản GPM Automate V3 paste-ready, và chạy thử kiểm thử quy trình.
+      </p>
+      <!-- Engine Status Badges -->
+      <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px; padding:6px 12px; background:var(--panel); border:1px solid var(--border); border-radius:8px; font-size:12.5px;">
+          <span id="gpm-status-login-dot" class="live-dot inactive"></span>
+          <span>GPM Login (Port 9495): <strong id="gpm-status-login-text" style="color:var(--text-soft);">Đang kiểm tra...</strong></span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; padding:6px 12px; background:var(--panel); border:1px solid var(--border); border-radius:8px; font-size:12.5px;">
+          <span id="gpm-status-automate-dot" class="live-dot inactive"></span>
+          <span>GPM Automate MCP (Port 19977): <strong id="gpm-status-automate-text" style="color:var(--text-soft);">Đang kiểm tra...</strong></span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; padding:6px 12px; background:var(--panel); border:1px solid var(--border); border-radius:8px; font-size:12.5px;">
+          <span class="live-dot active"></span>
+          <span>Otter Core MCP (Port 1993): <strong style="color:#10b981;">Đang hoạt động</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. QUẢN LÝ PROFILE GPM LOGIN -->
+    <div class="card-box" style="margin-top:16px;">
+      <div class="card-header">
+        <div class="card-title">
+          <span>👥</span> <span>1. Quản Lý Profile GPM Login & Mở Kèm Otter</span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="gpm-profile-search" placeholder="🔍 Lọc theo tên profile..." style="width:200px; padding:6px 10px; font-size:12px; border-radius:6px; background:var(--panel); border:1px solid var(--border); color:#fff;" />
+        </div>
+      </div>
+      <p style="margin:0 0 12px; font-size:13px; color:var(--text-soft);">
+        Bấm <strong>Mở (+ Otter)</strong> để khởi động profile trình duyệt GPM có sẵn extension Otter và cổng gỡ lỗi từ xa (CDP) phục vụ dò XPath tự động.
+      </p>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border); text-align:left; color:var(--text-soft); font-size:12px;">
+              <th style="padding:8px 10px;">TÊN PROFILE</th>
+              <th style="padding:8px 10px;">ID PROFILE</th>
+              <th style="padding:8px 10px;">PROXY</th>
+              <th style="padding:8px 10px;">TRẠNG THÁI</th>
+              <th style="padding:8px 10px;">CỔNG CDP</th>
+              <th style="padding:8px 10px; text-align:right;">THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody id="gpm-profiles-tbody">
+            <tr>
+              <td colspan="6" style="padding:16px; text-align:center; color:var(--text-soft);">
+                Đang nạp danh sách profile từ GPM Login Local API...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2. VISUAL XPATH TESTER & DOM INSPECTOR -->
+    <div class="card-box" style="margin-top:16px; border-color: rgba(56, 189, 248, 0.4);">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🎯</span> <span>2. Visual XPath Tester & DOM Inspector (Dò Selector Thật)</span>
+        </div>
+      </div>
+      <p style="margin:0 0 12px; font-size:13px; color:var(--text-soft);">
+        Quy tắc GPM Automate V3: Kiểm tra phần tử tồn tại bắt buộc dùng cú pháp <code>hasElement(XPATH)</code> hoặc <code>!hasElement(XPATH)</code>, không bọc ngoặc kép trong XPath.
+      </p>
+      <div style="display:grid; gap:12px;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <input type="text" id="gpm-xpath-input" placeholder="Nhập XPath cần kiểm tra (ví dụ: //button[@type='submit'] hoặc //input[@id='email'])" style="flex:1; min-width:300px; padding:8px 12px; font-size:13px; border-radius:8px; background:var(--panel); border:1px solid var(--border); color:#fff; font-family:monospace;" />
+          <button type="button" id="gpm-test-xpath-btn" style="min-height:unset; padding:8px 16px; font-size:13px; cursor:pointer; background:#0284c7; color:#fff; border:none; border-radius:8px; font-weight:600;">🧪 Thử Nghiệm XPath</button>
+        </div>
+        <div style="display:flex; gap:16px; align-items:center; font-size:13px;">
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="checkbox" id="gpm-xpath-negate" />
+            <span>Phủ định: <code>!hasElement(...)</code> (Chờ biến mất / Không tồn tại)</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="checkbox" id="gpm-xpath-livetest" checked />
+            <span>Đếm phần tử trên tab đang mở</span>
+          </label>
+        </div>
+        <!-- Result Box -->
+        <div id="gpm-xpath-result-box" style="display:none; padding:12px 14px; border-radius:8px; background:#090d16; border:1px solid var(--border); font-size:13px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span id="gpm-xpath-badge" style="font-weight:700; color:#38bdf8;">Kết quả phân tích:</span>
+            <button type="button" id="gpm-copy-has-element-btn" class="btn-copy">📋 Sao chép điều kiện hasElement()</button>
+          </div>
+          <div id="gpm-xpath-condition-text" style="font-family:monospace; color:#34d399; margin-bottom:6px; word-break:break-all;"></div>
+          <div id="gpm-xpath-elements-info" style="color:var(--text-soft); font-size:12.5px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. TRÌNH TẠO KỊCH BẢN GPM AUTOMATE V3 (PASTE-READY) -->
+    <div class="card-box" style="margin-top:16px; border-color: rgba(168, 85, 247, 0.4);">
+      <div class="card-header">
+        <div class="card-title">
+          <span>⚡</span> <span>3. Trình Tạo Block Kịch Bản GPM Automate V3 (Paste-Ready Clipboard)</span>
+        </div>
+        <button type="button" id="gpm-copy-script-btn" class="btn-copy" style="background:#7c3aed; color:#fff; font-weight:600; padding:6px 14px;">📋 Sao Chép Block (Dán Ctrl+V)</button>
+      </div>
+      <p style="margin:0 0 14px; font-size:13px; color:var(--text-soft);">
+        Sinh mã JSON .NET chuẩn <code>ActionNode</code> hoặc <code>NormalBlockNode</code> có sẵn GUID v4 và cấu trúc <code>raw_input</code> đã escape. Bạn chỉ cần bấm <strong>Sao chép Block</strong> rồi chuyển sang GPM Automate Editor nhấn <kbd>Ctrl+V</kbd>.
+      </p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:12px;">
+        <div>
+          <label style="font-size:12px; color:var(--text-soft); font-weight:600; display:block; margin-bottom:4px;">LOẠI HÀNH ĐỘNG (ACTION TYPE)</label>
+          <select id="gpm-script-action-type" style="width:100%; padding:8px; border-radius:6px; background:var(--panel); border:1px solid var(--border); color:#fff; font-size:13px;">
+            <option value="48">Mouse Click (48) — Bấm chuột vào phần tử</option>
+            <option value="50">Key Press / Type (50) — Nhập văn bản bàn phím</option>
+            <option value="11">Go to URL (11) — Mở liên kết trang web</option>
+            <option value="118">Wait Element (118) — Chờ phần tử xuất hiện</option>
+            <option value="53">Mouse Scroll (53) — Cuộn trang web</option>
+            <option value="68">Execute JS (68) — Thực thi JavaScript đồng bộ</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px; color:var(--text-soft); font-weight:600; display:block; margin-bottom:4px;">XPATH PHẦN TỬ</label>
+          <input type="text" id="gpm-script-xpath" placeholder="//button[@id='login']" style="width:100%; padding:8px; border-radius:6px; background:var(--panel); border:1px solid var(--border); color:#fff; font-size:13px; font-family:monospace;" />
+        </div>
+        <div>
+          <label style="font-size:12px; color:var(--text-soft); font-weight:600; display:block; margin-bottom:4px;">GIÁ TRỊ / NỘI DUNG / URL</label>
+          <input type="text" id="gpm-script-val" placeholder="https://... hoặc $variable hoặc text" style="width:100%; padding:8px; border-radius:6px; background:var(--panel); border:1px solid var(--border); color:#fff; font-size:13px;" />
+        </div>
+        <div>
+          <label style="font-size:12px; color:var(--text-soft); font-weight:600; display:block; margin-bottom:4px;">DELAY (MS HOẶC BIẾN)</label>
+          <input type="text" id="gpm-script-delay" value="$delay" placeholder="$delay hoặc 1000,2000" style="width:100%; padding:8px; border-radius:6px; background:var(--panel); border:1px solid var(--border); color:#fff; font-size:13px;" />
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+        <input type="text" id="gpm-script-comment" placeholder="Ghi chú bước thực hiện (ví dụ: Bấm nút Đăng nhập tài khoản...)" style="flex:1; padding:8px 12px; border-radius:6px; background:var(--panel); border:1px solid var(--border); color:#fff; font-size:13px;" />
+        <button type="button" id="gpm-gen-script-btn" style="min-height:unset; padding:8px 18px; font-size:13px; cursor:pointer; background:#9333ea; color:#fff; border:none; border-radius:8px; font-weight:600;">⚡ Tạo Block Ngay</button>
+      </div>
+      <!-- Preview code -->
+      <pre id="gpm-script-preview" style="background:#090d16; border:1px solid var(--border); border-radius:8px; padding:12px; font-size:12px; font-family:monospace; color:#38bdf8; max-height:220px; overflow-y:auto; white-space:pre-wrap; margin:0;">[
+  {
+    "$type": "GPMAutomateEditor.Models.NormalBlockNode, GPMAutomateEditor.Models",
+    "nodes": [],
+    "display_text": "Block mẫu chưa có action. Chọn action và bấm Tạo Block Ngay"
+  }
+]</pre>
+    </div>
+
+    <!-- 4. TEST RUNNER (DUAL-ENGINE AUTOMATION RUNNER) -->
+    <div class="card-box" style="margin-top:16px;">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🚀</span> <span>4. Test Runner & Trình Chạy Thử Quy Trình Tự Động</span>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <select id="gpm-test-engine-select" style="padding:6px 10px; border-radius:6px; background:var(--panel); border:1px solid var(--border); color:#fff; font-size:12px;">
+            <option value="extension">Engine: Extension Browser Controller</option>
+            <option value="cdp">Engine: CDP Direct (Port 9222 / Dynamic)</option>
+            <option value="mcp">Engine: GPM Automate MCP (Port 19977)</option>
+          </select>
+          <button type="button" id="gpm-run-test-workflow-btn" style="min-height:unset; padding:6px 14px; font-size:12px; cursor:pointer; background:#10b981; color:#fff; border:none; border-radius:6px; font-weight:600;">▶️ Chạy Thử Kịch Bản Mẫu</button>
+        </div>
+      </div>
+      <p style="margin:0 0 12px; font-size:13px; color:var(--text-soft);">
+        Kịch bản mẫu kiểm thử: 1. Mở trang Google -> 2. Kiểm tra ô tìm kiếm <code>//textarea[@name='q']</code> -> 3. Đọc tiêu đề trang.
+      </p>
+      <div id="gpm-runner-logs" style="background:#090d16; border:1px solid var(--border); border-radius:8px; padding:12px; font-size:12px; font-family:monospace; color:#e2e8f0; min-height:100px; max-height:200px; overflow-y:auto;">
+        <div style="color:var(--text-soft);">Sẵn sàng chạy thử kịch bản kiểm thử. Bấm "Chạy Thử Kịch Bản Mẫu" để bắt đầu...</div>
       </div>
     </div>
   </div>

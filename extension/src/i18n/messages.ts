@@ -182,6 +182,7 @@ export type TranslationKey =
   | "manage_tool_plans_desc"
   | "manage_tool_plans_name"
   | "manage_tools_desc"
+  | "manage_engine_title"
   | "manage_tools_title"
   | "manage_zero_risk_copy"
   | "mcp_none"
@@ -470,6 +471,7 @@ export const messages: Record<"vi" | "en", Record<TranslationKey, string>> = {
   "manage_tool_plans_desc": "Vòng lặp code theo plan, daemon là nguồn thật.",
   "manage_tool_plans_name": "Plans code liên tục",
   "manage_tools_desc": "Các tool MCP do daemon đăng ký (xem MCP_INSTRUCTIONS.md mục 4). Agent gọi qua MCP, không cần cấu hình thêm ở extension.",
+  "manage_engine_title": "🚀 Động cơ điều khiển trình duyệt (Dual-Engine: Extension vs CDP)",
   "manage_tools_title": "Nhóm công cụ MCP",
   "manage_zero_risk_copy": "✅ Zero-risk: copy prompt này gửi tay: {prompt}",
   "mcp_none": "Chưa cấu hình server nào trong <code>mcp_config.json</code>.",
@@ -757,6 +759,7 @@ export const messages: Record<"vi" | "en", Record<TranslationKey, string>> = {
   "manage_tool_plans_desc": "Plan-driven coding loop; daemon is the source of truth.",
   "manage_tool_plans_name": "Continuous-coding plans",
   "manage_tools_desc": "MCP tools registered by the daemon (see MCP_INSTRUCTIONS.md section 4). The agent calls them over MCP; no extra setup here.",
+  "manage_engine_title": "🚀 Browser Control Engine (Dual-Engine: Extension vs CDP)",
   "manage_tools_title": "MCP tool groups",
   "manage_zero_risk_copy": "✅ Zero-risk: copy this prompt and send manually: {prompt}",
   "mcp_none": "No external servers configured in <code>mcp_config.json</code>.",

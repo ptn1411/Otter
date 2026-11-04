@@ -261,3 +261,4 @@ export function validateXPathExpression(xpath: string): { valid: boolean; error?
   }
   return { valid: true };
 }
+
