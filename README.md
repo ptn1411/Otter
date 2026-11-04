@@ -12,14 +12,13 @@
   <br>
   <em>🌐 Ngôn ngữ / Language: <a href="#-tiếng-việt">Tiếng Việt</a> • <a href="#-english">English</a></em>
   <br>
-  <em>📖 Xem Landing Page & Hướng Dẫn Trực Quan: <a href="deploy/docs/index.html">deploy/docs/index.html</a> (hoặc <code>http://127.0.0.1:1993/docs</code> khi đang bật Otter)</em>
+  <strong>🌐 Trang Chủ Chính Thức & Cài Đặt 1-Click: <a href="https://otter.gpt.io.vn">https://otter.gpt.io.vn</a></strong>
 </p>
 
 <p align="center">
-  <a href="https://www.facebook.com/share/g/1CN8sjFYDH/?mibextid=wwXIfr"><img src="https://img.shields.io/badge/Facebook_Group-Otter_Community-blue?logo=facebook" alt="Facebook Community"></a>
-  <img src="https://img.shields.io/badge/Bản_quyền-Miễn_phí_trọn_đời-10b981" alt="Free Lifetime">
-  <img src="https://img.shields.io/badge/Cài_đặt-1_Click_Là_Xong-38bdf8" alt="1-Click Install">
-  <img src="https://img.shields.io/badge/Hỗ_trợ-Windows_%26_macOS-818cf8" alt="Windows & macOS">
+  <a href="https://otter.gpt.io.vn"><img src="https://img.shields.io/badge/Trang_Chủ-otter.gpt.io.vn-0284c7?style=for-the-badge&logo=google-chrome" alt="Trang chủ"></a>
+  <a href="https://otter.gpt.io.vn"><img src="https://img.shields.io/badge/Cài_Đặt_1--Click-irm_otter.gpt.io.vn-10b981?style=for-the-badge&logo=powershell" alt="1-Click Install"></a>
+  <a href="https://www.facebook.com/share/g/1CN8sjFYDH/?mibextid=wwXIfr"><img src="https://img.shields.io/badge/Facebook-Cộng_Đồng_Otter-1877F2?style=for-the-badge&logo=facebook" alt="Facebook Community"></a>
 </p>
 
 ---
@@ -74,21 +73,29 @@ Hầu hết mọi người khi dùng ChatGPT đều chỉ nhận được văn b
 
 ## 3. Hướng Dẫn Cài Đặt Trong 1 Phút (Cực Dễ)
 
-Tất cả file cài đặt đã được chuẩn bị sẵn gọn gàng trong thư mục [`deploy/`](deploy/):
+👉 **Truy cập Trang chủ chính thức:** **[https://otter.gpt.io.vn](https://otter.gpt.io.vn)**
 
-### Bước 1: Khởi động Otter trên máy tính
-- **Đối với Windows:** Vào thư mục `deploy/`, click đúp chuột vào file **`install.bat`** (hoặc `setup.ps1`). Xong!
-- **Đối với macOS / Linux:** Mở Terminal tại thư mục `deploy/` và chạy lệnh:
-  ```bash
-  chmod +x setup.sh && ./setup.sh
+### 🌟 Cách 1: Cài đặt tự động bằng 1 dòng lệnh (Khuyên dùng)
+- **Dành cho Windows**: Mở PowerShell và dán dòng lệnh:
+  ```powershell
+  irm https://otter.gpt.io.vn/setup.ps1 | iex
   ```
-*(Khi Otter chạy thành công, máy tính của bạn đã sẵn sàng làm việc cùng ChatGPT).*
+  *(Otter sẽ tự động tải phiên bản mới nhất, cấu hình khay hệ thống Tray, nạp Extension và chạy ngầm siêu nhẹ).*
 
-### Bước 2: Cài tiện ích điều khiển trên trình duyệt
-1. Mở trình duyệt Google Chrome hoặc Microsoft Edge, truy cập: `chrome://extensions/`
+- **Dành cho macOS / Linux**: Mở Terminal và dán dòng lệnh:
+  ```bash
+  curl -fsSL https://otter.gpt.io.vn/setup.sh | bash
+  ```
+
+---
+
+### Bước 2: Bật tiện ích điều khiển trên trình duyệt
+1. Mở Google Chrome hoặc Microsoft Edge, truy cập: `chrome://extensions/`
 2. Bật công tắc **Chế độ dành cho nhà phát triển** (Developer mode) ở góc trên bên phải.
-3. Kéo thả file **`otter-extension.zip`** (trong thư mục `deploy/`) vào cửa sổ trình duyệt.
+3. Chọn **Tải tiện ích đã giải nén** (Load unpacked) -> trỏ vào thư mục `%LOCALAPPDATA%\Otter\extension` (hoặc thư mục `extension/dist`).
 4. Ghim biểu tượng con Rái cá (🦦 Otter) lên thanh công cụ của bạn.
+
+---
 
 ### Bước 3: Bắt đầu sai việc cho AI!
 Mở ChatGPT Web, bấm vào biểu tượng Otter trên trình duyệt và bắt đầu giao việc bằng lời nói tự nhiên.
@@ -193,20 +200,29 @@ Normally, ChatGPT only replies with text. You still have to spend hours manually
 
 ## 3. 1-Minute Quick Setup Guide
 
-All ready-to-run installation files are conveniently organized in [`deploy/`](deploy/):
+👉 **Visit Official Homepage:** **[https://otter.gpt.io.vn](https://otter.gpt.io.vn)**
 
-### Step 1: Start Otter on your computer
-- **For Windows:** Open `deploy/` and double-click **`install.bat`** (or `setup.ps1`). That's it!
-- **For macOS / Linux:** Open your Terminal in `deploy/` and execute:
-  ```bash
-  chmod +x setup.sh && ./setup.sh
+### 🌟 Method 1: 1-Click Automated Installer (Recommended)
+- **On Windows**: Open PowerShell and run:
+  ```powershell
+  irm https://otter.gpt.io.vn/setup.ps1 | iex
   ```
+  *(Automatically installs Otter background daemon, system tray, extension, and starts automatically).*
+
+- **On macOS / Linux**: Open Terminal and run:
+  ```bash
+  curl -fsSL https://otter.gpt.io.vn/setup.sh | bash
+  ```
+
+---
 
 ### Step 2: Add the Browser Extension
 1. Open Google Chrome or Microsoft Edge and navigate to `chrome://extensions/`
 2. Turn ON **Developer mode** in the upper-right corner.
-3. Drag & drop the **`otter-extension.zip`** file (located inside `deploy/`) into your browser window.
+3. Click **Load unpacked** and select `%LOCALAPPDATA%\Otter\extension` (or `extension/dist`).
 4. Pin the Otter icon (🦦) to your browser toolbar.
+
+---
 
 ### Step 3: Talk to ChatGPT and delegate tasks!
 Open ChatGPT Web, click the Otter icon on the page you wish to inspect, and command AI naturally.
