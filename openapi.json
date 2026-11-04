@@ -1600,6 +1600,148 @@
           }
         }
       }
+    },
+    "/api/activity/v1/gpm/status": {
+      "get": {
+        "operationId": "getGpmStatus",
+        "summary": "Kiểm tra trạng thái GPM Login và GPM Automate",
+        "description": "Kiểm tra kết nối tới GPM Login API (9495) và GPM Automate MCP (19977)",
+        "responses": {
+          "200": {
+            "description": "Trạng thái sức khỏe của GPM"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/gpm/profiles": {
+      "get": {
+        "operationId": "listGpmProfiles",
+        "summary": "Danh sách Profile GPM Login",
+        "description": "Liệt kê danh sách các profile trình duyệt trong GPM Login",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "number", "default": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "number", "default": 50 } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách profile"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/gpm/profiles/start": {
+      "post": {
+        "operationId": "startGpmProfile",
+        "summary": "Khởi động Profile GPM Login",
+        "description": "Mở profile GPM Login kèm cổng CDP và nạp extension Otter",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "profileId": { "type": "string", "description": "ID profile GPM" },
+                  "additionArgs": { "type": "string", "description": "Tham số bổ sung Chromium" },
+                  "loadOtterExtension": { "type": "boolean", "default": true }
+                },
+                "required": ["profileId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thông tin cổng CDP và websocket"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/gpm/profiles/stop": {
+      "post": {
+        "operationId": "stopGpmProfile",
+        "summary": "Dừng Profile GPM Login",
+        "description": "Đóng profile GPM Login đang mở",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "profileId": { "type": "string" }
+                },
+                "required": ["profileId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả dừng profile"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/gpm/xpath/test": {
+      "post": {
+        "operationId": "testGpmXpath",
+        "summary": "Kiểm tra cú pháp XPath và tạo điều kiện hasElement()",
+        "description": "Kiểm tra XPath và tạo biểu thức điều kiện chuẩn GPM Automate V3",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "xpath": { "type": "string" },
+                  "negate": { "type": "boolean", "default": false },
+                  "liveTest": { "type": "boolean", "default": false }
+                },
+                "required": ["xpath"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả thẩm định XPath"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/gpm/script/generate": {
+      "post": {
+        "operationId": "generateGpmScript",
+        "summary": "Tạo kịch bản GPM Automate V3 paste-ready",
+        "description": "Sinh JSON .NET paste-ready để dán trực tiếp vào GPM Automate Editor bằng Ctrl+V",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "actionType": { "type": "number" },
+                  "xpath": { "type": "string" },
+                  "rawInput": { "type": "object" },
+                  "comment": { "type": "string" },
+                  "delay": { "type": "string" },
+                  "wrapInBlock": { "type": "boolean", "default": true }
+                },
+                "required": ["actionType"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "JSON paste-ready cho GPM Editor"
+          }
+        }
+      }
     }
   }
 }

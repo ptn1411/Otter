@@ -25,7 +25,8 @@ import {
   registerFbEngageTools,
   registerFbGroupPostTools,
   registerMuseTools,
-  registerFbMediaPostTools
+  registerFbMediaPostTools,
+  registerGpmTools
 } from "./tools";
 
 /**
@@ -118,6 +119,9 @@ export function createMcpServer(onActivity?: (event: any) => void): McpServer {
 
   // 17. Đăng bài Video, Hình ảnh & Hàng đợi Batch Facebook (Profile, Group, Page)
   registerFbMediaPostTools(mcp, onActivity);
+
+  // 18. GPM Automate V3 & GPM Login Local API Bridge
+  registerGpmTools(mcp, onActivity);
 
   return mcp;
 }

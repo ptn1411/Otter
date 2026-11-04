@@ -312,6 +312,7 @@ const server = Bun.serve<WsClientData>({
       url.pathname === "/api/media/file" ||
       url.pathname.startsWith("/storage/media/") ||
       url.pathname.startsWith("/api/activity/v1/fb/") ||
+      url.pathname.startsWith("/api/activity/v1/gpm/") ||
       url.pathname === "/openapi.json" ||
       matchDaemonRoute(url.pathname, "MCP_SERVERS") ||
       matchDaemonRoute(url.pathname, "SYS_LICENSE") ||

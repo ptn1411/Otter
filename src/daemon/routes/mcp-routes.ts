@@ -18,6 +18,16 @@ import {
   checkAndReplyMessengerOnce
 } from "../fb-sales";
 import { autoEngageFacebookFeed } from "../fb-engage";
+import {
+  getGpmHealth,
+  listGpmProfiles,
+  startGpmProfile,
+  stopGpmProfile,
+  generateGscriptActionNode,
+  generateGscriptBlock,
+  formatGpmCondition,
+  validateXPathExpression
+} from "../gpm";
 
 export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity: (event: any) => void): Promise<Response | null> {
   // 1. External MCP Tools Proxy (Custom GPT Actions & REST API)
@@ -93,6 +103,47 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
       if (toolName === "fb_feed_auto_engage") {
         const res = await autoEngageFacebookFeed(body, handleMcpActivity);
         return jsonResponse(res);
+      }
+
+      if (toolName === "gpm_status") {
+        const health = await getGpmHealth();
+        return jsonResponse(health);
+      }
+
+      if (toolName === "gpm_list_profiles") {
+        const res = await listGpmProfiles(body.page, body.pageSize, body.search);
+        return jsonResponse(res);
+      }
+
+      if (toolName === "gpm_start_profile") {
+        const res = await startGpmProfile(body.profileId, {
+          additionArgs: body.additionArgs,
+          loadOtterExtension: body.loadOtterExtension !== false
+        });
+        return jsonResponse(res);
+      }
+
+      if (toolName === "gpm_stop_profile") {
+        const res = await stopGpmProfile(body.profileId);
+        return jsonResponse(res);
+      }
+
+      if (toolName === "gpm_test_xpath") {
+        const validation = validateXPathExpression(body.xpath || "");
+        const condition = formatGpmCondition(body.xpath || "", Boolean(body.negate));
+        return jsonResponse({ xpath: body.xpath, isValid: validation.valid, error: validation.error, hasElementCondition: condition });
+      }
+
+      if (toolName === "gpm_generate_script") {
+        const node = generateGscriptActionNode({
+          actionType: Number(body.actionType) || 48,
+          xpath: body.xpath,
+          rawInput: body.rawInput,
+          comment: body.comment,
+          delay: body.delay
+        });
+        const output = body.wrapInBlock !== false ? generateGscriptBlock([node], body.comment || "Otter Action") : [node];
+        return jsonResponse({ success: true, pasteReadyJson: JSON.stringify(body.wrapInBlock !== false ? [output] : output, null, 2) });
       }
     }
 
@@ -206,6 +257,42 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
           qualifiedName: "otter_core_fb_media_run_now",
           title: "Kích hoạt đăng ngay bài media tiếp theo",
           description: "Đăng ngay bài media tiếp theo trong hàng đợi mà không cần chờ đến giờ hẹn."
+        },
+        {
+          name: "gpm_status",
+          qualifiedName: "otter_core_gpm_status",
+          title: "Trạng thái GPM Login & GPM Automate",
+          description: "Kiểm tra kết nối tới GPM Login API (9495) và GPM Automate MCP (19977)."
+        },
+        {
+          name: "gpm_list_profiles",
+          qualifiedName: "otter_core_gpm_list_profiles",
+          title: "Danh sách Profile GPM Login",
+          description: "Liệt kê các profile GPM kèm proxy và trạng thái chạy."
+        },
+        {
+          name: "gpm_start_profile",
+          qualifiedName: "otter_core_gpm_start_profile",
+          title: "Khởi động Profile GPM Login",
+          description: "Mở profile GPM Login kèm cổng CDP và nạp extension Otter."
+        },
+        {
+          name: "gpm_stop_profile",
+          qualifiedName: "otter_core_gpm_stop_profile",
+          title: "Đóng Profile GPM Login",
+          description: "Dừng (đóng) profile GPM Login đang chạy."
+        },
+        {
+          name: "gpm_test_xpath",
+          qualifiedName: "otter_core_gpm_test_xpath",
+          title: "Kiểm tra XPath & Gợi ý hasElement",
+          description: "Kiểm tra cú pháp XPath và tạo điều kiện chuẩn hasElement() cho GPM Automate V3."
+        },
+        {
+          name: "gpm_generate_script",
+          qualifiedName: "otter_core_gpm_generate_script",
+          title: "Tạo kịch bản GPM Automate V3 (.NET JSON)",
+          description: "Sinh mã JSON .NET paste-ready sao chép dán trực tiếp vào GPM Automate Editor."
         }
       ],
       lastChecked: Date.now(),

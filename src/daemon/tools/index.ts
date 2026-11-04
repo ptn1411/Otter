@@ -23,4 +23,5 @@ export { registerFbEngageTools } from "./fb-engage-tools";
 export { registerFbGroupPostTools } from "./fb-group-post-tools";
 export { registerMuseTools } from "./muse-tools";
 export { registerFbMediaPostTools } from "./fb-media-post-tools";
+export { registerGpmTools } from "./gpm-tools";
 

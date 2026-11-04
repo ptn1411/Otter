@@ -33,6 +33,16 @@ import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { assertSafePath } from "../security";
 import { jsonResponse, errorResponse } from "./common";
 import { matchDaemonRoute, matchDaemonRoutePrefix, getDaemonRoute } from "./lcg-routes";
+import {
+  getGpmHealth,
+  listGpmProfiles,
+  startGpmProfile,
+  stopGpmProfile,
+  generateGscriptActionNode,
+  generateGscriptBlock,
+  formatGpmCondition,
+  validateXPathExpression
+} from "../gpm";
 
 export async function handleActivityRoutes(
   req: Request,
@@ -725,6 +735,121 @@ export async function handleActivityRoutes(
     try {
       const res = await browserBridge.execute("reload_extension", {});
       return jsonResponse({ ok: true, message: res?.message || "Đang nạp lại tiện ích..." });
+    } catch (err: any) {
+      return errorResponse(err.message, 500);
+    }
+  }
+
+  // 12. GPM Automate & GPM Login API Routes
+  if (url.pathname === "/api/activity/v1/gpm/status" && req.method === "GET") {
+    try {
+      const health = await getGpmHealth();
+      return jsonResponse(health);
+    } catch (err: any) {
+      return errorResponse(err.message, 500);
+    }
+  }
+
+  if (url.pathname === "/api/activity/v1/gpm/profiles" && req.method === "GET") {
+    try {
+      const page = Number(url.searchParams.get("page")) || 1;
+      const pageSize = Number(url.searchParams.get("pageSize")) || 50;
+      const search = url.searchParams.get("search") || "";
+      const res = await listGpmProfiles(page, pageSize, search);
+      return jsonResponse(res);
+    } catch (err: any) {
+      return errorResponse(err.message, 500);
+    }
+  }
+
+  if (url.pathname === "/api/activity/v1/gpm/profiles/start" && req.method === "POST") {
+    try {
+      const body: any = await req.json();
+      if (!body.profileId) return errorResponse("Missing profileId", 400);
+      const res = await startGpmProfile(body.profileId, {
+        additionArgs: body.additionArgs,
+        loadOtterExtension: body.loadOtterExtension !== false
+      });
+      handleMcpActivity({ type: "gpm_start_profile", profileId: body.profileId, res });
+      return jsonResponse(res);
+    } catch (err: any) {
+      return errorResponse(err.message, 500);
+    }
+  }
+
+  if (url.pathname === "/api/activity/v1/gpm/profiles/stop" && req.method === "POST") {
+    try {
+      const body: any = await req.json();
+      if (!body.profileId) return errorResponse("Missing profileId", 400);
+      const res = await stopGpmProfile(body.profileId);
+      handleMcpActivity({ type: "gpm_stop_profile", profileId: body.profileId, res });
+      return jsonResponse(res);
+    } catch (err: any) {
+      return errorResponse(err.message, 500);
+    }
+  }
+
+  if (url.pathname === "/api/activity/v1/gpm/xpath/test" && req.method === "POST") {
+    try {
+      const body: any = await req.json();
+      const xpath = body.xpath || "";
+      const validation = validateXPathExpression(xpath);
+      const condition = formatGpmCondition(xpath, Boolean(body.negate));
+
+      let liveEvaluation = null;
+      if (validation.valid && body.liveTest) {
+        try {
+          const evalRes = await browserBridge.execute("evaluate_js", {
+            script: `(() => {
+              try {
+                const result = document.evaluate(${JSON.stringify(xpath)}, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+                const count = result.snapshotLength;
+                const sampleTexts = [];
+                for (let i = 0; i < Math.min(count, 5); i++) {
+                  const node = result.snapshotItem(i);
+                  sampleTexts.push((node.innerText || node.textContent || node.nodeName).slice(0, 100));
+                }
+                return { count, sampleTexts };
+              } catch (e) {
+                return { count: 0, error: e.message };
+              }
+            })()`
+          }, 5000);
+          liveEvaluation = evalRes?.result || evalRes;
+        } catch {}
+      }
+
+      return jsonResponse({
+        xpath,
+        isValid: validation.valid,
+        error: validation.error || null,
+        hasElementCondition: condition,
+        liveEvaluation
+      });
+    } catch (err: any) {
+      return errorResponse(err.message, 500);
+    }
+  }
+
+  if (url.pathname === "/api/activity/v1/gpm/script/generate" && req.method === "POST") {
+    try {
+      const body: any = await req.json();
+      const actionNode = generateGscriptActionNode({
+        actionType: Number(body.actionType) || 48,
+        xpath: body.xpath,
+        rawInput: body.rawInput,
+        comment: body.comment,
+        delay: body.delay
+      });
+      const output = body.wrapInBlock !== false
+        ? generateGscriptBlock([actionNode], body.comment || "Otter Action")
+        : [actionNode];
+      const jsonString = JSON.stringify(body.wrapInBlock !== false ? [output] : output, null, 2);
+      return jsonResponse({
+        success: true,
+        format: "GPM Automate V3 (.NET JSON)",
+        pasteReadyJson: jsonString
+      });
     } catch (err: any) {
       return errorResponse(err.message, 500);
     }
