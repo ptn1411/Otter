@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Otter — Cài đặt & Hướng dẫn</title>
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    :root{font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--text)}
+    *{box-sizing:border-box}
+    body{margin:0;padding:40px 20px 80px}
+    main{max-width:760px;margin:auto}
+    small{color:var(--accent);text-transform:uppercase;letter-spacing:.12em;font-weight:600}
+    h1{font-size:30px;line-height:1.2;margin:10px 0 16px;display:flex;align-items:center;gap:10px}
+    p{color:var(--text-soft);margin-top:0}
+    form{padding:22px;border:1px solid var(--border);border-radius:14px;background:var(--panel);display:grid;gap:14px}
+    label{display:grid;gap:6px;font-weight:600}
+    select,input,button,textarea{font:inherit;color:inherit;border:1px solid var(--border);border-radius:8px;min-height:42px;padding:10px 12px;background:var(--field)}
+    input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+    button{cursor:pointer;background:var(--accent-soft);color:var(--accent);font-weight:650;transition:all .15s ease}
+    button:hover:not(:disabled){filter:brightness(1.15)}
+    button:disabled{opacity:.5;cursor:wait}
+    a{color:var(--link);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .secondary{background:transparent}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    #status{white-space:pre-wrap;min-height:24px}
+    code{font-size:13px;overflow-wrap:anywhere}
+    .note-box { margin-top: 18px; padding: 20px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); display: grid; gap: 14px; }
+    .note-item { display: flex; gap: 12px; font-size: 14px; line-height: 1.6; color: var(--text-soft); }
+    .note-icon { font-size: 20px; flex-shrink: 0; }
+
+    /* Tabs Navigation */
+    .nav-tabs { display: flex; gap: 6px; margin: 24px 0 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px; flex-wrap: wrap; }
+    .tab-btn { background: transparent; border: 1px solid transparent; color: var(--text-soft); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all .2s; }
+    .tab-btn:hover { background: var(--surface); color: var(--text); }
+    .tab-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: tabFadeIn .25s ease; }
+    @keyframes tabFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Badges & License Cards */
+    .badge-plan { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-free { background: #374151; color: #9ca3af; }
+    .badge-trial { background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; }
+    .badge-pro { background: linear-gradient(135deg, #10b981, #059669); color: #000; }
+    .badge-enterprise { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff; }
+
+    .card-box { padding: 22px; border: 1px solid var(--border); border-radius: 14px; background: var(--panel); display: grid; gap: 14px; margin-bottom: 20px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .card-title { font-size: 17px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+
+    /* Code Snippet Box with Copy Button */
+    .cmd-box { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #0b0f17; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin: 8px 0; font-family: monospace; font-size: 13px; }
+    .cmd-text { color: #38bdf8; overflow-x: auto; white-space: nowrap; flex: 1; user-select: all; }
+    .btn-copy { background: rgba(255,255,255,0.08); border: 1px solid var(--border); color: #e2e8f0; font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer; flex-shrink: 0; min-height: unset; }
+    .btn-copy:hover { background: rgba(255,255,255,0.16); color: #fff; }
+
+    /* Gift & Google Auth Banner */
+    .gift-banner { background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(56, 189, 248, 0.08) 100%); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 14px; padding: 20px; display: grid; gap: 12px; }
+    .btn-google { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: #ffffff; color: #111827; font-weight: 700; font-size: 14px; padding: 10px 20px; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; transition: all .2s; }
+    .btn-google:hover { background: #f3f4f6; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(255,255,255,0.25); text-decoration: none; }
+    .btn-google svg { width: 18px; height: 18px; }
+
+    /* Status dot */
+    .live-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .live-dot.active { background: #10b981; box-shadow: 0 0 8px #10b981; }
+    .live-dot.inactive { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+  </style>
+</head>
+<body><main>
+  <!-- Top bar: Logo & Language -->
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+    <small data-i18n="sub_title">Trợ lý AI Otter / Bảng điều khiển & Cài đặt</small>
+    <div style="display:flex; gap:6px;">
+      <button type="button" id="btn-lang-vi" style="min-height:unset; padding:4px 10px; font-size:12px;">🇻🇳 Tiếng Việt</button>
+      <button type="button" id="btn-lang-en" style="min-height:unset; padding:4px 10px; font-size:12px;">🇬🇧 English</button>
+    </div>
+  </div>
+
+  <h1 data-i18n="title">🦦 Otter Assistant</h1>
+  <p data-i18n="desc">Otter kết nối ChatGPT với máy tính của bạn để duyệt web thông minh, chạy lệnh terminal và tự động hóa tác vụ. Tiện ích chỉ truyền lệnh thao tác, tuyệt đối không lưu trữ dữ liệu cá nhân.</p>
+
+  <!-- Navigation Tabs -->
+  <div class="nav-tabs">
+    <button type="button" class="tab-btn active" id="tab-btn-tasks" data-tab="tab-tasks">🕒 Tác Vụ Hẹn Giờ</button>
+    <button type="button" class="tab-btn" id="tab-btn-dashboard" data-tab="tab-dashboard">📊 Kế Hoạch & Tiến Độ</button>
+    <button type="button" class="tab-btn" id="tab-btn-manual" data-tab="tab-manual" data-i18n="tab_manual">📚 Cẩm Nang Lệnh Chi Tiết</button>
+    <button type="button" class="tab-btn" id="tab-btn-fb-sales" data-tab="tab-fb-sales" data-i18n="tab_fb_sales">💬 Kịch Bản Bán Hàng & FB</button>
+    <button type="button" class="tab-btn" id="tab-btn-commands" data-tab="tab-commands" data-i18n="tab_commands">⚡ Quản Lý Lệnh Nhanh</button>
+    <button type="button" class="tab-btn" id="tab-btn-guide" data-tab="tab-guide" data-i18n="tab_guide">📖 Cài Đặt & Kết Nối</button>
+    <button type="button" class="tab-btn" id="tab-btn-license" data-tab="tab-license" data-i18n="tab_license">💎 Gói & Bản Quyền</button>
+    <button type="button" class="tab-btn" id="tab-btn-settings" data-tab="tab-settings" data-i18n="tab_settings">🔌 Máy Chủ MCP</button>
+    <button type="button" class="tab-btn" id="tab-btn-manage" data-tab="tab-manage" data-i18n="tab_manage">🎛️ Quản Lý Tổng</button>
+  </div>
+
+  <!-- TAB: TÁC VỤ HẸN GIỜ CHATGPT WEB (SCHEDULED TASKS) -->
+  <div class="tab-pane active" id="tab-tasks">
+    <!-- Top Stats Counter -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; margin-bottom:16px;">
+      <div style="padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--panel);">
+        <div style="font-size:12px; color:var(--text-soft); font-weight:600;">TỔNG TÁC VỤ</div>
+        <div id="opt-stat-total" style="font-size:24px; font-weight:800; color:#fff; margin-top:4px;">0</div>
+      </div>
+      <div style="padding:14px; border:1px solid rgba(245, 158, 11, 0.3); border-radius:12px; background:rgba(245, 158, 11, 0.05);">
+        <div style="font-size:12px; color:#fbbf24; font-weight:600;">⏳ CHỜ THỰC THI</div>
+        <div id="opt-stat-pending" style="font-size:24px; font-weight:800; color:#fbbf24; margin-top:4px;">0</div>
+      </div>
+      <div style="padding:14px; border:1px solid rgba(56, 189, 248, 0.3); border-radius:12px; background:rgba(56, 189, 248, 0.05);">
+        <div style="font-size:12px; color:#38bdf8; font-weight:600;">🚀 ĐANG CHẠY</div>
+        <div id="opt-stat-running" style="font-size:24px; font-weight:800; color:#38bdf8; margin-top:4px;">0</div>
+      </div>
+      <div style="padding:14px; border:1px solid rgba(16, 185, 129, 0.3); border-radius:12px; background:rgba(16, 185, 129, 0.05);">
+        <div style="font-size:12px; color:#34d399; font-weight:600;">✅ ĐÃ HOÀN THÀNH</div>
+        <div id="opt-stat-completed" style="font-size:24px; font-weight:800; color:#34d399; margin-top:4px;">0</div>
+      </div>
+    </div>
+
+    <!-- Form Đặt Lịch Tác Vụ Mới -->
+    <div class="card-box" style="border-color: rgba(99, 102, 241, 0.4); background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.04) 100%);">
+      <div class="card-header">
+        <div class="card-title">
+          <span style="font-size:22px;">🕒</span>
+          <span>Đặt Lịch Tác Vụ Tự Động Trên ChatGPT Web</span>
+        </div>
+        <button type="button" id="opt-tasks-refresh-btn" style="min-height:unset; padding:6px 12px; font-size:12px; cursor:pointer;">🔄 Làm mới</button>
+      </div>
+      <p style="margin:0; font-size:13px; color:var(--text-soft); line-height:1.5;">
+        Hệ thống tự động mở đúng profile ChatGPT Web cài sẵn, điền câu lệnh prompt và chờ ChatGPT tự thực thi (gọi Muse AI, viết code, tìm kiếm...). Sau khi xong, toàn bộ kết quả, link chat và ảnh chụp màn hình sẽ được lưu lại.
+      </p>
+
+      <form id="opt-task-form" style="padding:0; background:transparent; border:none; gap:12px; margin-top:6px;">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
+          <div>
+            <label style="font-size:13px;">Tiêu đề tác vụ</label>
+            <input type="text" id="opt-task-title" required placeholder="Ví dụ: Tóm tắt tin tức sáng nay hoặc tạo video ngắn" style="width:100%; margin-top:4px;">
+          </div>
+          <div>
+            <label style="font-size:13px;">Lặp lại định kỳ</label>
+            <select id="opt-task-repeat" style="width:100%; margin-top:4px;">
+              <option value="0">Chạy một lần duy nhất</option>
+              <option value="15">Lặp lại mỗi 15 phút</option>
+              <option value="30">Lặp lại mỗi 30 phút</option>
+              <option value="60">Lặp lại mỗi 1 giờ</option>
+              <option value="360">Lặp lại mỗi 6 giờ</option>
+              <option value="1440">Lặp lại mỗi 24 giờ</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:13px;">Câu lệnh / Prompt gửi tới ChatGPT Web</label>
+          <textarea id="opt-task-prompt" required rows="3" placeholder="Ví dụ: Chào bạn, hãy dùng ask_muse_agent để nhờ Muse AI viết một câu danh ngôn và kịch bản 3 phân cảnh..." style="width:100%; margin-top:4px; font-size:13px;"></textarea>
+          <!-- Gợi ý nhanh -->
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; font-size:12px;">
+            <span style="color:var(--text-soft); align-self:center;">Gợi ý:</span>
+            <button type="button" class="opt-quick-prompt" data-prompt="Chào bạn, hãy dùng công cụ ask_muse_agent để nhờ Muse AI viết một câu danh ngôn 10 từ về AI và báo cáo lại kết quả." style="min-height:unset; padding:4px 8px; font-size:11.5px; background:rgba(255,255,255,0.06); border:1px solid var(--border); color:#38bdf8; border-radius:6px; cursor:pointer;">/muse Danh ngôn AI</button>
+            <button type="button" class="opt-quick-prompt" data-prompt="Hãy đóng vai Chuyên Gia Đa Năng: lên kịch bản video ngắn 15s giới thiệu sản phẩm và tạo storyboard chi tiết." style="min-height:unset; padding:4px 8px; font-size:11.5px; background:rgba(255,255,255,0.06); border:1px solid var(--border); color:#a78bfa; border-radius:6px; cursor:pointer;">/chuyengia Kịch bản video</button>
+            <button type="button" class="opt-quick-prompt" data-prompt="Hãy viết script Python crawl tỷ giá vàng hôm nay và giải thích cách chạy." style="min-height:unset; padding:4px 8px; font-size:11.5px; background:rgba(255,255,255,0.06); border:1px solid var(--border); color:#34d399; border-radius:6px; cursor:pointer;">Script crawl vàng</button>
+          </div>
+        </div>
+
+        <div style="padding:12px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:10px;">
+          <label style="font-size:13px; margin-bottom:6px; display:block;">Thời gian bắt đầu thực thi</label>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <input type="datetime-local" id="opt-task-scheduled-at" style="padding:8px 10px; font-size:13px;">
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button type="button" class="opt-quick-time" data-min="0" style="min-height:unset; padding:6px 10px; font-size:11.5px; background:rgba(16, 185, 129, 0.2); border:1px solid #10b981; color:#34d399; border-radius:6px; cursor:pointer;">Chạy ngay</button>
+              <button type="button" class="opt-quick-time" data-min="1" style="min-height:unset; padding:6px 10px; font-size:11.5px; background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text); border-radius:6px; cursor:pointer;">+1 phút</button>
+              <button type="button" class="opt-quick-time" data-min="5" style="min-height:unset; padding:6px 10px; font-size:11.5px; background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text); border-radius:6px; cursor:pointer;">+5 phút</button>
+              <button type="button" class="opt-quick-time" data-min="15" style="min-height:unset; padding:6px 10px; font-size:11.5px; background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text); border-radius:6px; cursor:pointer;">+15 phút</button>
+              <button type="button" class="opt-quick-time" data-min="60" style="min-height:unset; padding:6px 10px; font-size:11.5px; background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text); border-radius:6px; cursor:pointer;">+1 giờ</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end;">
+          <button type="submit" id="opt-task-submit-btn" style="padding:10px 24px; font-size:14px; background:linear-gradient(135deg, #6366f1, #8b5cf6); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">🚀 Lên Lịch Tác Vụ</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Danh sách các tác vụ -->
+    <div class="card-box">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📋</span> <span>Danh Sách Tác Vụ Tự Động</span>
+        </div>
+        <span id="opt-tasks-count-label" style="font-size:12px; color:var(--text-soft);">Đang tải...</span>
+      </div>
+      <div id="opt-tasks-list-container" style="display:grid; gap:12px; margin-top:8px;">
+        <div style="color:var(--text-soft); font-size:13px; text-align:center; padding:20px;">Đang nạp danh sách tác vụ...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: PLAN DASHBOARD (BẢNG KẾ HOẠCH & TIẾN ĐỘ) -->
+  <div class="tab-pane" id="tab-dashboard">
+    <div class="card-box">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📊</span> <span>Bảng Kế Hoạch & Tiến Độ Lập Trình (Plan Dashboard)</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="opt-dashboard-open-btn" style="min-height:unset; padding:6px 12px; font-size:12px; cursor:pointer;">↗️ Mở tab riêng</button>
+          <button type="button" id="opt-dashboard-reload-btn" style="min-height:unset; padding:6px 12px; font-size:12px; cursor:pointer;">🔄 Tải lại</button>
+        </div>
+      </div>
+      <p style="margin:0; font-size:13px; color:var(--text-soft);">
+        Theo dõi trạng thái các kế hoạch lập trình dài hơi (continuous coding loop), phân bổ nhiệm vụ và xem log tiến trình realtime.
+      </p>
+      <div style="margin-top:12px; border-radius:10px; overflow:hidden; border:1px solid var(--border); min-height:600px; background:#0b0f17;">
+        <iframe id="opt-dashboard-iframe" style="width:100%; height:750px; border:none; display:block;" src="about:blank"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: CẨM NANG LỆNH CHO NGƯỜI MỚI (USER MANUAL) -->
+  <div class="tab-pane" id="tab-manual">
+    <!-- Quick Start: 3 Cách Sử Dụng Lệnh -->
+    <div class="card-box" style="border-color: rgba(56, 189, 248, 0.4); background: linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);">
+      <div class="card-header">
+        <div class="card-title">
+          <span style="font-size:22px;">🚀</span>
+          <span>3 Cách Dùng Lệnh Đơn Giản Trong 1 Nốt Nhạc (Dành Cho Người Mới)</span>
+        </div>
+        <span style="font-size:11px; background:#38bdf8; color:#000; padding:3px 10px; border-radius:9999px; font-weight:800;">DỄ DÙNG 100%</span>
+      </div>
+      <p style="margin:0; font-size:13.5px; color:var(--text); line-height:1.6;">
+        Bạn không cần phải nhớ cú pháp phức tạp! Tiện ích Otter đã trang bị sẵn 3 cách kích hoạt câu lệnh thông minh ngay trên khung chat của ChatGPT Web:
+      </p>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-top:6px;">
+        <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:10px; padding:12px;">
+          <div style="font-weight:700; color:#34d399; font-size:13px; display:flex; align-items:center; gap:6px;">
+            <span>⚡ Cách 1: Nút Bấm 1-Chạm</span>
+          </div>
+          <p style="margin:6px 0 0; font-size:12.5px; color:var(--text-soft); line-height:1.5;">
+            Nhìn ngay phía trên ô gõ chat của ChatGPT Web, bấm trực tiếp vào các nút màu xanh như <code style="color:#38bdf8;">🎯 /fb-sales</code>, <code style="color:#38bdf8;">💬 /fb-listen</code>, <code style="color:#38bdf8;">📱 /fb-feed</code>. Prompt mẫu sẽ tự động điền sẵn vào ô chat!
+          </p>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:10px; padding:12px;">
+          <div style="font-weight:700; color:#38bdf8; font-size:13px; display:flex; align-items:center; gap:6px;">
+            <span>⌨️ Cách 2: Gõ dấu gạch chéo <code>/</code></span>
+          </div>
+          <p style="margin:6px 0 0; font-size:12.5px; color:var(--text-soft); line-height:1.5;">
+            Đặt con trỏ vào ô chat ChatGPT và gõ ký tự <code style="color:#34d399;">/</code> (ví dụ: <code style="color:#38bdf8;">/fb</code>, <code style="color:#38bdf8;">/term</code>, <code style="color:#38bdf8;">/browse</code>). Menu lệnh sẽ tự động xổ ra, bạn chỉ cần dùng phím mũi tên <b>↑</b> <b>↓</b> và nhấn <b>Enter</b> để chọn.
+          </p>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:10px; padding:12px;">
+          <div style="font-weight:700; color:#fbbf24; font-size:13px; display:flex; align-items:center; gap:6px;">
+            <span>💡 Cách 3: Nút Lệnh Mẫu</span>
+          </div>
+          <p style="margin:6px 0 0; font-size:12.5px; color:var(--text-soft); line-height:1.5;">
+            Click vào nút <code style="color:#fbbf24;">💡 Lệnh mẫu</code> ở thanh công cụ dưới ô chat ChatGPT để mở toàn bộ thư viện câu lệnh mẫu, có chia danh mục và tìm kiếm nhanh.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Search & Category Filter -->
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+      <input type="text" id="manual-search-input" placeholder="🔍 Tìm kiếm câu lệnh theo từ khóa (facebook, kịch bản, code, plan, vps, terminal, browse...)..." style="flex:1; min-width:280px; padding:10px 14px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:#fff; font-size:13px;">
+      <div style="display:flex; gap:6px; flex-wrap:wrap;" id="manual-filter-btns">
+        <button type="button" class="manual-cat-btn active" data-cat="all" style="min-height:unset; padding:6px 12px; font-size:12px; background:var(--accent-soft); border:1px solid var(--accent); color:var(--accent); border-radius:6px; cursor:pointer;">Tất cả</button>
+        <button type="button" class="manual-cat-btn" data-cat="fb" style="min-height:unset; padding:6px 12px; font-size:12px; background:transparent; border:1px solid var(--border); color:var(--text-soft); border-radius:6px; cursor:pointer;">Facebook & Bán Hàng</button>
+        <button type="button" class="manual-cat-btn" data-cat="code" style="min-height:unset; padding:6px 12px; font-size:12px; background:transparent; border:1px solid var(--border); color:var(--text-soft); border-radius:6px; cursor:pointer;">Lập Trình & Plan</button>
+        <button type="button" class="manual-cat-btn" data-cat="browser" style="min-height:unset; padding:6px 12px; font-size:12px; background:transparent; border:1px solid var(--border); color:var(--text-soft); border-radius:6px; cursor:pointer;">Trình Duyệt Web</button>
+        <button type="button" class="manual-cat-btn" data-cat="multi" style="min-height:unset; padding:6px 12px; font-size:12px; background:transparent; border:1px solid var(--border); color:var(--text-soft); border-radius:6px; cursor:pointer;">Đa AI (Claude/Gemini/Codex)</button>
+        <button type="button" class="manual-cat-btn" data-cat="vps" style="min-height:unset; padding:6px 12px; font-size:12px; background:transparent; border:1px solid var(--border); color:var(--text-soft); border-radius:6px; cursor:pointer;">Quản Trị VPS</button>
+      </div>
+    </div>
+
+    <!-- Command Cards Container -->
+    <div id="manual-cards-container" style="display:grid; gap:16px;">
+
+      <!-- Card 1: /fb-sales -->
+      <div class="card-box manual-cmd-card" data-cat="fb" style="border-left:4px solid #10b981; margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🎯</span> <code style="color:#34d399; font-weight:800; font-size:16px;">/fb-sales</code>
+            <span style="font-size:15px; color:#fff; font-weight:700;">— Thiết lập & Sửa Kịch Bản Bán Hàng Facebook</span>
+          </div>
+          <span style="font-size:11px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); padding:2px 8px; border-radius:6px; font-weight:600;">Facebook Marketing</span>
+        </div>
+        <p style="margin:4px 0 8px; font-size:13px; color:var(--text-soft);">
+          <b>Khi nào dùng:</b> Dùng khi bạn muốn AI tự động thiết lập hoặc tinh chỉnh kịch bản bán hàng theo sản phẩm của bạn (thời trang, mỹ phẩm, bất động sản, khóa học...). Kịch bản gồm 6 bước phễu khách hàng, xử lý từ chối giá cả/tính năng và bình luận dạo.
+        </p>
+        <div style="font-size:12px; color:#38bdf8; margin-bottom:6px;">
+          🛠️ <b>Tool AI tự động gọi:</b> <code>fb_sales_get_playbook</code> ➔ <code>fb_sales_update_stage</code> ➔ <code>fb_sales_update_intent</code> ➔ <code>fb_sales_update_comments</code>.
+        </div>
+        <div style="background:#0b0f17; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:monospace; font-size:12px; color:#e2e8f0; line-height:1.5; position:relative;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:11px;">MẪU CÂU LỆNH DÁN VÀO CHATGPT:</span>
+            <button type="button" class="btn-copy-prompt" style="min-height:unset; padding:4px 10px; font-size:11px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); border-radius:4px; cursor:pointer;">📋 Sao chép lệnh</button>
+          </div>
+          <div class="prompt-text">Hãy giúp tôi cấu hình và tối ưu kịch bản bán hàng trên Facebook:
+1. Gọi tool 'fb_sales_get_playbook' để lấy toàn bộ kịch bản 6 giai đoạn (greeting, discovery, pitch, objection, closing, support), các ý định khách hàng (intents: pricing, features, objection_safety...) và bình luận dạo.
+2. Dựa vào sản phẩm/dịch vụ của tôi: [Điền tên sản phẩm/dịch vụ của bạn tại đây]
+3. Dùng tool 'fb_sales_update_stage' để cập nhật câu thoại mẫu phù hợp cho từng giai đoạn trong phễu bán hàng.
+4. Dùng tool 'fb_sales_update_intent' để tối ưu câu giải đáp giá cả, tính năng và xử lý thắc mắc bảo mật.
+5. Dùng tool 'fb_sales_update_comments' để cập nhật câu bình luận dạo tự nhiên khi đi tương tác feed.</div>
+        </div>
+      </div>
+
+      <!-- Card 2: /fb-listen -->
+      <div class="card-box manual-cmd-card" data-cat="fb" style="border-left:4px solid #38bdf8; margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>💬</span> <code style="color:#38bdf8; font-weight:800; font-size:16px;">/fb-listen</code>
+            <span style="font-size:15px; color:#fff; font-weight:700;">— Bật Trực & Tự Động Trả Lời Tin Nhắn Messenger</span>
+          </div>
+          <span style="font-size:11px; background:rgba(56,189,248,0.2); color:#38bdf8; border:1px solid rgba(56,189,248,0.4); padding:2px 8px; border-radius:6px; font-weight:600;">Messenger Bot</span>
+        </div>
+        <p style="margin:4px 0 8px; font-size:13px; color:var(--text-soft);">
+          <b>Khi nào dùng:</b> Bật tiến trình chạy ngầm liên tục kiểm tra tin nhắn Messenger mới đến. Khi khách hàng nhắn tin, bot sẽ tự động nhận diện ý định, trả lời theo đúng kịch bản bán hàng đã lưu và ghi nhớ lịch sử cuộc trò chuyện vào database.
+        </p>
+        <div style="font-size:12px; color:#38bdf8; margin-bottom:6px;">
+          🛠️ <b>Tool AI tự động gọi:</b> <code>fb_messenger_listen_status</code> ➔ <code>fb_messenger_listen_start</code> (interval=5s) ➔ <code>fb_messenger_listen_stop</code>.
+        </div>
+        <div style="background:#0b0f17; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:monospace; font-size:12px; color:#e2e8f0; line-height:1.5; position:relative;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:11px;">MẪU CÂU LỆNH DÁN VÀO CHATGPT:</span>
+            <button type="button" class="btn-copy-prompt" style="min-height:unset; padding:4px 10px; font-size:11px; background:rgba(56,189,248,0.2); color:#38bdf8; border:1px solid rgba(56,189,248,0.4); border-radius:4px; cursor:pointer;">📋 Sao chép lệnh</button>
+          </div>
+          <div class="prompt-text">Hãy quản lý chế độ tự động lắng nghe và trực tin nhắn Messenger:
+1. Gọi tool 'fb_messenger_listen_status' để kiểm tra xem daemon có đang lắng nghe tin nhắn hay không.
+2. Nếu chưa bật hoặc cần đổi chu kỳ, gọi 'fb_messenger_listen_start' với interval_seconds=5 để bắt đầu tự động đọc tin nhắn đến, tra cứu kịch bản sales trong SQLite, trả lời khách và lưu lịch sử hội thoại.
+3. Nếu tôi yêu cầu dừng trực, hãy gọi tool 'fb_messenger_listen_stop'.</div>
+        </div>
+      </div>
+
+      <!-- Card 3: /fb-feed -->
+      <div class="card-box manual-cmd-card" data-cat="fb" style="border-left:4px solid #f59e0b; margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📱</span> <code style="color:#fbbf24; font-weight:800; font-size:16px;">/fb-feed</code>
+            <span style="font-size:15px; color:#fff; font-weight:700;">— Quét Bảng Tin & Tương Tác Bài Viết Tự Động</span>
+          </div>
+          <span style="font-size:11px; background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); padding:2px 8px; border-radius:6px; font-weight:600;">Feed Engagement</span>
+        </div>
+        <p style="margin:4px 0 8px; font-size:13px; color:var(--text-soft);">
+          <b>Khi nào dùng:</b> Lướt bảng tin Facebook, đọc nội dung các bài viết gần nhất, tự động phân loại chủ đề và bấm Like/Love kèm bình luận dạo thông minh theo kịch bản để nuôi tài khoản và tăng tương tác.
+        </p>
+        <div style="font-size:12px; color:#38bdf8; margin-bottom:6px;">
+          🛠️ <b>Tool AI tự động gọi:</b> <code>fb_feed_scan</code> ➔ <code>fb_feed_engage_post</code> (kèm chống tương tác trùng debounce).
+        </div>
+        <div style="background:#0b0f17; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:monospace; font-size:12px; color:#e2e8f0; line-height:1.5; position:relative;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:11px;">MẪU CÂU LỆNH DÁN VÀO CHATGPT:</span>
+            <button type="button" class="btn-copy-prompt" style="min-height:unset; padding:4px 10px; font-size:11px; background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); border-radius:4px; cursor:pointer;">📋 Sao chép lệnh</button>
+          </div>
+          <div class="prompt-text">Hãy quét Bảng tin Facebook và tương tác bài viết an toàn:
+1. Nếu có tool 'fb_feed_scan', hãy gọi 'fb_feed_scan' với limit=5 để quét các bài viết trên feed.
+2. Phân loại nội dung từng bài viết (du lịch, kinh doanh, đời sống...).
+3. Với mỗi bài phù hợp, gọi tool 'fb_feed_engage_post' để like/love và bình luận.
+4. Báo cáo lại danh sách các bài viết đã tương tác thành công.
+(Nếu phiên chat chưa có sẵn tool fb_feed_scan trong Action, hãy gọi ngay executeTerminalCommand với: bun scripts/fb-feed-auto-engage.ts --max 5)</div>
+        </div>
+      </div>
+
+      <!-- Card 4: /fb-notif -->
+      <div class="card-box manual-cmd-card" data-cat="fb" style="border-left:4px solid #ec4899; margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🔔</span> <code style="color:#f472b6; font-weight:800; font-size:16px;">/fb-notif</code>
+            <span style="font-size:15px; color:#fff; font-weight:700;">— Đọc Thông Báo & Trả Lời Bình Luận Khách Hàng</span>
+          </div>
+          <span style="font-size:11px; background:rgba(236,72,153,0.2); color:#f472b6; border:1px solid rgba(236,72,153,0.4); padding:2px 8px; border-radius:6px; font-weight:600;">Thông Báo FB</span>
+        </div>
+        <p style="margin:4px 0 8px; font-size:13px; color:var(--text-soft);">
+          <b>Khi nào dùng:</b> Quét thông báo mới từ Facebook (ai bình luận vào bài viết của bạn, ai hỏi giá hoặc tư vấn), tự động mở bài viết và gõ câu trả lời lịch sự cho khách.
+        </p>
+        <div style="font-size:12px; color:#38bdf8; margin-bottom:6px;">
+          🛠️ <b>Tool AI tự động gọi:</b> <code>fb_notifications_read</code> ➔ <code>fb_notification_open_and_reply</code>.
+        </div>
+        <div style="background:#0b0f17; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:monospace; font-size:12px; color:#e2e8f0; line-height:1.5; position:relative;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:11px;">MẪU CÂU LỆNH DÁN VÀO CHATGPT:</span>
+            <button type="button" class="btn-copy-prompt" style="min-height:unset; padding:4px 10px; font-size:11px; background:rgba(236,72,153,0.2); color:#f472b6; border:1px solid rgba(236,72,153,0.4); border-radius:4px; cursor:pointer;">📋 Sao chép lệnh</button>
+          </div>
+          <div class="prompt-text">Hãy kiểm tra thông báo Facebook mới nhất và phản hồi cho khách:
+1. Gọi tool 'fb_notifications_read' với limit=5 để đọc danh sách thông báo gần đây.
+2. Phân tích các thông báo liên quan đến khách bình luận hỏi mua hàng, tư vấn hoặc trao đổi trên bài viết.
+3. Với thông báo cần trả lời, gọi tool 'fb_notification_open_and_reply':
+   - notification_index: số thứ tự của thông báo (bắt đầu từ 0)
+   - reply_text: câu trả lời lịch sự, đúng kịch bản giải đáp thắc mắc của khách.
+4. Báo cáo kết quả thông báo nào đã được trả lời xong.</div>
+        </div>
+      </div>
+
+      <!-- Card 5: Lập Plan & Code Từng Cái Một -->
+      <div class="card-box manual-cmd-card" data-cat="code" style="border-left:4px solid #8b5cf6; margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📋</span> <code style="color:#a78bfa; font-weight:800; font-size:16px;">/plan-code</code>
+            <span style="font-size:15px; color:#fff; font-weight:700;">— Lập Kế Hoạch & Code Từng Bước Một (Continuous Coding)</span>
+          </div>
+          <span style="font-size:11px; background:rgba(139,92,246,0.2); color:#a78bfa; border:1px solid rgba(139,92,246,0.4); padding:2px 8px; border-radius:6px; font-weight:600;">Lập Trình Bài Bản</span>
+        </div>
+        <p style="margin:4px 0 8px; font-size:13px; color:var(--text-soft);">
+          <b>Khi nào dùng:</b> Dùng khi bạn muốn AI thực hiện một dự án phần mềm hoặc viết một tính năng hoàn chỉnh mà <b>không làm ẩu</b>. Yêu cầu AI lập bảng kế hoạch (Plan) chia nhỏ thành 3–5 bước, làm xong bước nào kiểm tra và báo cáo bước đó trước khi chuyển sang bước tiếp theo.
+        </p>
+        <div style="font-size:12px; color:#38bdf8; margin-bottom:6px;">
+          🛠️ <b>Tool AI tự động gọi:</b> <code>read_file</code> ➔ <code>write_file</code> / <code>edit_file</code> ➔ <code>execute_terminal_command</code> (chạy test nghiệm thu).
+        </div>
+        <div style="background:#0b0f17; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:monospace; font-size:12px; color:#e2e8f0; line-height:1.5; position:relative;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:11px;">MẪU CÂU LỆNH DÁN VÀO CHATGPT:</span>
+            <button type="button" class="btn-copy-prompt" style="min-height:unset; padding:4px 10px; font-size:11px; background:rgba(139,92,246,0.2); color:#a78bfa; border:1px solid rgba(139,92,246,0.4); border-radius:4px; cursor:pointer;">📋 Sao chép lệnh</button>
+          </div>
+          <div class="prompt-text">Tôi muốn bạn thực hiện nhiệm vụ: [MÔ TẢ CÔNG VIỆC CẦN LÀM, VÍ DỤ: LẬP TRÌNH ỨNG DỤNG MÁY TÍNH WEB]
+
+QUY TẮC THỰC HIỆN BẮT BUỘC (LÀM TỪNG BƯỚC MỘT):
+1. Lập Plan: Đầu tiên hãy lập bảng kế hoạch gồm 3-5 bước rõ ràng (Nhiệm vụ, Tiêu chí nghiệm thu).
+2. Thực thi tuần tự: Sử dụng các công cụ read_file, write_file, execute_terminal_command để làm từng bước một.
+3. Nghiệm thu: Hoàn thành bước nào phải chạy lệnh kiểm tra bước đó, đạt kết quả Passed mới chuyển tiếp.
+4. Tổng kết toàn bộ tiến độ cho tôi khi hoàn tất 100%.</div>
+        </div>
+      </div>
+
+      <!-- Card 6: /test -->
+      <div class="card-box manual-cmd-card" data-cat="code" style="border-left:4px solid #10b981; margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🧪</span> <code style="color:#34d399; font-weight:800; font-size:16px;">/test</code>
+            <span style="font-size:15px; color:#fff; font-weight:700;">— Chạy Kiểm Thử Tự Động (Unit Tests)</span>
+          </div>
+          <span style="font-size:11px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); padding:2px 8px; border-radius:6px; font-weight:600;">Testing</span>
+        </div>
+        <p style="margin:4px 0 8px; font-size:13px; color:var(--text-soft);">
+          <b>Khi nào dùng:</b> Kiểm tra xem code của toàn bộ dự án có bị lỗi không bằng cách chạy toàn bộ bộ unit test tự động.
+        </p>
+        <div style="background:#0b0f17; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:monospace; font-size:12px; color:#e2e8f0; line-height:1.5;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:11px;">MẪU CÂU LỆNH DÁN VÀO CHATGPT:</span>
+            <button type="button" class="btn-copy-prompt" style="min-height:unset; padding:4px 10px; font-size:11px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); border-radius:4px; cursor:pointer;">📋 Sao chép lệnh</button>
+          </div>
+          <div class="prompt-text">Mở Terminal và chạy toàn bộ unit test của dự án bằng lệnh: bun test</div>
+        </div>
+      </div>
+
+      <!-- Card 7: /term -->
+      <div class="card-box manual-cmd-card" data-cat="code" style="border-left:4px solid #38bdf8; margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>💻</span> <code style="color:#38bdf8; font-weight:800; font-size:16px;">/term</code>
+            <span style="font-size:15px; color:#fff; font-weight:700;">— Chạy Lệnh Console / Terminal Trực Tiếp</span>
+          </div>
+          <span style="font-size:11px; background:rgba(56,189,248,0.2); color:#38bdf8; border:1px solid rgba(56,189,248,0.4); padding:2px 8px; border-radius:6px; font-weight:600;">Terminal PTY</span>
+        </div>
+        <p style="margin:4px 0 8px; font-size:13px; color:var(--text-soft);">
+          <b>Khi nào dùng:</b> Ra lệnh cho AI mở Live Terminal PTY trên máy tính của bạn và thực thi các lệnh PowerShell, CMD hoặc Bash.
+        </p>
+        <div style="background:#0b0f17; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:monospace; font-size:12px; color:#e2e8f0; line-height:1.5;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:11px;">MẪU CÂU LỆNH DÁN VÀO CHATGPT:</span>
+            <button type="button" class="btn-copy-prompt" style="min-height:unset; padding:4px 10px; font-size:11px; background:rgba(56,189,248,0.2); color:#38bdf8; border:1px solid rgba(56,189,248,0.4); border-radius:4px; cursor:pointer;">📋 Sao chép lệnh</button>
+          </div>
+          <div class="prompt-text">Mở Live Terminal và chạy lệnh: [LỆNH BẠN MUỐN CHẠY, VÍ DỤ: dir HOẶC git status]</div>
+        </div>
+      </div>
+
+      <!-- Card 8: /browse -->
+      <div class="card-box manual-cmd-card" data-cat="browser" style="border-left:4px solid #38bdf8; margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🌐</span> <code style="color:#38bdf8; font-weight:800; font-size:16px;">/browse</code>
+            <span style="font-size:15px; color:#fff; font-weight:700;">— Đọc & Phân Tích Trang Web Đang Mở</span>
+          </div>
+          <span style="font-size:11px; background:rgba(56,189,248,0.2); color:#38bdf8; border:1px solid rgba(56,189,248,0.4); padding:2px 8px; border-radius:6px; font-weight:600;">Browser CUA</span>
+        </div>
+        <p style="margin:4px 0 8px; font-size:13px; color:var(--text-soft);">
+          <b>Khi nào dùng:</b> Ra lệnh cho AI "nhìn" vào tab web đang mở, đọc cấu trúc DOM nén và đánh số các phần tử tương tác [1], [2], [3] để AI biết nút nào có thể bấm hoặc ô nào có thể gõ chữ.
+        </p>
+        <div style="background:#0b0f17; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:monospace; font-size:12px; color:#e2e8f0; line-height:1.5;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:11px;">MẪU CÂU LỆNH DÁN VÀO CHATGPT:</span>
+            <button type="button" class="btn-copy-prompt" style="min-height:unset; padding:4px 10px; font-size:11px; background:rgba(56,189,248,0.2); color:#38bdf8; border:1px solid rgba(56,189,248,0.4); border-radius:4px; cursor:pointer;">📋 Sao chép lệnh</button>
+          </div>
+          <div class="prompt-text">Đọc trang web đang mở, phân tích cấu trúc DOM và cho tôi biết các phần tử có thể tương tác.</div>
+        </div>
+      </div>
+
+      <!-- Card 9: /open & /click -->
+      <div class="card-box manual-cmd-card" data-cat="browser" style="border-left:4px solid #38bdf8; margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🖱️</span> <code style="color:#38bdf8; font-weight:800; font-size:16px;">/open & /click</code>
+            <span style="font-size:15px; color:#fff; font-weight:700;">— Mở Link Mới & Bấm Chuột Tự Động</span>
+          </div>
+          <span style="font-size:11px; background:rgba(56,189,248,0.2); color:#38bdf8; border:1px solid rgba(56,189,248,0.4); padding:2px 8px; border-radius:6px; font-weight:600;">Browser CUA</span>
+        </div>
+        <p style="margin:4px 0 8px; font-size:13px; color:var(--text-soft);">
+          <b>Khi nào dùng:</b> Mở một trang web bất kỳ bằng <code>browser_open</code> hoặc ra lệnh cho AI click chuột vào nút theo số index [1] sau khi đọc trang.
+        </p>
+        <div style="background:#0b0f17; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:monospace; font-size:12px; color:#e2e8f0; line-height:1.5;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:11px;">MẪU CÂU LỆNH DÁN VÀO CHATGPT:</span>
+            <button type="button" class="btn-copy-prompt" style="min-height:unset; padding:4px 10px; font-size:11px; background:rgba(56,189,248,0.2); color:#38bdf8; border:1px solid rgba(56,189,248,0.4); border-radius:4px; cursor:pointer;">📋 Sao chép lệnh</button>
+          </div>
+          <div class="prompt-text">Mở trang web https://vnexpress.net sau đó đọc trang và bấm chuột vào phần tử [1] tin tức nổi bật nhất.</div>
+        </div>
+      </div>
+
+      <!-- Card 10: /screen -->
+      <div class="card-box manual-cmd-card" data-cat="browser" style="border-left:4px solid #f59e0b; margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🖥️</span> <code style="color:#fbbf24; font-weight:800; font-size:16px;">/screen</code>
+            <span style="font-size:15px; color:#fff; font-weight:700;">— Chụp Ảnh Màn Hình Desktop & Danh Sách Cửa Sổ</span>
+          </div>
+          <span style="font-size:11px; background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); padding:2px 8px; border-radius:6px; font-weight:600;">Desktop CUA</span>
+        </div>
+        <p style="margin:4px 0 8px; font-size:13px; color:var(--text-soft);">
+          <b>Khi nào dùng:</b> Khi bạn muốn AI chụp ảnh toàn bộ màn hình máy tính của bạn và kiểm tra xem đang có những cửa sổ ứng dụng nào (Chrome, VS Code, Excel, Notepad...).
+        </p>
+        <div style="background:#0b0f17; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:monospace; font-size:12px; color:#e2e8f0; line-height:1.5;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:11px;">MẪU CÂU LỆNH DÁN VÀO CHATGPT:</span>
+            <button type="button" class="btn-copy-prompt" style="min-height:unset; padding:4px 10px; font-size:11px; background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); border-radius:4px; cursor:pointer;">📋 Sao chép lệnh</button>
+          </div>
+          <div class="prompt-text">Chụp ảnh màn hình máy tính và liệt kê danh sách các cửa sổ ứng dụng đang mở.</div>
+        </div>
+      </div>
+
+      <!-- Card 11: /pipeline -->
+      <div class="card-box manual-cmd-card" data-cat="multi" style="border-left:4px solid #ef4444; margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>⚡</span> <code style="color:#f87171; font-weight:800; font-size:16px;">/pipeline</code>
+            <span style="font-size:15px; color:#fff; font-weight:700;">— Quy Trình Liên Hoàn 3 AI (Codex ➔ Claude ➔ Gemini)</span>
+          </div>
+          <span style="font-size:11px; background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); padding:2px 8px; border-radius:6px; font-weight:600;">Multi-Agent Pipeline</span>
+        </div>
+        <p style="margin:4px 0 8px; font-size:13px; color:var(--text-soft);">
+          <b>Khi nào dùng:</b> Dùng khi bạn muốn xây dựng tính năng lớn: OpenAI Codex sẽ phân tích spec & kiến trúc ➔ Claude Code CLI viết toàn bộ code mã nguồn ➔ Gemini Antigravity audit bảo mật và chạy test kiểm thử tự động.
+        </p>
+        <div style="background:#0b0f17; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:monospace; font-size:12px; color:#e2e8f0; line-height:1.5;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:11px;">MẪU CÂU LỆNH DÁN VÀO CHATGPT:</span>
+            <button type="button" class="btn-copy-prompt" style="min-height:unset; padding:4px 10px; font-size:11px; background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); border-radius:4px; cursor:pointer;">📋 Sao chép lệnh</button>
+          </div>
+          <div class="prompt-text">Dùng công cụ 'agent_orchestrate_pipeline' để chạy quy trình liên hoàn 3 AI cho: [Tên tính năng hoặc module cần lập trình]
+- Bước 1 (Codex): Phân tích yêu cầu và thiết kế kiến trúc chi tiết.
+- Bước 2 (Claude): Triển khai mã nguồn và viết unit test theo thiết kế của Bước 1.
+- Bước 3 (Gemini): Rà soát an ninh, audit bảo mật và chạy bun test kiểm thử toàn diện.</div>
+        </div>
+      </div>
+
+      <!-- Card 12: /vps -->
+      <div class="card-box manual-cmd-card" data-cat="vps" style="border-left:4px solid #10b981; margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🖥️</span> <code style="color:#34d399; font-weight:800; font-size:16px;">/vps</code>
+            <span style="font-size:15px; color:#fff; font-weight:700;">— Kiểm Tra Sức Khỏe & Quản Trị Máy Chủ VPS</span>
+          </div>
+          <span style="font-size:11px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); padding:2px 8px; border-radius:6px; font-weight:600;">VPS SSH Paramiko</span>
+        </div>
+        <p style="margin:4px 0 8px; font-size:13px; color:var(--text-soft);">
+          <b>Khi nào dùng:</b> Kết nối SSH liên tục tới máy chủ Linux từ xa để audit CPU, RAM, Disk, mở cổng tường lửa UFW, cài SSL Certbot hoặc kiểm tra Docker.
+        </p>
+        <div style="background:#0b0f17; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:monospace; font-size:12px; color:#e2e8f0; line-height:1.5;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="color:#94a3b8; font-size:11px;">MẪU CÂU LỆNH DÁN VÀO CHATGPT:</span>
+            <button type="button" class="btn-copy-prompt" style="min-height:unset; padding:4px 10px; font-size:11px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); border-radius:4px; cursor:pointer;">📋 Sao chép lệnh</button>
+          </div>
+          <div class="prompt-text">Mở phiên SSH tương tác 'vps_session_open' và chạy kiểm tra sức khỏe toàn diện VPS bằng 'vps_health_audit'.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Pro Tips Box -->
+    <div class="note-box" style="margin-top:20px; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.04);">
+      <div class="note-item">
+        <span class="note-icon">💡</span>
+        <div>
+          <strong style="color:#fbbf24;">Kinh Nghiệm Vàng Dành Cho Người Mới Khi Ra Lệnh Cho AI:</strong>
+          <ul style="margin:6px 0 0; padding-left:18px; font-size:13px; color:var(--text); line-height:1.6;">
+            <li><b>Luôn yêu cầu lập Plan trước:</b> Đối với các tác vụ viết code hoặc làm nhiều bước, hãy nhắc AI <i>"Lên Plan trước rồi làm từng bước một"</i>. AI sẽ chia nhỏ việc thành từng task rõ ràng, không làm ẩu và kiểm tra nghiệm thu chắc chắn.</li>
+            <li><b>Tự tạo phím tắt 1-chạm:</b> Vào tab <b>⚡ Quản Lý Lệnh Nhanh</b>, bạn có thể tự thêm bất kỳ câu lệnh nào bạn hay dùng và bấm ⭐ Ghim để đưa ra ngoài khung chat.</li>
+            <li><b>Chỉnh sửa kịch bản bán hàng:</b> Vào tab <b>💬 Kịch Bản Bán Hàng & FB</b> để chỉnh sửa các câu chào, câu báo giá và chốt đơn bằng tay bất cứ lúc nào!</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 1: HƯỚNG DẪN CẤU HÌNH (SETUP GUIDE) -->
+  <div class="tab-pane" id="tab-guide">
+    <!-- Live Daemon Status Checker -->
+    <div class="card-box" style="border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.04);">
+      <div class="card-header">
+        <div class="card-title">
+          <span id="daemon-live-dot" class="live-dot inactive"></span>
+          <span data-i18n="guide_daemon_status_title">Trạng thái Otter Daemon trên máy tính:</span>
+        </div>
+        <button type="button" id="btn-check-daemon" style="min-height:unset; padding:6px 14px; font-size:12px;" data-i18n="btn_recheck">🔄 Kiểm tra kết nối</button>
+      </div>
+      <div id="daemon-status-text" style="font-size:14px; color:var(--text-soft);">Đang kiểm tra kết nối tới http://127.0.0.1:1993...</div>
+      <div id="tunnel-info-box" style="display:none; font-size:13px; color:#38bdf8; background:rgba(56, 189, 248, 0.1); padding:8px 12px; border-radius:6px;"></div>
+    </div>
+
+    <!-- Step 1: Install & Silent Daemon -->
+    <div class="card-box">
+      <div class="card-title"><span style="color:#10b981;font-size:20px;">1️⃣</span> <span data-i18n="guide_step1_title">Bước 1: Khởi động Otter Daemon (Chỉ 1 dòng lệnh)</span></div>
+      <p style="font-size:14px;" data-i18n="guide_step1_desc">Mở Terminal/PowerShell trên máy tính của bạn và dán một dòng lệnh dưới đây để tự động kéo binary, cài đặt và chạy ngầm cùng Windows/macOS/Linux:</p>
+
+      <div style="font-weight:600; font-size:13px; color:#fff; margin-top:4px;">🪟 Windows (PowerShell):</div>
+      <div class="cmd-box">
+        <span class="cmd-text" id="cmd-win">irm https://otter.gpt.io.vn/setup.ps1 | iex</span>
+        <button type="button" class="btn-copy" data-target="cmd-win" data-i18n="btn_copy">Sao chép</button>
+      </div>
+
+      <div style="font-weight:600; font-size:13px; color:#fff; margin-top:8px;">🍎 macOS / 🐧 Linux (Bash):</div>
+      <div class="cmd-box">
+        <span class="cmd-text" id="cmd-unix">curl -fsSL https://otter.gpt.io.vn/setup.sh | bash</span>
+        <button type="button" class="btn-copy" data-target="cmd-unix" data-i18n="btn_copy">Sao chép</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Connect Extension -->
+    <div class="card-box">
+      <div class="card-title"><span style="color:#38bdf8;font-size:20px;">2️⃣</span> <span data-i18n="guide_step2_title">Bước 2: Kết nối Tiện ích Chrome với máy tính</span></div>
+      <p style="font-size:14px;" data-i18n="guide_step2_desc">Tiện ích Otter tự động kết nối tới máy chủ nội bộ <code>http://127.0.0.1:1993</code>. Nếu bạn muốn điều khiển máy tính này từ xa khi đang ở ngoài đường, hãy dùng đường link <b>Cloudflare TryCloudflare Tunnel</b> được tạo tự động trong quá trình cài đặt.</p>
+      <div>
+        <a id="management" href="http://127.0.0.1:1993/activity" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; font-weight:600; font-size:14px;">
+          👉 <span data-i18n="open_dashboard_link">Mở Bảng theo dõi hoạt động trực tiếp (Port 1993)</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Step 3: Use with ChatGPT -->
+    <div class="card-box">
+      <div class="card-title"><span style="color:#f59e0b;font-size:20px;">3️⃣</span> <span data-i18n="guide_step3_title">Bước 3: Mở ChatGPT và trải nghiệm</span></div>
+      <p style="font-size:14px;" data-i18n="guide_step3_desc">Truy cập <b>https://chatgpt.com</b>. Thanh công cụ thông minh của Otter sẽ tự động xuất hiện ở góc trên bên phải khung chat, giúp AI có thể duyệt web, bấm chuột, gõ phím, chạy terminal và tạo video.</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">
+        <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" class="btn-copy" style="background:#10b981; color:#000; font-weight:700; padding:8px 16px; border-radius:6px; text-decoration:none;" data-i18n="btn_open_chatgpt">🚀 Mở ChatGPT Web</a>
+        <a href="https://otter.gpt.io.vn/#cai-dat" target="_blank" rel="noopener noreferrer" class="btn-copy" style="background:rgba(255,255,255,0.08); padding:8px 16px; border-radius:6px; text-decoration:none;" data-i18n="btn_open_docs">🌐 Xem tài liệu & Video hướng dẫn</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: BẢN QUYỀN & GÓI ĐANG DÙNG (LICENSE & SUBSCRIPTION) -->
+  <div class="tab-pane" id="tab-license">
+    <!-- License Status Overview Card -->
+    <div class="card-box" id="license-overview-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>💎</span> <span data-i18n="lic_card_title">Gói Dịch Vụ & Bản Quyền Hiện Tại</span>
+        </div>
+        <div id="lic-tier-badge" class="badge-plan badge-free">FREE</div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:14px; margin-top:8px;">
+        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid var(--border);">
+          <div style="font-size:12px; color:var(--text-soft);" data-i18n="lic_status_label">Trạng thái giấy phép:</div>
+          <div id="lic-status-val" style="font-weight:700; font-size:15px; color:#10b981; margin-top:2px;">Đang kiểm tra...</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid var(--border);">
+          <div style="font-size:12px; color:var(--text-soft);" data-i18n="lic_expires_label">Thời hạn bản quyền:</div>
+          <div id="lic-expires-val" style="font-weight:700; font-size:15px; color:#fff; margin-top:2px;">—</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid var(--border);">
+          <div style="font-size:12px; color:var(--text-soft);" data-i18n="lic_customer_label">Khách hàng / Email:</div>
+          <div id="lic-customer-val" style="font-weight:700; font-size:14px; color:#38bdf8; margin-top:2px; word-break:break-all;">—</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid var(--border);">
+          <div style="font-size:12px; color:var(--text-soft);" data-i18n="lic_support_code_label">Mã thiết bị (Support Code):</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+            <code id="lic-support-val" style="font-weight:700; color:#f59e0b;">—</code>
+            <button type="button" id="btn-copy-support" class="btn-copy" style="padding:2px 8px; font-size:11px;" data-i18n="btn_copy">Sao chép</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+        <button type="button" id="btn-refresh-license" style="min-height:unset; padding:6px 14px; font-size:12px;" data-i18n="btn_refresh_status">🔄 Làm mới bản quyền</button>
+      </div>
+    </div>
+
+    <!-- Google Sign-in Claim Gift Card -->
+    <div class="gift-banner">
+      <div style="display:flex; align-items:flex-start; gap:12px;">
+        <span style="font-size:32px;">🎁</span>
+        <div>
+          <h3 style="margin:0 0 6px; font-size:18px; color:#fff;" data-i18n="gift_title">Đăng nhập Google nhận ngay 30 ngày dùng thử PRO</h3>
+          <p style="margin:0 0 14px; font-size:13.5px; color:var(--text-soft);" data-i18n="gift_desc">
+            Đăng nhập tài khoản Google trên hệ thống máy chủ Otter để nhận mã kích hoạt 30 ngày dùng thử PRO hoàn toàn miễn phí, kèm tính năng nhận thông báo Web Push trực tiếp trên trình duyệt khi tác vụ hoàn thành.
+          </p>
+          <a href="https://otter.gpt.io.vn/#nhan-key-mien-phi" target="_blank" rel="noopener noreferrer" class="btn-google">
+            <svg viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span data-i18n="btn_google_signin_claim">Đăng nhập Google Nhận 30 Ngày & Bật Thông Báo</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- License Activation Form -->
+    <div class="card-box" style="margin-top:20px;">
+      <div class="card-title"><span>🔑</span> <span data-i18n="lic_activate_title">Kích Hoạt Bản Quyền Bằng Mã Key</span></div>
+      <p style="font-size:13px; color:var(--text-soft); margin:0;" data-i18n="lic_activate_desc">Nếu bạn đã có mã bản quyền (nhận qua email sau khi đăng nhập Google hoặc mua gói PRO), hãy nhập vào đây để kích hoạt cho máy tính này:</p>
+
+      <form id="license-activate-form" style="padding:0; background:transparent; border:none; gap:12px;">
+        <label>
+          <span style="font-size:13px;" data-i18n="lic_email_label">Email đã đăng ký:</span>
+          <input id="lic-input-email" type="email" placeholder="example@gmail.com">
+        </label>
+        <label>
+          <span style="font-size:13px;" data-i18n="lic_key_label">Mã License Key (ví dụ: OTTER-PRO-... hoặc mã offline):</span>
+          <input id="lic-input-key" type="text" placeholder="OTTER-..." required>
+        </label>
+        <div class="actions">
+          <button id="btn-submit-activate" type="submit" style="background:#10b981; color:#000; font-weight:700;" data-i18n="btn_activate_key">⚡ Kích hoạt bản quyền ngay</button>
+        </div>
+        <p id="lic-activate-status" style="margin:0; font-size:14px;"></p>
+      </form>
+    </div>
+
+    <!-- Chrome Desktop Notifications Card -->
+    <div class="card-box" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.04);">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🔔</span> <span data-i18n="noti_title">Thông Báo Trình Duyệt Desktop</span>
+        </div>
+        <button type="button" id="btn-test-notification" style="min-height:unset; padding:6px 14px; font-size:12px; background:rgba(16, 185, 129, 0.2); color:#34d399; border-color:#10b981;" data-i18n="btn_test_noti">🔔 Bật & Thử nghiệm thông báo</button>
+      </div>
+      <p style="font-size:13px; color:var(--text-soft); margin:0;" data-i18n="noti_desc">
+        Otter sẽ gửi thông báo trực tiếp lên góc màn hình máy tính của bạn khi: AI hoàn thành một tác vụ phức tạp, bản quyền sắp hết hạn, hoặc nhận được tin nhắn thông báo quan trọng.
+      </p>
+      <div id="noti-status-msg" style="font-size:13px; color:#10b981; display:none;"></div>
+    </div>
+  </div>
+
+  <!-- TAB 3: KẾT NỐI & MÁY CHỦ MCP (SETTINGS) -->
+  <div class="tab-pane" id="tab-settings">
+    <form id="server-form">
+      <label><span data-i18n="server_label">Máy tính nhận lệnh điều khiển</span><select id="server"><option value="http://127.0.0.1:1993">Máy tính này (Port 1993)</option><option value="http://localhost:1993">localhost:1993</option></select></label>
+      <label><span data-i18n="token_label">Mã khóa xác thực bảo mật (API Key / Token)</span><input id="server-token" type="password" placeholder="Bắt buộc khi kết nối qua Cloudflare Tunnel / Internet (Bỏ trống nếu chạy local)"></label>
+      <div class="actions"><button id="save" type="submit" data-i18n="save_btn">Kiểm tra kết nối và lưu</button></div>
+      <p id="status" role="status" aria-live="polite"></p>
+    </form>
+
+    <form id="plugin-form" style="margin-top:20px;">
+      <label><span data-i18n="plugin_label">Tên trợ lý AI trên ChatGPT</span><input id="plugin-name" type="text" maxlength="80" autocomplete="off" placeholder="Ví dụ: Otter Assistant" required></label>
+      <div class="actions"><button id="plugin-save" type="submit" data-i18n="plugin_save_btn">Lưu tên trợ lý</button></div>
+      <p id="plugin-status" role="status" aria-live="polite"></p>
+    </form>
+
+    <div class="note-box" id="mcp-servers-box">
+      <div class="note-item">
+        <span class="note-icon">🔌</span>
+        <div style="width:100%">
+          <strong>Máy chủ MCP Mở Rộng (External MCP Servers):</strong>
+          <p style="margin:4px 0 10px;font-size:13px;color:var(--text-soft)">Các máy chủ MCP bên ngoài cấu hình trong <code>mcp_config.json</code> được tự động tổng hợp sang ChatGPT Web và Custom GPT Actions:</p>
+          <div id="mcp-server-list" style="display:grid;gap:8px;font-size:13px;">Đang tải danh sách MCP server...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <div class="note-item">
+        <span class="note-icon">🏠</span>
+        <div><strong data-i18n="note_local_title">Lưu trữ trên máy:</strong> <span data-i18n="note_local_desc">Toàn bộ cài đặt, tên trợ lý và thư mục làm việc được bảo mật trực tiếp trên chính chiếc máy tính này, không đồng bộ ra bên ngoài.</span></div>
+      </div>
+      <div class="note-item">
+        <span class="note-icon">💻</span>
+        <div><strong data-i18n="note_switch_title">Chuyển đổi thiết bị:</strong> <span data-i18n="note_switch_desc">Nếu muốn điều khiển một máy tính khác, bạn chỉ cần bấm vào tên máy tính ở góc bảng điều khiển để chọn. Mỗi tab trình duyệt có thể chọn điều khiển một máy riêng biệt.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: TẬP LỆNH NHANH (CUSTOM COMMANDS) -->
+  <div class="tab-pane" id="tab-commands">
+    <div class="card-box" id="custom-commands-box" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.04);">
+      <div class="card-header">
+        <div class="card-title">
+          <span>⚡</span> <span data-i18n="commands_title">Tập lệnh của tôi & Lệnh nhanh (Custom Slash Commands)</span>
+        </div>
+        <span style="font-size:11px; background:#10b981; color:#000; padding:2px 8px; border-radius:9999px; font-weight:700;">PRO</span>
+      </div>
+      <p style="margin:0;font-size:13px;color:var(--text-soft)" data-i18n="commands_desc">Bạn có thể yêu cầu AI tự tạo lệnh mới trong cuộc trò chuyện, hoặc tự thêm bằng tay bên dưới. Bấm ⭐ để ghim lệnh ra thanh phím tắt nhanh 1-chạm:</p>
+
+      <form id="opt-add-cmd-form" style="display:grid; grid-template-columns: 70px 140px 1fr auto; gap:8px; margin-bottom:12px;">
+        <input id="opt-cmd-icon" type="text" placeholder="Icon" value="⚡" style="text-align:center; padding:8px; background:var(--field); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:13px;">
+        <input id="opt-cmd-slash" type="text" placeholder="/lenh-tat" style="padding:8px; background:var(--field); border:1px solid var(--border); border-radius:6px; color:#34d399; font-weight:700; font-size:13px;" required>
+        <input id="opt-cmd-title" type="text" placeholder="Tiêu đề gợi nhớ" style="padding:8px; background:var(--field); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:13px;" required>
+        <button type="submit" id="opt-cmd-add-btn" style="padding:8px 16px; background:#10b981; color:#000; font-weight:700; border:none; border-radius:6px; cursor:pointer;" data-i18n="commands_add_btn">+ Thêm lệnh</button>
+      </form>
+      <textarea id="opt-cmd-prompt" placeholder="Nội dung prompt mẫu hoàn chỉnh sẽ tự động điền vào khung chat..." rows="2" style="width:100%; box-sizing:border-box; margin-bottom:10px; padding:8px; background:var(--field); border:1px solid var(--border); border-radius:6px; color:#fff; font-family:monospace; font-size:12px; resize:vertical;"></textarea>
+
+      <div id="custom-commands-list" style="display:grid; gap:8px; font-size:13px;">Đang tải danh sách tập lệnh...</div>
+    </div>
+  </div>
+
+  <!-- TAB 5: QUẢN LÝ TỔNG (MANAGEMENT CENTER) -->
+  <div class="tab-pane" id="tab-manage">
+    <div class="card-box">
+      <div class="card-header">
+        <div class="card-title"><span>🎛️</span> <span data-i18n="manage_title">Quản lý tổng — Plans, Queue, Skills & Extension</span></div>
+        <button type="button" id="manage-refresh" style="min-height:unset; padding:6px 14px; font-size:12px;" data-i18n="manage_refresh_btn">🔄 Làm mới</button>
+      </div>
+      <p style="margin:0;font-size:13px;color:var(--text-soft)" data-i18n="manage_desc">Dùng máy chủ đang chọn ở tab “Kết Nối & Máy Chủ MCP”. Trang tự làm mới khi tab này đang mở.</p>
+      <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:13px; margin-top:8px;">
+        <span>Queue: <b id="manage-queue">—</b></span>
+        <span>Daemon: <b id="manage-daemon">—</b></span>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:center;">
+        <label style="font-size:13px;">Tự làm mới mỗi
+          <select id="manage-refresh-ms" style="min-height:unset; padding:4px 8px; font-size:13px;">
+            <option value="5000">5 giây</option>
+            <option value="10000">10 giây</option>
+            <option value="30000">30 giây</option>
+            <option value="0">Tắt</option>
+          </select>
+        </label>
+        <label style="font-size:13px;"><input type="checkbox" id="manage-notify"> Thông báo khi có plan bị blocked hoặc xong</label>
+      </div>
+      <p id="manage-status" style="margin:8px 0 0; font-size:13px;"></p>
+    </div>
+
+    <div class="card-box">
+      <div class="card-title"><span>🔄</span> <span data-i18n="manage_plans_title">Plans code liên tục</span></div>
+      <div id="manage-plans-list" style="display:grid; gap:8px; font-size:13px;">Đang tải plans...</div>
+    </div>
+
+    <div class="card-box">
+      <div class="card-title"><span>🔁</span> <span>Page Loop — Vòng lặp trên trang ChatGPT</span></div>
+      <p style="margin:0;font-size:13px;color:var(--text-soft)">Phiên page-loop chỉ chạy khi bạn bấm Start cho từng phiên (mặc định tắt, 10 lượt / 30 phút). Auto: daemon inject + watcher đọc lượt. Zero-risk: chỉ chuẩn bị prompt, bạn tự gửi tay, daemon không đọc/sửa DOM.</p>
+      <div id="manage-page-loops-list" style="display:grid; gap:8px; font-size:13px; margin-top:10px;">Đang tải page-loop...</div>
+      <form id="manage-page-loop-form" style="padding:0; background:transparent; border:none; gap:10px; margin-top:10px;">
+        <label style="font-size:13px;">Mục tiêu <input id="manage-page-loop-goal" type="text" placeholder="Mục tiêu phiên page-loop" required></label>
+        <label style="font-size:13px;">Plan ID (tùy chọn) <input id="manage-page-loop-plan" type="text" placeholder="Để trống = mục tiêu tự do"></label>
+        <label style="font-size:13px;">Chế độ <select id="manage-page-loop-mode"><option value="auto">auto</option><option value="zero_risk">zero_risk</option></select></label>
+        <div class="actions"><button type="submit">▶️ Start page-loop</button><button type="button" id="manage-doctor-btn">🩺 Chạy doctor</button></div>
+      </form>
+      <p id="manage-page-loop-status" style="margin:8px 0 0; font-size:13px;"></p>
+      <p id="manage-doctor-status" style="margin:8px 0 0; font-size:13px;"></p>
+    </div>
+
+    <div class="card-box">
+      <div class="card-title"><span>📦</span> <span data-i18n="manage_skills_title">Skills đã cài</span></div>
+      <input id="manage-skills-search" type="text" placeholder="Tìm skill theo tên hoặc mô tả..." style="width:100%; padding:8px; background:var(--field); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:13px;">
+      <div id="manage-skills-list" style="display:grid; gap:8px; font-size:13px; margin-top:10px;">Đang tải skills...</div>
+    </div>
+
+    <div class="card-box">
+      <div class="card-title"><span>🌐</span> <span>Fleet — Nhiều máy / nhiều node</span></div>
+      <p style="margin:0;font-size:13px;color:var(--text-soft)">Hub này (daemon đang chọn) liệt kê worker đã đăng ký. Dispatch thật chỉ chạy qua MCP tool fleet_dispatch từ tab ChatGPT của hub — extension không tự gọi worker, để tránh dispatch trùng/lẫn. Form dưới đây tạo sẵn lệnh để bạn dán vào tab ChatGPT của hub.</p>
+      <div id="manage-fleet-list" style="display:grid; gap:8px; font-size:13px; margin-top:10px;">Đang tải fleet...</div>
+      <form id="manage-fleet-dispatch-form" style="padding:0; background:transparent; border:none; gap:10px; margin-top:10px;">
+        <label style="font-size:13px;">Node ID <input id="manage-fleet-node" type="text" placeholder="Ví dụ: nam" required></label>
+        <label style="font-size:13px;">Goal <input id="manage-fleet-goal" type="text" placeholder="Mục tiêu giao cho worker" required></label>
+        <label style="font-size:13px;">Task (mỗi dòng một task) <textarea id="manage-fleet-tasks" rows="3" placeholder="Task 1&#10;Task 2" required></textarea></label>
+        <label style="font-size:13px;">Project root trên worker (để trống = cwd của worker) <input id="manage-fleet-project" type="text" placeholder="/home/nam/code/chatmcp"></label>
+        <div class="actions"><button type="submit">📋 Tạo lệnh fleet_dispatch (copy để dán vào ChatGPT hub)</button></div>
+        <p id="manage-fleet-status" style="margin:0; font-size:13px;"></p>
+      </form>
+    </div>
+
+    <div class="card-box">
+      <div class="card-title"><span>🌐</span> <span>Mở Chrome theo profile</span></div>
+      <p style="margin:0;font-size:13px;color:var(--text-soft)">Mở Chrome trên máy chạy daemon đang chọn, với đúng profile cần làm (mỗi profile = một login ChatGPT + một cấu hình server riêng). Nút này gọi daemon qua HTTP, không phải extension tự mở.</p>
+      <div id="manage-chrome-list" style="display:grid; gap:8px; font-size:13px; margin-top:10px;">Đang tải profile...</div>
+      <form id="manage-custom-browser-form" style="padding:0; background:transparent; border:none; gap:10px; margin-top:10px;">
+        <label style="font-size:13px;">Mở bằng trình duyệt khác (ví dụ GPM): đường dẫn tới file trình duyệt <input id="manage-custom-browser-path" type="text" placeholder="Ví dụ: C:\Program Files\GPM Browser\gpm.exe (đường dẫn trên máy chạy daemon)"></label>
+        <label style="font-size:13px;">Profile (tùy chọn, truyền thẳng thành --profile-directory) <input id="manage-custom-browser-profile" type="text" placeholder="Để trống = mở mặc định của trình duyệt đó"></label>
+        <label style="font-size:13px;">URL <input id="manage-custom-browser-url" type="text" value="https://chatgpt.com"></label>
+        <div class="actions"><button type="submit">🚀 Mở trình duyệt theo đường dẫn</button></div>
+      </form>
+      <p id="manage-chrome-status" style="margin:8px 0 0; font-size:13px;"></p>
+    </div>
+
+    <div class="card-box">
+      <div class="card-title"><span>💾</span> <span>Export / Import máy chủ</span></div>
+      <p style="margin:0;font-size:13px;color:var(--text-soft)">Mang danh sách máy chủ tự thêm sang máy/profile khác. File export chứa token (nếu có) — giữ file như giữ mật khẩu, chỉ import trên máy của chính bạn.</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+        <button type="button" id="manage-export-servers">⬇️ Export servers (JSON)</button>
+        <label style="font-size:13px;">⬆️ Import servers <input id="manage-import-servers" type="file" accept="application/json,.json" style="font-size:13px;"></label>
+      </div>
+      <p id="manage-servers-io-status" style="margin:8px 0 0; font-size:13px;"></p>
+    </div>
+
+    <div class="card-box">
+      <div class="card-title"><span>🧰</span> <span data-i18n="manage_tools_title">Nhóm công cụ MCP</span></div>
+      <div id="manage-tools-list" style="display:grid; gap:8px; font-size:13px;"></div>
+    </div>
+
+    <div class="card-box">
+      <div class="card-title"><span>🔌</span> <span data-i18n="manage_server_title">Thêm máy chủ mới</span></div>
+      <form id="manage-add-server-form" style="padding:0; background:transparent; border:none; gap:10px;">
+        <label style="font-size:13px;">Tên máy chủ <input id="manage-server-name" type="text" placeholder="Ví dụ: Máy bàn" required></label>
+        <label style="font-size:13px;">API base <input id="manage-server-url" type="text" placeholder="http://127.0.0.1:1993 hoặc https://..." required></label>
+        <label style="font-size:13px;">API key (nếu có) <input id="manage-server-token" type="password" placeholder="Để trống nếu chạy local"></label>
+        <div class="actions"><button type="submit" data-i18n="manage_server_add_btn">+ Thêm máy chủ</button></div>
+        <p id="manage-server-status" style="margin:0; font-size:13px;"></p>
+      </form>
+    </div>
+
+    <div class="card-box">
+      <div class="card-title"><span>🔗</span> <span data-i18n="manage_links_title">Mở nhanh</span></div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="button" id="manage-open-plan-dashboard">📊 Mở Plan Dashboard</button>
+        <button type="button" id="manage-open-activity">📈 Mở Activity</button>
+        <button type="button" id="manage-open-chatgpt">🚀 Mở ChatGPT Web</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 6: KỊCH BẢN BÁN HÀNG & FB (FB SALES PLAYBOOK) -->
+  <div class="tab-pane" id="tab-fb-sales">
+    <div class="card-box" style="border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.04);">
+      <div class="card-header">
+        <div class="card-title">
+          <span>💬</span> <span>Kịch Bản Bán Hàng Messenger & Tương Tác Facebook</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="fb-sales-refresh" style="min-height:unset; padding:6px 12px; font-size:12px; cursor:pointer;">🔄 Tải lại</button>
+          <button type="button" id="fb-sales-reset" style="min-height:unset; padding:6px 12px; font-size:12px; background:rgba(239, 68, 68, 0.2); border:1px solid #ef4444; color:#fca5a5; cursor:pointer;">↩️ Khôi phục mặc định</button>
+        </div>
+      </div>
+      <p style="margin:0; font-size:13px; color:var(--text-soft);">
+        Tự do chỉnh sửa câu từ kịch bản bán hàng bằng tay bên dưới. Mọi thay đổi được lưu trực tiếp vào database SQLite của Otter và bot tự động áp dụng ngay lập tức mà không cần khởi động lại.
+      </p>
+
+      <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:13px; margin: 12px 0 6px; padding: 10px 14px; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
+        <span>Messenger Listener: <b id="fb-sales-listener-status" style="color:#10b981;">Đang kiểm tra...</b></span>
+        <span>Số tin đã rep: <b id="fb-sales-replied-count">0</b></span>
+        <span>Khách gần nhất: <b id="fb-sales-last-customer">—</b></span>
+      </div>
+      <div id="fb-sales-status-msg" style="font-size:13px; font-weight:600; min-height:20px; margin-top:4px;"></div>
+    </div>
+
+    <!-- PHẦN 1: PHỄU BÁN HÀNG 6 BƯỚC -->
+    <div class="card-box" style="margin-top:16px;">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🎯</span> <span>1. Phễu Bán Hàng Messenger (Sales Funnel)</span>
+        </div>
+      </div>
+      <p style="margin:0 0 14px; font-size:13px; color:var(--text-soft);">
+        Bot sẽ dẫn dắt khách hàng qua từng bước phễu. Mỗi dòng trong ô là một câu thoại mẫu (bot sẽ chọn ngẫu nhiên). Dùng <code>{name}</code> để tự động chèn tên khách.
+      </p>
+      <div id="fb-sales-stages-container" style="display:grid; gap:14px;">
+        <div style="color:var(--text-soft); font-size:13px;">Đang tải các bước kịch bản...</div>
+      </div>
+    </div>
+
+    <!-- PHẦN 2: BỘ NHẬN DIỆN Ý ĐỊNH TRẢ LỜI TỨC THÌ (INTENTS) -->
+    <div class="card-box" style="margin-top:16px;">
+      <div class="card-header">
+        <div class="card-title">
+          <span>⚡</span> <span>2. Trả Lời Câu Hỏi Thường Gặp (Intent Matching)</span>
+        </div>
+      </div>
+      <p style="margin:0 0 14px; font-size:13px; color:var(--text-soft);">
+        Khi khách hỏi các câu hỏi phổ biến (giá bao nhiêu, tính năng gì, bạn là ai, khen ngợi, hoặc để lại SĐT Zalo), bot sẽ ưu tiên trả lời đúng ý định ngay lập tức.
+      </p>
+      <div id="fb-sales-intents-container" style="display:grid; gap:14px;">
+        <div style="color:var(--text-soft); font-size:13px;">Đang tải danh sách ý định...</div>
+      </div>
+    </div>
+
+    <!-- PHẦN 3: KỊCH BẢN BÌNH LUẬN DẠO (COMMENT SEEDING) -->
+    <div class="card-box" style="margin-top:16px;">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📝</span> <span>3. Kịch Bản Bình Luận Dạo Facebook (Comment Seeding)</span>
+        </div>
+      </div>
+      <p style="margin:0 0 14px; font-size:13px; color:var(--text-soft);">
+        Dùng khi tự động tương tác các bài viết trên Bảng feed Facebook. Mỗi dòng là một câu bình luận mẫu. Dùng <code>{author}</code> để tự chèn tên tác giả bài viết.
+      </p>
+      <div id="fb-sales-comments-container" style="display:grid; gap:14px;">
+        <div style="color:var(--text-soft); font-size:13px;">Đang tải kịch bản bình luận...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Community Box -->
+  <div class="note-box" style="border-color: rgba(96, 165, 250, 0.4); background: rgba(96, 165, 250, 0.05); margin-top:28px;">
+    <div class="note-item">
+      <span class="note-icon">💬</span>
+      <div>
+        <strong data-i18n="community_title">Cộng đồng Facebook & Hỗ trợ kỹ thuật:</strong>
+        <p style="margin:4px 0 0; font-size:13px; color:var(--text-soft)">
+          <span data-i18n="community_desc">Tham gia giao lưu, hỏi đáp và nhận hỗ trợ kỹ thuật tại</span>
+          <a href="https://www.facebook.com/share/g/1CN8sjFYDH/?mibextid=wwXIfr" target="_blank" rel="noreferrer" style="font-weight:600; color:#60a5fa; margin-left:4px;" data-i18n="community_link">Nhóm Facebook Hỗ trợ Otter</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- Modal Chi Tiết Tác Vụ -->
+  <div id="opt-task-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:var(--panel); border:1px solid var(--border); border-radius:14px; max-width:760px; width:100%; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.6);">
+      <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="opt-modal-title" style="margin:0; font-size:16px; font-weight:700; color:#fff;">Chi Tiết Tác Vụ</h3>
+        <button type="button" id="opt-modal-close" style="background:transparent; border:none; color:var(--text-soft); font-size:20px; cursor:pointer; min-height:unset; padding:4px 8px;">✕</button>
+      </div>
+      <div id="opt-modal-body" style="padding:20px; overflow-y:auto; display:grid; gap:16px; font-size:13.5px;"></div>
+      <div style="padding:12px 20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; background:rgba(0,0,0,0.2);">
+        <button type="button" id="opt-modal-close-btn" style="min-height:unset; padding:8px 16px; font-size:13px; cursor:pointer;">Đóng</button>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="options.js"></script>
+</body>
+</html>

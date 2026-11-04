@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Otter Authority • Cổng Quản Trị Bảo Mật Tối Cao</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Firebase App & Auth SDK (Compat CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+  <style>
+    :root {
+      --bg: #070a12;
+      --card: #0e1526;
+      --border: rgba(255, 255, 255, 0.08);
+      --primary: #10b981;
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 50% 15%, #0f2744 0%, var(--bg) 80%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .login-box {
+      background: rgba(14, 21, 38, 0.88);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 24px;
+      padding: 44px 34px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px -10px rgba(56, 189, 248, 0.18);
+      text-align: center;
+    }
+    .logo {
+      font-size: 56px;
+      margin-bottom: 12px;
+      display: inline-block;
+      filter: drop-shadow(0 4px 14px rgba(16, 185, 129, 0.35));
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+    p.subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 26px;
+      line-height: 1.5;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
+
+    /* Button Google Sign-In */
+    .btn-google {
+      width: 100%;
+      background: #ffffff;
+      color: #1e293b;
+      font-size: 15px;
+      font-weight: 700;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    }
+    .btn-google:hover {
+      background: #f8fafc;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(255,255,255,0.15);
+    }
+    .btn-google:disabled { opacity: 0.6; cursor: not-allowed; }
+    .google-icon { width: 20px; height: 20px; }
+
+    .alert {
+      margin-top: 16px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      line-height: 1.4;
+      text-align: left;
+    }
+    .alert-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+    .alert-success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .security-notice {
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="logo">🦦</div>
+    <div><span class="badge"><span class="dot"></span> Otter Authority Gateway</span></div>
+    <h1>Cổng Quản Trị Hệ Thống</h1>
+    <p class="subtitle">Xác thực quyền quản trị viên tối cao để truy cập hệ thống cấp phép bản quyền</p>
+
+    <!-- Phương Thức 1: Đăng nhập Google Firebase (Khuyên Dùng) -->
+    <button type="button" class="btn-google" id="btnGoogleAuth" onclick="handleGoogleAdminLogin()">
+      <svg class="google-icon" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+      </svg>
+      <span>Đăng Nhập Quản Trị Bằng Google</span>
+    </button>
+
+    <div id="alertBox" class="alert"></div>
+
+    <div class="security-notice">
+      🔒 Khu vực bảo mật cấp độ cao của Otter Authority. Mọi lượt truy vấn, IP khách và thao tác trái phép đều được ghi vết tự động vào hệ thống phòng thủ.
+    </div>
+  </div>
+
+  <script>
+    // Cấu hình Firebase Web Client
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyBmRwlVmrO1qX6Og_2clEeD4dSH1k6Hdjc",
+      authDomain: "otter-aeccc.firebaseapp.com",
+      projectId: "otter-aeccc",
+      storageBucket: "otter-aeccc.firebasestorage.app",
+      messagingSenderId: "413906945210",
+      appId: "1:413906945210:web:43656df9009fbe29476e83"
+    };
+
+    let fbAuth = null;
+    try {
+      if (typeof firebase !== 'undefined') {
+        const app = firebase.initializeApp(FIREBASE_CONFIG);
+        fbAuth = firebase.auth();
+      }
+    } catch (e) {
+      console.warn("Firebase Init Error:", e);
+    }
+
+    function showAlert(msg, isSuccess = false) {
+      const box = document.getElementById('alertBox');
+      box.className = 'alert ' + (isSuccess ? 'alert-success' : 'alert-error');
+      box.innerText = msg;
+      box.style.display = 'block';
+    }
+
+    // 1. Đăng nhập Google Firebase Admin
+    async function handleGoogleAdminLogin() {
+      const btn = document.getElementById('btnGoogleAuth');
+      if (!fbAuth) {
+        showAlert("Không thể khởi tạo dịch vụ xác thực Google Firebase.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>Đang xác thực Google...</span>';
+
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        const result = await fbAuth.signInWithPopup(provider);
+        const user = result.user;
+        const idToken = await user.getIdToken(true);
+
+        showAlert("Đang xác thực quyền hạn quản trị viên...", true);
+
+        const res = await fetch('/api/admin/login-firebase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          showAlert("✅ " + (data.message || "Xác thực thành công! Đang chuyển hướng..."), true);
+          setTimeout(() => { window.location.reload(); }, 400);
+        } else {
+          showAlert(data.error || "Từ chối truy cập: Tài khoản không có quyền quản trị viên!");
+          btn.disabled = false;
+          btn.innerHTML = '<span>Đăng Nhập Quản Trị Bằng Google</span>';
+        }
+      } catch (err) {
+        showAlert("Lỗi đăng nhập Google: " + (err.message || err));
+        btn.disabled = false;
+        btn.innerHTML = '<span>Đăng Nhập Quản Trị Bằng Google</span>';
+      }
+    }
+  </script>
+</body>
+</html>

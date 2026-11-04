@@ -1,0 +1,1142 @@
+{
+  "activating": {
+    "message": "Đang xác thực...",
+    "description": "activating"
+  },
+  "activating_request": {
+    "message": "Đang gửi yêu cầu kích hoạt bản quyền tới máy chủ...",
+    "description": "activating_request"
+  },
+  "activity_connected": {
+    "message": "Đã kết nối",
+    "description": "activity_connected"
+  },
+  "activity_connecting": {
+    "message": "Đang kết nối...",
+    "description": "activity_connecting"
+  },
+  "activity_continuous": {
+    "message": "Tương tác liên tục (Continuous)",
+    "description": "activity_continuous"
+  },
+  "activity_empty": {
+    "message": "Chưa có sự kiện nào trong cuộc trò chuyện này.",
+    "description": "activity_empty"
+  },
+  "activity_mcp_config": {
+    "message": "🔌 Cấu hình MCP Servers",
+    "description": "activity_mcp_config"
+  },
+  "activity_offline": {
+    "message": "Ngoại tuyến",
+    "description": "activity_offline"
+  },
+  "activity_open_term": {
+    "message": "💻 Mở Live Terminal PTY",
+    "description": "activity_open_term"
+  },
+  "activity_title": {
+    "message": "Otter Active",
+    "description": "activity_title"
+  },
+  "app_description": {
+    "message": "Bộ điều khiển trình duyệt Agentic AI và bộ công cụ tự động hóa cho ChatGPT Web (nén DOM, Live Terminal, Automation HUD)",
+    "description": "app_description"
+  },
+  "app_name": {
+    "message": "Otter — Agentic AI Browser Controller",
+    "description": "app_name"
+  },
+  "btn_activate_key": {
+    "message": "⚡ Kích hoạt bản quyền ngay",
+    "description": "btn_activate_key"
+  },
+  "btn_copied": {
+    "message": "✓ Đã sao chép!",
+    "description": "btn_copied"
+  },
+  "btn_copied_short": {
+    "message": "✓ Đã chép",
+    "description": "btn_copied_short"
+  },
+  "btn_copy": {
+    "message": "Sao chép",
+    "description": "btn_copy"
+  },
+  "btn_google_signin_claim": {
+    "message": "Đăng nhập Google Nhận 30 Ngày & Bật Thông Báo",
+    "description": "btn_google_signin_claim"
+  },
+  "btn_open_chatgpt": {
+    "message": "🚀 Mở ChatGPT Web",
+    "description": "btn_open_chatgpt"
+  },
+  "btn_open_docs": {
+    "message": "🌐 Xem tài liệu & Video hướng dẫn",
+    "description": "btn_open_docs"
+  },
+  "btn_recheck": {
+    "message": "🔄 Kiểm tra kết nối",
+    "description": "btn_recheck"
+  },
+  "btn_refresh_status": {
+    "message": "🔄 Làm mới bản quyền",
+    "description": "btn_refresh_status"
+  },
+  "btn_test_noti": {
+    "message": "🔔 Bật & Thử nghiệm thông báo",
+    "description": "btn_test_noti"
+  },
+  "cat_bookmarks": {
+    "message": "Kho Bookmark Cá Nhân",
+    "description": "cat_bookmarks"
+  },
+  "cat_browser": {
+    "message": "Trình duyệt Web",
+    "description": "cat_browser"
+  },
+  "cat_cbm": {
+    "message": "Codebase Memory",
+    "description": "cat_cbm"
+  },
+  "cat_desktop": {
+    "message": "Desktop & CUA",
+    "description": "cat_desktop"
+  },
+  "cat_facebook": {
+    "message": "Facebook & Bán Hàng",
+    "description": "cat_facebook"
+  },
+  "cat_media": {
+    "message": "Video & Âm thanh",
+    "description": "cat_media"
+  },
+  "cat_terminal": {
+    "message": "Dòng lệnh & Terminal",
+    "description": "cat_terminal"
+  },
+  "cat_vps": {
+    "message": "Quản trị VPS SSH",
+    "description": "cat_vps"
+  },
+  "checking_daemon": {
+    "message": "Đang kiểm tra kết nối tới http://127.0.0.1:1993...",
+    "description": "checking_daemon"
+  },
+  "cmd_add_command": {
+    "message": "+ Thêm lệnh",
+    "description": "cmd_add_command"
+  },
+  "cmd_autocomplete_header": {
+    "message": "⚡ Otter Commands (gõ /...)",
+    "description": "cmd_autocomplete_header"
+  },
+  "cmd_autocomplete_nav": {
+    "message": "↵ chọn • ↑↓ duyệt",
+    "description": "cmd_autocomplete_nav"
+  },
+  "cmd_badge_custom": {
+    "message": "Cá nhân",
+    "description": "cmd_badge_custom"
+  },
+  "cmd_close": {
+    "message": "Đóng",
+    "description": "cmd_close"
+  },
+  "cmd_confirm_delete": {
+    "message": "Bạn có chắc muốn xóa tập lệnh này?",
+    "description": "cmd_confirm_delete"
+  },
+  "cmd_create_title": {
+    "message": "✨ TẠO TẬP LỆNH SLASH MỚI:",
+    "description": "cmd_create_title"
+  },
+  "cmd_del_btn": {
+    "message": "Xóa",
+    "description": "cmd_del_btn"
+  },
+  "cmd_delete_confirm": {
+    "message": "Bạn có chắc muốn xóa tập lệnh {slash}?",
+    "description": "cmd_delete_confirm"
+  },
+  "cmd_delete_tooltip": {
+    "message": "Xóa tập lệnh này",
+    "description": "cmd_delete_tooltip"
+  },
+  "cmd_empty": {
+    "message": "Chưa có tập lệnh tùy chỉnh nào. Bạn có thể yêu cầu AI tạo trong ô chat hoặc thêm ngay bằng form trên.",
+    "description": "cmd_empty"
+  },
+  "cmd_error_fields": {
+    "message": "Vui lòng nhập đầy đủ Lệnh slash, Tiêu đề và Prompt mẫu.",
+    "description": "cmd_error_fields"
+  },
+  "cmd_hint_esc": {
+    "message": "Nhấn Esc để đóng",
+    "description": "cmd_hint_esc"
+  },
+  "cmd_hint_tip": {
+    "message": "💡 Mẹo: Bấm ⭐ Ghim để đưa lệnh ra thanh Quick Action Chips 1-chạm",
+    "description": "cmd_hint_tip"
+  },
+  "cmd_insert_cmd": {
+    "message": "Chèn lệnh →",
+    "description": "cmd_insert_cmd"
+  },
+  "cmd_missing_fields": {
+    "message": "Vui lòng nhập đầy đủ Lệnh tắt, Tiêu đề và Prompt mẫu.",
+    "description": "cmd_missing_fields"
+  },
+  "cmd_modal_title": {
+    "message": "Danh Mục Lệnh Otter MCP",
+    "description": "cmd_modal_title"
+  },
+  "cmd_my_category": {
+    "message": "Tập lệnh của tôi",
+    "description": "cmd_my_category"
+  },
+  "cmd_no_match": {
+    "message": "Không tìm thấy lệnh nào phù hợp với từ khóa",
+    "description": "cmd_no_match"
+  },
+  "cmd_pin_btn": {
+    "message": "⭐ Ghim",
+    "description": "cmd_pin_btn"
+  },
+  "cmd_pin_btn_pinned": {
+    "message": "⭐ Đã ghim",
+    "description": "cmd_pin_btn_pinned"
+  },
+  "cmd_pin_btn_unpinned": {
+    "message": "☆ Ghim",
+    "description": "cmd_pin_btn_unpinned"
+  },
+  "cmd_pin_checkbox": {
+    "message": "Ghim ra thanh phím tắt nhanh (⭐ Quick Action Chips)",
+    "description": "cmd_pin_checkbox"
+  },
+  "cmd_pin_tooltip_pinned": {
+    "message": "Bỏ ghim khỏi thanh phím tắt",
+    "description": "cmd_pin_tooltip_pinned"
+  },
+  "cmd_pin_tooltip_unpinned": {
+    "message": "Ghim ra thanh phím tắt (Quick Action Chips)",
+    "description": "cmd_pin_tooltip_unpinned"
+  },
+  "cmd_pinned_badge": {
+    "message": "⭐ Đã ghim",
+    "description": "cmd_pinned_badge"
+  },
+  "cmd_pinned_category": {
+    "message": "⭐ CÁC LỆNH ĐÃ GHIM (QUICK ACTION CHIPS)",
+    "description": "cmd_pinned_category"
+  },
+  "cmd_placeholder_prompt": {
+    "message": "Nội dung prompt mẫu sẽ tự động điền vào ô chat...",
+    "description": "cmd_placeholder_prompt"
+  },
+  "cmd_placeholder_slash": {
+    "message": "/lenh-tat",
+    "description": "cmd_placeholder_slash"
+  },
+  "cmd_placeholder_title": {
+    "message": "Tiêu đề lệnh (ví dụ: Audit RAM VPS)",
+    "description": "cmd_placeholder_title"
+  },
+  "cmd_quick_chips_label": {
+    "message": "⚡ LỆNH NHANH:",
+    "description": "cmd_quick_chips_label"
+  },
+  "cmd_save_command": {
+    "message": "Lưu tập lệnh",
+    "description": "cmd_save_command"
+  },
+  "cmd_saving": {
+    "message": "Đang lưu...",
+    "description": "cmd_saving"
+  },
+  "cmd_search_placeholder": {
+    "message": "🔍 Tìm nhanh câu lệnh (hoặc gõ /browse, /test, /vps...)...",
+    "description": "cmd_search_placeholder"
+  },
+  "cmd_unpin_btn": {
+    "message": "Bỏ ghim",
+    "description": "cmd_unpin_btn"
+  },
+  "commands_add_btn": {
+    "message": "+ Thêm lệnh",
+    "description": "commands_add_btn"
+  },
+  "commands_desc": {
+    "message": "Bạn có thể yêu cầu AI tự tạo lệnh mới trong cuộc trò chuyện, hoặc tự thêm bằng tay bên dưới. Bấm ⭐ để ghim lệnh ra thanh phím tắt nhanh 1-chạm:",
+    "description": "commands_desc"
+  },
+  "commands_title": {
+    "message": "Tập lệnh của tôi & Lệnh nhanh (Custom Slash Commands):",
+    "description": "commands_title"
+  },
+  "community_desc": {
+    "message": "Tham gia giao lưu, hỏi đáp và nhận hỗ trợ kỹ thuật tại",
+    "description": "community_desc"
+  },
+  "community_link": {
+    "message": "Nhóm Facebook Hỗ trợ Otter",
+    "description": "community_link"
+  },
+  "community_title": {
+    "message": "Cộng đồng Facebook & Hỗ trợ kỹ thuật:",
+    "description": "community_title"
+  },
+  "confirm_restore_all": {
+    "message": "Bạn có chắc muốn khôi phục toàn bộ kịch bản bán hàng và bình luận về mặc định ban đầu của Otter?",
+    "description": "confirm_restore_all"
+  },
+  "connect_auth_success": {
+    "message": "✅ Kết nối & xác thực thành công! Cài đặt đã được lưu.",
+    "description": "connect_auth_success"
+  },
+  "connect_failed": {
+    "message": "❌ Không thể kết nối tới server (HTTP lỗi hoặc sai token): {message}",
+    "description": "connect_failed"
+  },
+  "daemon_offline": {
+    "message": "🔴 Chưa phát hiện Otter Daemon. Vui lòng chạy lệnh ở Bước 1 bên dưới để khởi động.",
+    "description": "daemon_offline"
+  },
+  "daemon_online": {
+    "message": "🟢 Otter Daemon đang hoạt động tốt trên máy tính này (Port 1993).",
+    "description": "daemon_online"
+  },
+  "desc": {
+    "message": "Otter kết nối ChatGPT với máy tính của bạn để duyệt web thông minh, chạy lệnh terminal và tự động hóa tác vụ. Tiện ích chỉ truyền lệnh thao tác, tuyệt đối không lưu trữ dữ liệu cá nhân.",
+    "description": "desc"
+  },
+  "error_connect": {
+    "message": "Lỗi kết nối: {message}",
+    "description": "error_connect"
+  },
+  "error_prefix": {
+    "message": "Lỗi: {message}",
+    "description": "error_prefix"
+  },
+  "error_restore": {
+    "message": "Lỗi khôi phục: {message}",
+    "description": "error_restore"
+  },
+  "error_save_comment": {
+    "message": "Lỗi khi lưu bình luận: {message}",
+    "description": "error_save_comment"
+  },
+  "error_save_intent": {
+    "message": "Lỗi khi lưu ý định: {message}",
+    "description": "error_save_intent"
+  },
+  "error_save_phase": {
+    "message": "Lỗi khi lưu giai đoạn: {message}",
+    "description": "error_save_phase"
+  },
+  "export_doc_title": {
+    "message": "Cuộc trò chuyện Otter",
+    "description": "export_doc_title"
+  },
+  "export_exported_at": {
+    "message": "Thời gian xuất",
+    "description": "export_exported_at"
+  },
+  "export_success": {
+    "message": "Đã xuất cuộc trò chuyện ra Markdown thành công!",
+    "description": "export_success"
+  },
+  "export_total_turns": {
+    "message": "Tổng số lượt chat",
+    "description": "export_total_turns"
+  },
+  "gift_desc": {
+    "message": "Đăng nhập tài khoản Google trên hệ thống máy chủ Otter để nhận mã kích hoạt 30 ngày dùng thử PRO hoàn toàn miễn phí, kèm tính năng nhận thông báo Web Push trực tiếp trên trình duyệt khi tác vụ hoàn thành.",
+    "description": "gift_desc"
+  },
+  "gift_title": {
+    "message": "Đăng nhập Google nhận ngay 30 ngày dùng thử PRO",
+    "description": "gift_title"
+  },
+  "guide_daemon_status_title": {
+    "message": "Trạng thái Otter Daemon trên máy tính:",
+    "description": "guide_daemon_status_title"
+  },
+  "guide_step1_desc": {
+    "message": "Mở Terminal/PowerShell trên máy tính của bạn và dán một dòng lệnh dưới đây để tự động kéo binary, cài đặt và chạy ngầm cùng Windows/macOS/Linux:",
+    "description": "guide_step1_desc"
+  },
+  "guide_step1_title": {
+    "message": "Bước 1: Khởi động Otter Daemon (Chỉ 1 dòng lệnh)",
+    "description": "guide_step1_title"
+  },
+  "guide_step2_desc": {
+    "message": "Tiện ích Otter tự động kết nối tới máy chủ nội bộ http://127.0.0.1:1993. Nếu bạn muốn điều khiển máy tính này từ xa khi đang ở ngoài đường, hãy dùng đường link Cloudflare TryCloudflare Tunnel được tạo tự động trong quá trình cài đặt.",
+    "description": "guide_step2_desc"
+  },
+  "guide_step2_title": {
+    "message": "Bước 2: Kết nối Tiện ích Chrome với máy tính",
+    "description": "guide_step2_title"
+  },
+  "guide_step3_desc": {
+    "message": "Truy cập https://chatgpt.com. Thanh công cụ thông minh của Otter sẽ tự động xuất hiện ở góc trên bên phải khung chat, giúp AI có thể duyệt web, bấm chuột, gõ phím, chạy terminal và tạo video.",
+    "description": "guide_step3_desc"
+  },
+  "guide_step3_title": {
+    "message": "Bước 3: Mở ChatGPT và trải nghiệm",
+    "description": "guide_step3_title"
+  },
+  "lic_activate_desc": {
+    "message": "Nếu bạn đã có mã bản quyền (nhận qua email sau khi đăng nhập Google hoặc mua gói PRO), hãy nhập vào đây để kích hoạt cho máy tính này:",
+    "description": "lic_activate_desc"
+  },
+  "lic_activate_success": {
+    "message": "Kích hoạt bản quyền thành công!",
+    "description": "lic_activate_success"
+  },
+  "lic_activate_title": {
+    "message": "Kích Hoạt Bản Quyền Bằng Mã Key",
+    "description": "lic_activate_title"
+  },
+  "lic_active": {
+    "message": "🟢 Đang hoạt động (Hợp lệ)",
+    "description": "lic_active"
+  },
+  "lic_card_title": {
+    "message": "Gói Dịch Vụ & Bản Quyền Hiện Tại",
+    "description": "lic_card_title"
+  },
+  "lic_customer_default": {
+    "message": "Khách hàng Otter",
+    "description": "lic_customer_default"
+  },
+  "lic_customer_label": {
+    "message": "Khách hàng / Email:",
+    "description": "lic_customer_label"
+  },
+  "lic_daemon_unreachable": {
+    "message": "Không thể kết nối daemon ({message})",
+    "description": "lic_daemon_unreachable"
+  },
+  "lic_email_label": {
+    "message": "Email đã đăng ký:",
+    "description": "lic_email_label"
+  },
+  "lic_expired": {
+    "message": "🔴 Đã hết hạn",
+    "description": "lic_expired"
+  },
+  "lic_expires_label": {
+    "message": "Thời hạn bản quyền:",
+    "description": "lic_expires_label"
+  },
+  "lic_key_label": {
+    "message": "Mã License Key (ví dụ: OTTER-PRO-... hoặc mã offline):",
+    "description": "lic_key_label"
+  },
+  "lic_lifetime": {
+    "message": "Vĩnh viễn (Lifetime)",
+    "description": "lic_lifetime"
+  },
+  "lic_not_linked": {
+    "message": "Chưa liên kết",
+    "description": "lic_not_linked"
+  },
+  "lic_status_label": {
+    "message": "Trạng thái giấy phép:",
+    "description": "lic_status_label"
+  },
+  "lic_support_code_label": {
+    "message": "Mã thiết bị (Support Code):",
+    "description": "lic_support_code_label"
+  },
+  "lic_unlicensed": {
+    "message": "🟡 Chưa kích hoạt bản quyền",
+    "description": "lic_unlicensed"
+  },
+  "listener_none": {
+    "message": "Chưa có",
+    "description": "listener_none"
+  },
+  "listener_paused": {
+    "message": "🔴 Đang tạm dừng",
+    "description": "listener_paused"
+  },
+  "listener_running": {
+    "message": "🟢 Đang chạy (chu kỳ 5s)",
+    "description": "listener_running"
+  },
+  "load_cmd_failed": {
+    "message": "Không thể tải danh sách tập lệnh: {message}",
+    "description": "load_cmd_failed"
+  },
+  "load_mcp_failed": {
+    "message": "Không thể tải danh sách MCP: {message}",
+    "description": "load_mcp_failed"
+  },
+  "manage_blocked_reason": {
+    "message": "lý do: {reason}",
+    "description": "manage_blocked_reason"
+  },
+  "manage_browser_open_failed": {
+    "message": "❌ Không mở được trình duyệt: {message}",
+    "description": "manage_browser_open_failed"
+  },
+  "manage_browser_opened": {
+    "message": "✅ Đã gọi mở trình duyệt {path} (pid {pid}). Đợi cửa sổ trình duyệt hiện ra rồi làm việc trong đó.",
+    "description": "manage_browser_opened"
+  },
+  "manage_confirm_cancel": {
+    "message": "Bạn có chắc muốn hủy plan này?",
+    "description": "manage_confirm_cancel"
+  },
+  "manage_current_task": {
+    "message": "Task đang chạy:",
+    "description": "manage_current_task"
+  },
+  "manage_desc": {
+    "message": "Dùng máy chủ đang chọn ở tab “Kết Nối & Máy Chủ MCP”. Trang tự làm mới khi tab này đang mở.",
+    "description": "manage_desc"
+  },
+  "manage_doctor_fail": {
+    "message": "có mục fail",
+    "description": "manage_doctor_fail"
+  },
+  "manage_empty_plans": {
+    "message": "Chưa có plan nào. Tạo plan bằng MCP tool plan_create rồi quay lại đây.",
+    "description": "manage_empty_plans"
+  },
+  "manage_empty_skills": {
+    "message": "Chưa có skill nào.",
+    "description": "manage_empty_skills"
+  },
+  "manage_enter_browser": {
+    "message": "❌ Nhập đường dẫn tới file trình duyệt (trên máy chạy daemon).",
+    "description": "manage_enter_browser"
+  },
+  "manage_enter_fleet": {
+    "message": "❌ Nhập đủ Node ID, Goal và ít nhất 1 task.",
+    "description": "manage_enter_fleet"
+  },
+  "manage_enter_goal": {
+    "message": "❌ Nhập mục tiêu.",
+    "description": "manage_enter_goal"
+  },
+  "manage_exported": {
+    "message": "✅ Đã export {count} server. Giữ file như giữ mật khẩu (có token).",
+    "description": "manage_exported"
+  },
+  "manage_fleet_copied": {
+    "message": "✓ Đã copy lệnh fleet_dispatch — dán vào tab ChatGPT của hub để chạy.",
+    "description": "manage_fleet_copied"
+  },
+  "manage_fleet_failed": {
+    "message": "Không tải được fleet ({message}). Daemon này có phải hub không, và đã chọn đúng daemon ở tab Kết Nối chưa?",
+    "description": "manage_fleet_failed"
+  },
+  "manage_imported": {
+    "message": "✅ Import xong: {imported} mới, {skipped} bỏ qua (trùng/không hợp lệ). Chọn server mới ở tab Kết Nối để dùng.",
+    "description": "manage_imported"
+  },
+  "manage_links_title": {
+    "message": "Mở nhanh",
+    "description": "manage_links_title"
+  },
+  "manage_loading": {
+    "message": "Đang tải...",
+    "description": "manage_loading"
+  },
+  "manage_next_task": {
+    "message": "Task tiếp theo:",
+    "description": "manage_next_task"
+  },
+  "manage_no_daemon": {
+    "message": "Không kết nối được daemon.",
+    "description": "manage_no_daemon"
+  },
+  "manage_no_outbox": {
+    "message": "Không có prompt kẹt trong outbox.",
+    "description": "manage_no_outbox"
+  },
+  "manage_no_page_loops": {
+    "message": "Chưa có phiên page-loop nào. Start một phiên ở form dưới.",
+    "description": "manage_no_page_loops"
+  },
+  "manage_no_profiles": {
+    "message": "Chưa thấy profile Chrome nào trên máy chạy daemon ({dir}). Mở Chrome bằng tay một lần để tạo profile Default.",
+    "description": "manage_no_profiles"
+  },
+  "manage_no_workers": {
+    "message": "Chưa có worker nào đăng ký. Đăng ký bằng MCP tool fleet_register từ tab ChatGPT của hub, hoặc POST /api/fleet/nodes với token.",
+    "description": "manage_no_workers"
+  },
+  "manage_open_profile_btn": {
+    "message": "🚀 Mở profile này",
+    "description": "manage_open_profile_btn"
+  },
+  "manage_outbox_attempts": {
+    "message": "(thử {count} lần)",
+    "description": "manage_outbox_attempts"
+  },
+  "manage_page_loop_failed": {
+    "message": "Không tải được page-loop ({message}).",
+    "description": "manage_page_loop_failed"
+  },
+  "manage_page_loop_turns": {
+    "message": "lượt {turn}/{max} · epoch {epoch}",
+    "description": "manage_page_loop_turns"
+  },
+  "manage_page_started": {
+    "message": "✅ Đã start phiên {id}.",
+    "description": "manage_page_started"
+  },
+  "manage_page_stopped": {
+    "message": "✅ Đã dừng phiên.",
+    "description": "manage_page_stopped"
+  },
+  "manage_plans_title": {
+    "message": "Plans code liên tục",
+    "description": "manage_plans_title"
+  },
+  "manage_profile_failed": {
+    "message": "Không tải được profile Chrome ({message}). Máy chạy daemon có Chrome và màn hình không?",
+    "description": "manage_profile_failed"
+  },
+  "manage_profile_open_failed": {
+    "message": "❌ Không mở được profile {directory}: {message}",
+    "description": "manage_profile_open_failed"
+  },
+  "manage_profile_opened": {
+    "message": "✅ Đã gọi mở Chrome profile {directory} (pid {pid}). Đợi cửa sổ Chrome hiện ra rồi làm việc trong đó.",
+    "description": "manage_profile_opened"
+  },
+  "manage_refresh_btn": {
+    "message": "🔄 Làm mới",
+    "description": "manage_refresh_btn"
+  },
+  "manage_resume_btn": {
+    "message": "▶️ Tiếp tục",
+    "description": "manage_resume_btn"
+  },
+  "manage_resume_copied": {
+    "message": "✓ Đã copy resume prompt!",
+    "description": "manage_resume_copied"
+  },
+  "manage_resume_prompt": {
+    "message": "✅ Resume prompt (zero-risk: copy gửi tay): {prompt}",
+    "description": "manage_resume_prompt"
+  },
+  "manage_resumed": {
+    "message": "✅ Đã resume phiên.",
+    "description": "manage_resumed"
+  },
+  "manage_server_add_btn": {
+    "message": "+ Thêm máy chủ",
+    "description": "manage_server_add_btn"
+  },
+  "manage_server_added": {
+    "message": "✅ Đã thêm máy chủ. Chọn máy chủ mới ở tab Kết Nối để dùng.",
+    "description": "manage_server_added"
+  },
+  "manage_server_invalid": {
+    "message": "Vui lòng nhập tên và URL máy chủ hợp lệ.",
+    "description": "manage_server_invalid"
+  },
+  "manage_server_title": {
+    "message": "Thêm máy chủ mới",
+    "description": "manage_server_title"
+  },
+  "manage_skills_title": {
+    "message": "Skills đã cài",
+    "description": "manage_skills_title"
+  },
+  "manage_stop_btn": {
+    "message": "🛑 Dừng",
+    "description": "manage_stop_btn"
+  },
+  "manage_title": {
+    "message": "Quản lý tổng — Plans, Queue, Skills & Extension",
+    "description": "manage_title"
+  },
+  "manage_tool_code_desc": {
+    "message": "Tìm kiếm, liệt kê, symbol, outline, git status — không cần index.",
+    "description": "manage_tool_code_desc"
+  },
+  "manage_tool_code_name": {
+    "message": "Không gian code",
+    "description": "manage_tool_code_name"
+  },
+  "manage_tool_db_desc": {
+    "message": "Mặc định chỉ đọc; ghi cần cả allowWrite và confirmWrite.",
+    "description": "manage_tool_db_desc"
+  },
+  "manage_tool_db_name": {
+    "message": "Quản lý Database (Python)",
+    "description": "manage_tool_db_name"
+  },
+  "manage_tool_fb_post_desc": {
+    "message": "Chế độ auto, 1 bài/phiên từ RSS.",
+    "description": "manage_tool_fb_post_desc"
+  },
+  "manage_tool_fb_post_name": {
+    "message": "Facebook · Đăng bài tin mới",
+    "description": "manage_tool_fb_post_name"
+  },
+  "manage_tool_fb_reply_desc": {
+    "message": "ChatGPT soạn, daemon ghi sổ; mặc định draft.",
+    "description": "manage_tool_fb_reply_desc"
+  },
+  "manage_tool_fb_reply_name": {
+    "message": "Facebook · Trả lời bình luận",
+    "description": "manage_tool_fb_reply_name"
+  },
+  "manage_tool_ide_desc": {
+    "message": "Gửi và nhận task cho worker.",
+    "description": "manage_tool_ide_desc"
+  },
+  "manage_tool_ide_name": {
+    "message": "Hàng đợi task IDE/Giano",
+    "description": "manage_tool_ide_name"
+  },
+  "manage_tool_loop_desc": {
+    "message": "Vòng lặp code chuẩn: test pass mới done, 3 lần fail thì block, cổng cuối bắt buộc.",
+    "description": "manage_tool_loop_desc"
+  },
+  "manage_tool_loop_name": {
+    "message": "Bộ điều khiển vòng lặp",
+    "description": "manage_tool_loop_name"
+  },
+  "manage_tool_plans_desc": {
+    "message": "Vòng lặp code theo plan, daemon là nguồn thật.",
+    "description": "manage_tool_plans_desc"
+  },
+  "manage_tool_plans_name": {
+    "message": "Plans code liên tục",
+    "description": "manage_tool_plans_name"
+  },
+  "manage_tools_desc": {
+    "message": "Các tool MCP do daemon đăng ký (xem MCP_INSTRUCTIONS.md mục 4). Agent gọi qua MCP, không cần cấu hình thêm ở extension.",
+    "description": "manage_tools_desc"
+  },
+  "manage_tools_title": {
+    "message": "Nhóm công cụ MCP",
+    "description": "manage_tools_title"
+  },
+  "manage_zero_risk_copy": {
+    "message": "✅ Zero-risk: copy prompt này gửi tay: {prompt}",
+    "description": "manage_zero_risk_copy"
+  },
+  "mcp_none": {
+    "message": "Chưa cấu hình server nào trong <code>mcp_config.json</code>.",
+    "description": "mcp_none"
+  },
+  "note_local_desc": {
+    "message": "Toàn bộ cài đặt, tên trợ lý và thư mục làm việc được bảo mật trực tiếp trên chính chiếc máy tính này, không đồng bộ ra bên ngoài.",
+    "description": "note_local_desc"
+  },
+  "note_local_title": {
+    "message": "Lưu trữ trên máy:",
+    "description": "note_local_title"
+  },
+  "note_switch_desc": {
+    "message": "Nếu muốn điều khiển một máy tính khác, bạn chỉ cần bấm vào tên máy tính ở góc bảng điều khiển để chọn. Mỗi tab trình duyệt có thể chọn điều khiển một máy riêng biệt.",
+    "description": "note_switch_desc"
+  },
+  "note_switch_title": {
+    "message": "Chuyển đổi thiết bị:",
+    "description": "note_switch_title"
+  },
+  "noti_desc": {
+    "message": "Otter sẽ gửi thông báo trực tiếp lên góc màn hình máy tính của bạn khi: AI hoàn thành một tác vụ phức tạp, bản quyền sắp hết hạn, hoặc nhận được tin nhắn thông báo quan trọng.",
+    "description": "noti_desc"
+  },
+  "noti_enabled": {
+    "message": "✅ Đã bật thông báo trên trình duyệt thành công!",
+    "description": "noti_enabled"
+  },
+  "noti_title": {
+    "message": "Thông Báo Trình Duyệt Desktop",
+    "description": "noti_title"
+  },
+  "open_dashboard_link": {
+    "message": "Mở Bảng theo dõi hoạt động trực tiếp (Port 1993)",
+    "description": "open_dashboard_link"
+  },
+  "panel_add_server": {
+    "message": "➕ Thêm máy chủ MCP mới:",
+    "description": "panel_add_server"
+  },
+  "panel_added_success": {
+    "message": "✅ Đã thêm '{name}' thành công!",
+    "description": "panel_added_success"
+  },
+  "panel_confirm_delete_server": {
+    "message": "Bạn có chắc muốn xóa máy chủ '{name}' khỏi mcp_config.json?",
+    "description": "panel_confirm_delete_server"
+  },
+  "panel_connecting": {
+    "message": "Đang kết nối...",
+    "description": "panel_connecting"
+  },
+  "panel_daemon_unreachable": {
+    "message": "Không kết nối được Otter daemon ({base}).",
+    "description": "panel_daemon_unreachable"
+  },
+  "panel_enter_name_url": {
+    "message": "Vui lòng nhập tên và URL!",
+    "description": "panel_enter_name_url"
+  },
+  "panel_error_prefix": {
+    "message": "Lỗi: {message}",
+    "description": "panel_error_prefix"
+  },
+  "panel_mcp_header": {
+    "message": "Máy Chủ MCP (mcp_config.json)",
+    "description": "panel_mcp_header"
+  },
+  "panel_no_servers": {
+    "message": "Chưa cấu hình MCP Server ngoài nào.",
+    "description": "panel_no_servers"
+  },
+  "panel_node_label": {
+    "message": "Node (daemon cho tab này)",
+    "description": "panel_node_label"
+  },
+  "panel_offline": {
+    "message": "offline",
+    "description": "panel_offline"
+  },
+  "panel_refresh": {
+    "message": "🔄 Làm mới",
+    "description": "panel_refresh"
+  },
+  "panel_save_connect": {
+    "message": "+ Lưu & Kết nối",
+    "description": "panel_save_connect"
+  },
+  "panel_server_name_placeholder": {
+    "message": "Tên server (vd: gpmlogin)",
+    "description": "panel_server_name_placeholder"
+  },
+  "panel_server_url_placeholder": {
+    "message": "URL (vd: http://127.0.0.1:9495/mcp)",
+    "description": "panel_server_url_placeholder"
+  },
+  "panel_token_placeholder": {
+    "message": "Bearer token (tùy chọn)",
+    "description": "panel_token_placeholder"
+  },
+  "picker_commands_btn": {
+    "message": "💡 Lệnh mẫu",
+    "description": "picker_commands_btn"
+  },
+  "picker_commands_title": {
+    "message": "Mở danh mục câu lệnh mẫu chuẩn của Otter MCP (hoặc gõ / trong ô chat)",
+    "description": "picker_commands_title"
+  },
+  "picker_error_file": {
+    "message": "❌ Lỗi chọn file",
+    "description": "picker_error_file"
+  },
+  "picker_error_folder": {
+    "message": "❌ Lỗi chọn thư mục",
+    "description": "picker_error_folder"
+  },
+  "picker_file_btn": {
+    "message": "📄 Chọn file",
+    "description": "picker_file_btn"
+  },
+  "picker_file_prefix": {
+    "message": "File: ",
+    "description": "picker_file_prefix"
+  },
+  "picker_file_title": {
+    "message": "Mở cửa sổ chọn file máy tính gốc",
+    "description": "picker_file_title"
+  },
+  "picker_files_count": {
+    "message": "files",
+    "description": "picker_files_count"
+  },
+  "picker_files_prefix": {
+    "message": "Files: ",
+    "description": "picker_files_prefix"
+  },
+  "picker_folder_btn": {
+    "message": "📁 Chọn thư mục dự án",
+    "description": "picker_folder_btn"
+  },
+  "picker_folder_prefix": {
+    "message": "Thư mục: ",
+    "description": "picker_folder_prefix"
+  },
+  "picker_folder_title": {
+    "message": "Mở cửa sổ chọn thư mục máy tính gốc",
+    "description": "picker_folder_title"
+  },
+  "picker_opening_file": {
+    "message": "⏳ Đang mở chọn file...",
+    "description": "picker_opening_file"
+  },
+  "picker_opening_folder": {
+    "message": "⏳ Đang mở chọn thư mục...",
+    "description": "picker_opening_folder"
+  },
+  "plan_cancel": {
+    "message": "Hủy bỏ",
+    "description": "plan_cancel"
+  },
+  "plan_continue": {
+    "message": "Tiếp tục",
+    "description": "plan_continue"
+  },
+  "plan_title": {
+    "message": "💡 Otter Agent Plan",
+    "description": "plan_title"
+  },
+  "plugin_label": {
+    "message": "Tên trợ lý AI trên ChatGPT",
+    "description": "plugin_label"
+  },
+  "plugin_placeholder": {
+    "message": "Ví dụ: Otter Assistant",
+    "description": "plugin_placeholder"
+  },
+  "plugin_save_btn": {
+    "message": "Lưu tên trợ lý",
+    "description": "plugin_save_btn"
+  },
+  "restore_success": {
+    "message": "✅ Đã khôi phục kịch bản về mặc định thành công!",
+    "description": "restore_success"
+  },
+  "save_btn": {
+    "message": "Kiểm tra kết nối và lưu",
+    "description": "save_btn"
+  },
+  "save_comment_btn": {
+    "message": "💾 Lưu bình luận",
+    "description": "save_comment_btn"
+  },
+  "save_comment_success": {
+    "message": "Đã lưu kịch bản bình luận thành công!",
+    "description": "save_comment_success"
+  },
+  "save_error": {
+    "message": "❌ Lỗi",
+    "description": "save_error"
+  },
+  "save_intent_btn": {
+    "message": "💾 Lưu ý định",
+    "description": "save_intent_btn"
+  },
+  "save_intent_success": {
+    "message": "Đã lưu ý định thành công!",
+    "description": "save_intent_success"
+  },
+  "save_phase_btn": {
+    "message": "💾 Lưu bước này",
+    "description": "save_phase_btn"
+  },
+  "save_phase_success": {
+    "message": "Đã lưu giai đoạn thành công!",
+    "description": "save_phase_success"
+  },
+  "saved": {
+    "message": "✓ Đã lưu",
+    "description": "saved"
+  },
+  "saving": {
+    "message": "⏳ Đang lưu...",
+    "description": "saving"
+  },
+  "server_label": {
+    "message": "Máy tính nhận lệnh điều khiển",
+    "description": "server_label"
+  },
+  "sidepanel_checking": {
+    "message": "Đang kiểm tra...",
+    "description": "sidepanel_checking"
+  },
+  "sidepanel_logs_title": {
+    "message": "Daemon Status",
+    "description": "sidepanel_logs_title"
+  },
+  "sidepanel_offline": {
+    "message": "Kết nối: Ngoại tuyến",
+    "description": "sidepanel_offline"
+  },
+  "sidepanel_online": {
+    "message": "Kết nối: Sẵn sàng",
+    "description": "sidepanel_online"
+  },
+  "sidepanel_open_activity": {
+    "message": "Mở Daemon Activity",
+    "description": "sidepanel_open_activity"
+  },
+  "sidepanel_open_chatgpt": {
+    "message": "Mở tab ChatGPT",
+    "description": "sidepanel_open_chatgpt"
+  },
+  "sidepanel_open_options": {
+    "message": "Mở Management Center",
+    "description": "sidepanel_open_options"
+  },
+  "sidepanel_open_plan_dashboard": {
+    "message": "Mở Plan Dashboard",
+    "description": "sidepanel_open_plan_dashboard"
+  },
+  "sidepanel_refresh_status": {
+    "message": "Kiểm tra lại trạng thái",
+    "description": "sidepanel_refresh_status"
+  },
+  "sidepanel_scheduler_desc": {
+    "message": "Lịch FB được quản lý trong Management Center (Options) và qua MCP tools — Side Panel bản này chưa liệt kê lịch trực tiếp vì chưa có HTTP route cho lịch FB. Bấm nút dưới để mở Management Center.",
+    "description": "sidepanel_scheduler_desc"
+  },
+  "sidepanel_scheduler_title": {
+    "message": "Lịch Hẹn Giờ Đăng Bài Nhóm",
+    "description": "sidepanel_scheduler_title"
+  },
+  "sidepanel_suite": {
+    "message": "Otter Suite",
+    "description": "sidepanel_suite"
+  },
+  "sidepanel_tab_logs": {
+    "message": "Nhật ký",
+    "description": "sidepanel_tab_logs"
+  },
+  "sidepanel_tab_scheduler": {
+    "message": "Lịch FB",
+    "description": "sidepanel_tab_scheduler"
+  },
+  "sidepanel_tab_terminal": {
+    "message": "Terminal",
+    "description": "sidepanel_tab_terminal"
+  },
+  "sidepanel_terminal_desc": {
+    "message": "Terminal PTY thật vẫn chạy trong trang ChatGPT (TerminalPanel). Side Panel bản này không giả lập xterm — bấm nút dưới để mở tab ChatGPT và dùng Live Terminal trong trang.",
+    "description": "sidepanel_terminal_desc"
+  },
+  "sidepanel_terminal_title": {
+    "message": "Live Terminal",
+    "description": "sidepanel_terminal_title"
+  },
+  "sub_title": {
+    "message": "Trợ lý AI Otter / Bảng điều khiển & Cài đặt",
+    "description": "sub_title"
+  },
+  "tab_commands": {
+    "message": "⚡ Tập Lệnh Nhanh",
+    "description": "tab_commands"
+  },
+  "tab_fb_sales": {
+    "message": "💬 Kịch Bản Bán Hàng & FB",
+    "description": "tab_fb_sales"
+  },
+  "tab_guide": {
+    "message": "📖 Hướng Dẫn Cấu Hình",
+    "description": "tab_guide"
+  },
+  "tab_license": {
+    "message": "💎 Gói Đang Dùng & Bản Quyền",
+    "description": "tab_license"
+  },
+  "tab_manage": {
+    "message": "🎛️ Quản Lý Tổng",
+    "description": "tab_manage"
+  },
+  "tab_manual": {
+    "message": "📚 Cẩm Nang Lệnh Chi Tiết",
+    "description": "tab_manual"
+  },
+  "tab_settings": {
+    "message": "🔌 Kết Nối & Máy Chủ MCP",
+    "description": "tab_settings"
+  },
+  "term_clear": {
+    "message": "Xóa màn hình",
+    "description": "term_clear"
+  },
+  "term_connected": {
+    "message": "[Otter Terminal Connected]\nReady to receive commands.\n",
+    "description": "term_connected"
+  },
+  "term_copied": {
+    "message": "Đã chép!",
+    "description": "term_copied"
+  },
+  "term_copy": {
+    "message": "Sao chép",
+    "description": "term_copy"
+  },
+  "term_placeholder": {
+    "message": "Nhập lệnh hoặc phím và nhấn Enter...",
+    "description": "term_placeholder"
+  },
+  "term_title": {
+    "message": "Otter Live Terminal (PTY)",
+    "description": "term_title"
+  },
+  "title": {
+    "message": "🦦 Otter Assistant",
+    "description": "title"
+  },
+  "token_label": {
+    "message": "Mã khóa xác thực bảo mật (API Key / Token)",
+    "description": "token_label"
+  },
+  "token_placeholder": {
+    "message": "Bắt buộc khi kết nối qua Cloudflare Tunnel / Internet (Bỏ trống nếu chạy local)",
+    "description": "token_placeholder"
+  },
+  "tpl_cancel": {
+    "message": "Hủy",
+    "description": "tpl_cancel"
+  },
+  "tpl_default_label": {
+    "message": "Mặc định",
+    "description": "tpl_default_label"
+  },
+  "tpl_insert": {
+    "message": "Chèn vào Chat",
+    "description": "tpl_insert"
+  },
+  "tpl_modal_title": {
+    "message": "Điền tham số",
+    "description": "tpl_modal_title"
+  },
+  "tpl_placeholder": {
+    "message": "Nhập {name}...",
+    "description": "tpl_placeholder"
+  },
+  "tunnel_ready": {
+    "message": "Sẵn sàng kết nối từ xa",
+    "description": "tunnel_ready"
+  },
+  "update_close": {
+    "message": "Đóng",
+    "description": "update_close"
+  },
+  "update_current_version": {
+    "message": "Phiên bản hiện tại: v{version}",
+    "description": "update_current_version"
+  },
+  "update_default_changelog": {
+    "message": "Bản cập nhật mới với nhiều tính năng và cải thiện hiệu năng.",
+    "description": "update_default_changelog"
+  },
+  "update_download": {
+    "message": "Tải Bản Mới (.zip)",
+    "description": "update_download"
+  },
+  "update_snooze": {
+    "message": "Nhắc lại sau",
+    "description": "update_snooze"
+  },
+  "update_title": {
+    "message": "Otter Có Bản Cập Nhật",
+    "description": "update_title"
+  }
+}

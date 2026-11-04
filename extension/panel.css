@@ -1,0 +1,81 @@
+#otter-root,
+#chatmcp-root {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999999;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+#otter-badge,
+#chatmcp-badge {
+  background: #10a37f;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+}
+
+#otter-badge:hover,
+#chatmcp-badge:hover {
+  transform: scale(1.05);
+}
+
+#otter-panel,
+#chatmcp-panel {
+  position: absolute;
+  bottom: 45px;
+  right: 0;
+  width: 420px;
+  height: 320px;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.otter-header,
+.chatmcp-header {
+  padding: 10px 14px;
+  background: #252525;
+  color: #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.otter-header button,
+.chatmcp-header button {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#otter-logs,
+#chatmcp-logs {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  color: #a0aec0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+#otter-logs pre,
+#chatmcp-logs pre {
+  margin: 4px 0;
+  white-space: pre-wrap;
+  color: #63b3ed;
+  font-family: monospace;
+}

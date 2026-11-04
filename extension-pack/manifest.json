@@ -1,0 +1,77 @@
+{
+  "name": "otter-extension",
+  "version": "2.0.0",
+  "zip": "otter-extension-2.0.0.zip",
+  "zipSize": 1775619,
+  "generatedAt": "2026-11-01T03:34:32.100Z",
+  "files": {
+    "background.js": {
+      "sha256": "234b420d16eabe962ea079e5a910c8ab02ef6a67890802bec80b1347ed15cd03",
+      "size": 45776
+    },
+    "content.js": {
+      "sha256": "be99d05da1b351f962e50135452cdacfe2da5754316619f37064464af84d3514",
+      "size": 98549
+    },
+    "icons/icon128.png": {
+      "sha256": "93291326e4906612b0fb2701cd6857cdc0834e8f61895735e48b1e75afebce58",
+      "size": 519310
+    },
+    "icons/icon16.png": {
+      "sha256": "93291326e4906612b0fb2701cd6857cdc0834e8f61895735e48b1e75afebce58",
+      "size": 519310
+    },
+    "icons/icon48.png": {
+      "sha256": "93291326e4906612b0fb2701cd6857cdc0834e8f61895735e48b1e75afebce58",
+      "size": 519310
+    },
+    "manifest.json": {
+      "sha256": "6edbbc82358e6444aa0f27505e304383cb9d339cb03f248bf1fd322695d5f890",
+      "size": 1436
+    },
+    "options.html": {
+      "sha256": "042bcc51fd2d9cf5d0feb54f83b09715b1a63a82d26ea0b097890b9ddef8734a",
+      "size": 73558
+    },
+    "options.js": {
+      "sha256": "d9015bd1e7cb540052487472ec7211501ff26d6935a888c50b29490b0bfd08e3",
+      "size": 64876
+    },
+    "plan-overlay.css": {
+      "sha256": "7191201616ad3cd3ba089913d39cae924be367efe930162d47ad1239fd6d3750",
+      "size": 3554
+    },
+    "theme.css": {
+      "sha256": "6d820b9e11890a7d035c9d89bc221c2d1dd5705f2f1ef64102b6125b5d185996",
+      "size": 1125
+    },
+    "vendor/prism/LICENSE": {
+      "sha256": "2b947f0901a7ffcf08a89957da9783c0e9c6e72cb6ce8e959f501ab5409e4d2b",
+      "size": 1066
+    },
+    "vendor/prism/prism.js": {
+      "sha256": "a37d57f4cce5af712fd8737fb343e767782ae5ffcd1ba773afe37d7eef4c93e8",
+      "size": 97086
+    },
+    "vendor/xterm/LICENSE-addon-fit": {
+      "sha256": "e256f01188af527e4d06d21d06fbf785ae9c50d4b328bf03cbe0ba7f0aa4228f",
+      "size": 1103
+    },
+    "vendor/xterm/LICENSE-xterm": {
+      "sha256": "b569f629d00f2626a8100df2a1798210535621e42164dfd426a6fe5aac7b0ccd",
+      "size": 1261
+    },
+    "vendor/xterm/addon-fit.js": {
+      "sha256": "4df3789fa7bff5d545ba38462a8cd2f7460ba971021bce3f81c2870f937a201e",
+      "size": 1484
+    },
+    "vendor/xterm/xterm.css": {
+      "sha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6",
+      "size": 7112
+    },
+    "vendor/xterm/xterm.js": {
+      "sha256": "98d0973151aff2991d335b1adbbdac2e14da26341abe329d677d4c0034402bdf",
+      "size": 488630
+    }
+  }
+}

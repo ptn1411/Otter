@@ -1,0 +1,47 @@
+{
+  "name": "otter",
+  "version": "2.0.0",
+  "description": "Otter — Agentic AI Desktop & Browser Controller built with Bun + TypeScript (Port 1993)",
+  "module": "src/daemon/index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun src/daemon/index.ts",
+    "stdio": "bun src/daemon/stdio.ts",
+    "start:tunnel": "bun src/daemon/index.ts --tunnel",
+    "dev": "bun --watch src/daemon/index.ts",
+    "dev:tunnel": "bun --watch src/daemon/index.ts --tunnel",
+    "setup:bin": "bun scripts/setup-binaries.ts",
+    "setup:cua": "bun tools/cua/setup-cua.ts",
+    "sync:skills": "bun scripts/sync-skills.ts",
+    "skill": "bun tools/skill/skill.ts",
+    "build:skill": "bun build --compile --minify --target=bun-windows-x64 ./tools/skill/skill.ts --outfile tools/skill/skill.exe",
+    "build:extension": "bun build.extension.ts",
+    "build:exe": "bun build --compile --minify --target=bun-windows-x64 ./src/daemon/index.ts --outfile dist/otter.exe",
+    "build:win": "bun build --compile --minify --target=bun-windows-x64 ./src/daemon/index.ts --outfile dist/otter-windows-x64.exe",
+    "build:mac-arm": "bun build --compile --minify --target=bun-darwin-arm64 ./src/daemon/index.ts --outfile dist/otter-darwin-arm64",
+    "build:mac-x64": "bun build --compile --minify --target=bun-darwin-x64 ./src/daemon/index.ts --outfile dist/otter-darwin-x64",
+    "build:all": "bun run build:win && bun run build:mac-arm && bun run build:mac-x64",
+    "build:vps-ssh": "bun scripts/build-vps-engine.ts",
+    "build:tray": "cargo build --release --manifest-path tray/Cargo.toml",
+    "package": "bun run build:extension && powershell -Command \"New-Item -ItemType Directory -Force -Path dist; Compress-Archive -Path extension/dist/* -DestinationPath dist/otter-extension.zip -Force\" && bun run build:exe",
+    "deploy": "bun scripts/deploy.ts",
+    "deploy:vps": "bun scripts/deploy-to-vps.ts",
+    "license:status": "bun src/daemon/license/keygen-tool.ts --status",
+    "license:self": "bun src/daemon/license/keygen-tool.ts --self",
+    "license:keygen": "bun src/daemon/license/keygen-tool.ts",
+    "license:activate": "bun src/daemon/license/keygen-tool.ts --activate",
+    "license:server": "bun src/server/license-server.ts",
+    "i18n:generate": "bun scripts/generate-i18n.ts",
+    "i18n:check": "bun scripts/check-i18n.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@types/nodemailer": "^8.0.2",
+    "firebase-admin": "^14.5.0",
+    "nodemailer": "^10.2.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/skill.exe" ] && [ -n "$COMSPEC" ]; then
+  exec "$SCRIPT_DIR/skill.exe" "$@"
+elif [ -f "$SCRIPT_DIR/skill-bin" ] && [ -x "$SCRIPT_DIR/skill-bin" ]; then
+  exec "$SCRIPT_DIR/skill-bin" "$@"
+elif command -v bun >/dev/null 2>&1; then
+  exec bun "$SCRIPT_DIR/skill.ts" "$@"
+else
+  echo "[!] Bun chưa được cài đặt. Vui lòng cài đặt Bun (https://bun.sh) hoặc sử dụng file nhị phân đã biên dịch." >&2
+  exit 1
+fi
+
+

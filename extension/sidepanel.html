@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Otter Side Panel</title>
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div class="header">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-weight: 700; color: #89b4fa;" data-i18n="sidepanel_suite">Otter Suite</span>
+      <span id="daemon-badge" class="status-badge">Checking...</span>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="terminal" data-i18n="sidepanel_tab_terminal">Terminal</button>
+      <button class="tab-btn" data-tab="tasks">🕒 Tác Vụ</button>
+      <button class="tab-btn" data-tab="scheduler" data-i18n="sidepanel_tab_scheduler">FB Scheduler</button>
+      <button class="tab-btn" data-tab="logs" data-i18n="sidepanel_tab_logs">Logs</button>
+    </div>
+  </div>
+  <div id="tab-tasks" class="content" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <h4 style="margin: 0;">Tác Vụ Hẹn Giờ ChatGPT</h4>
+      <button id="sidepanel-tasks-refresh" class="panel-btn" style="min-height:unset; padding:4px 8px; font-size:11px;">🔄 Làm mới</button>
+    </div>
+    <p style="font-size: 12px; color: #a6adc8; margin-top:0;">Tác vụ tự động chạy trên ChatGPT Web. Kết quả và ảnh chụp được lưu tự động.</p>
+    <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+      <button id="sidepanel-open-tasks-btn" class="panel-btn" style="flex: 1;">⚙️ Quản Lý Đặt Lịch</button>
+      <button id="sidepanel-open-plan-btn" class="panel-btn" style="flex: 1;">📊 Plan Dashboard</button>
+    </div>
+    <div id="sidepanel-tasks-list" style="display: grid; gap: 8px; font-size: 12px;">Đang tải tác vụ...</div>
+  </div>
+  <div id="tab-terminal" class="content">
+    <h4 style="margin-top: 0;" data-i18n="sidepanel_terminal_title">Live Terminal</h4>
+    <p style="font-size: 12px; color: #a6adc8;"><span data-i18n="sidepanel_terminal_desc">Terminal PTY thật vẫn chạy trong trang ChatGPT (TerminalPanel). Side Panel bản này không giả lập xterm — bấm nút dưới để mở tab ChatGPT và dùng Live Terminal trong trang.</span></p>
+    <button id="open-chatgpt-btn" class="panel-btn" data-i18n="sidepanel_open_chatgpt">Mở tab ChatGPT</button>
+    <button id="open-activity-btn" class="panel-btn" data-i18n="sidepanel_open_activity">Mở Daemon Activity</button>
+  </div>
+  <div id="tab-scheduler" class="content" style="display: none;">
+    <h4 style="margin-top: 0;" data-i18n="sidepanel_scheduler_title">Lịch Hẹn Giờ Đăng Bài Nhóm</h4>
+    <p style="font-size: 12px; color: #a6adc8;"><span data-i18n="sidepanel_scheduler_desc">Lịch FB được quản lý trong Management Center (Options) và qua MCP tools — Side Panel bản này chưa liệt kê lịch trực tiếp vì chưa có HTTP route cho lịch FB. Bấm nút dưới để mở Management Center.</span></p>
+    <button id="open-options-btn" class="panel-btn" data-i18n="sidepanel_open_options">Mở Management Center</button>
+    <button id="open-plan-dashboard-btn" class="panel-btn" data-i18n="sidepanel_open_plan_dashboard">Mở Plan Dashboard</button>
+  </div>
+  <div id="tab-logs" class="content" style="display: none;">
+    <h4 style="margin-top: 0;" data-i18n="sidepanel_logs_title">Daemon Status</h4>
+    <pre id="daemon-logs" style="font-size: 11px; color: #a6adc8; background: #181825; padding: 8px; border-radius: 6px; white-space: pre-wrap;"></pre>
+    <button id="refresh-status-btn" class="panel-btn" data-i18n="sidepanel_refresh_status">Kiểm tra lại trạng thái</button>
+  </div>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

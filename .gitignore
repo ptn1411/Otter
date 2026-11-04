@@ -1,0 +1,83 @@
+# Dependencies
+target/
+tray/target/
+node_modules/
+.bun-cache/
+.pnp
+.pnp.js
+
+# Build outputs & Bundles
+dist/
+build/
+deploy/
+extension/dist/
+*.zip
+tunnel.url
+
+# SQLite databases & runtime locks
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+chatmcp-storage.sqlite*
+otter-storage.sqlite*
+*.db
+*.db-shm
+*.db-wal
+
+# Large precompiled binaries (restored via `bun run setup:bin`)
+*.exe
+*.dll
+*.node
+*.so
+*.dylib
+
+
+.agents/
+
+bin/
+bin/skills/
+bin/cloudflared*
+bin/codebase-memory-mcp*
+bin/cua/*.exe
+bin/cua/*.dll
+bin/cua/*.node
+
+# Environment & credentials
+.env
+*.env
+!.env.example
+mcp_config.json
+!mcp_config.example.json
+*-firebase-adminsdk-*.json
+data/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Scratch & temporary workspace
+output/
+storage/
+scratch/
+.tmp/
+*.tmp
+*.spec
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun.log
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Agent caches (Keep .agents/skills tracked!)
+.superpowers/
+.worktrees/
+.commandcode/
+.codebase-memory/
+
+

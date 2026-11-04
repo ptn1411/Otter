@@ -1,0 +1,1586 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Otter Desktop & Browser Controller API",
+    "description": "API cho phép ChatGPT điều khiển máy tính cục bộ và trình duyệt web qua Otter Agent (chạy lệnh console, đọc ghi file, tự động hóa web với thuật toán nén DOM Alibaba Page Agent)",
+    "version": "v2.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://otter.gpt.io.vn",
+      "description": "Otter Cloudflare Tunnel Server"
+    }
+  ],
+  "paths": {
+    "/api/activity/v1/terminal/exec": {
+      "post": {
+        "operationId": "executeTerminalCommand",
+        "summary": "Chạy một lệnh dòng lệnh trên máy tính (PowerShell/CMD)",
+        "description": "Thực thi lệnh console trong môi trường hệ điều hành Windows và nhận về stdout/stderr",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "command": {
+                    "type": "string",
+                    "description": "Lệnh console muốn thực thi (Ví dụ: dir, git status, cargo build)"
+                  },
+                  "cwd": {
+                    "type": "string",
+                    "description": "Thư mục làm việc thực thi lệnh (tùy chọn)"
+                  }
+                },
+                "required": [
+                  "command"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả thực thi thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "stdout": {
+                      "type": "string"
+                    },
+                    "stderr": {
+                      "type": "string"
+                    },
+                    "exitCode": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/files/read": {
+      "post": {
+        "operationId": "readFile",
+        "summary": "Đọc nội dung của một tệp tin trên máy tính",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filePath": {
+                    "type": "string",
+                    "description": "Đường dẫn tuyệt đối hoặc tương đối của tệp"
+                  }
+                },
+                "required": [
+                  "filePath"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Nội dung tệp",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/files/write": {
+      "post": {
+        "operationId": "writeFile",
+        "summary": "Ghi hoặc sửa nội dung của một tệp tin",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filePath": {
+                    "type": "string",
+                    "description": "Đường dẫn tệp cần lưu"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "Nội dung văn bản cần ghi vào tệp"
+                  }
+                },
+                "required": [
+                  "filePath",
+                  "content"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Xác nhận ghi tệp thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/open": {
+      "post": {
+        "operationId": "browserOpen",
+        "summary": "Mở một trang web trên Google Chrome",
+        "description": "Mở một địa chỉ URL trên trình duyệt web cục bộ của người dùng để quan sát hoặc tương tác",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "URL trang web cần mở (VD: https://google.com)"
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả mở trang web",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/read": {
+      "get": {
+        "operationId": "browserReadPage",
+        "summary": "Đọc nội dung và cấu trúc trang web hiện tại đang mở trên Chrome",
+        "description": "BẮT BUỘC GỌI HÀM NÀY khi người dùng yêu cầu đọc trang, phân tích trang, tìm trend hoặc lên kịch bản từ trang đang mở. KHÔNG ĐƯỢC yêu cầu người dùng gửi link hay ảnh chụp màn hình vì hàm này tự động đọc trực tiếp từ trình duyệt.",
+        "responses": {
+          "200": {
+            "description": "Dữ liệu trang web",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "elementsCount": {
+                      "type": "integer"
+                    },
+                    "elements": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "summaryText": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/click": {
+      "post": {
+        "operationId": "browserClick",
+        "summary": "Bấm chuột vào một phần tử trên trang theo index",
+        "description": "Thực hiện chuỗi sự kiện click W3C chuẩn xác vào nút bấm hoặc liên kết có số [index] tương ứng",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "index": {
+                    "type": "integer",
+                    "description": "Chỉ số phần tử [index] lấy từ browserReadPage"
+                  }
+                },
+                "required": [
+                  "index"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả click",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/type": {
+      "post": {
+        "operationId": "browserType",
+        "summary": "Nhập văn bản vào ô input theo index",
+        "description": "Gõ văn bản vào ô nhập liệu hoặc ô tìm kiếm theo [index], hỗ trợ tự nhấn Enter",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "index": {
+                    "type": "integer",
+                    "description": "Chỉ số ô nhập liệu [index]"
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Văn bản cần gõ"
+                  },
+                  "pressEnter": {
+                    "type": "boolean",
+                    "description": "Có nhấn phím Enter sau khi gõ không"
+                  }
+                },
+                "required": [
+                  "index",
+                  "text"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả gõ chữ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/select": {
+      "post": {
+        "operationId": "browserSelect",
+        "summary": "Chọn một mục trong dropdown <select>",
+        "description": "Chọn một option trong danh sách dropdown theo [index] và tên option",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "index": {
+                    "type": "integer",
+                    "description": "Chỉ số thẻ select [index]"
+                  },
+                  "option": {
+                    "type": "string",
+                    "description": "Tên hoặc value của option cần chọn"
+                  }
+                },
+                "required": [
+                  "index",
+                  "option"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả chọn option",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/scroll": {
+      "post": {
+        "operationId": "browserScroll",
+        "summary": "Cuộn trang web lên hoặc xuống",
+        "description": "Cuộn trang web để xem thêm nội dung",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "up",
+                      "down"
+                    ],
+                    "description": "Hướng cuộn"
+                  },
+                  "amount": {
+                    "type": "integer",
+                    "description": "Số pixel muốn cuộn"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả cuộn trang",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/back": {
+      "post": {
+        "operationId": "browserBack",
+        "summary": "Quay lại trang trước",
+        "description": "Điều hướng quay lại trang trước đó trong lịch sử",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả quay lại trang",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/tabs/list": {
+      "get": {
+        "operationId": "browserListTabs",
+        "summary": "Liệt kê danh sách các tab đang mở trên trình duyệt",
+        "description": "Xem danh sách tất cả các tab trình duyệt Chrome (id, title, url, active, isControlled)",
+        "responses": {
+          "200": {
+            "description": "Danh sách tab",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tabs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "controlledTabId": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/tabs/switch": {
+      "post": {
+        "operationId": "browserSwitchTab",
+        "summary": "Chuyển sang điều khiển một tab cụ thể theo tabId",
+        "description": "Kích hoạt và chuyển quyền điều khiển sang tab chỉ định",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tabId": {
+                    "type": "integer",
+                    "description": "ID của tab lấy từ browserListTabs"
+                  }
+                },
+                "required": [
+                  "tabId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả chuyển tab",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/tabs/close": {
+      "post": {
+        "operationId": "browserCloseTab",
+        "summary": "Đóng tab trình duyệt Chrome",
+        "description": "Đóng tab trình duyệt theo tabId hoặc tab đang điều khiển hiện tại",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tabId": {
+                    "type": "integer",
+                    "description": "ID của tab cần đóng (tùy chọn)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả đóng tab",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "closedTabId": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/engine": {
+      "post": {
+        "operationId": "browserEngineStatus",
+        "summary": "Quản lý và đo lường trạng thái 2 động cơ trình duyệt (Extension vs CDP)",
+        "description": "Kiểm tra kết nối của Chrome Extension và CDP port 9222, chạy đo đạc tốc độ phản hồi (benchmark) và chuyển đổi chế độ auto/extension/cdp",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "extension",
+                      "cdp"
+                    ],
+                    "description": "Chế độ động cơ muốn chuyển đổi"
+                  },
+                  "benchmark": {
+                    "type": "boolean",
+                    "description": "Có chạy benchmark so sánh tốc độ không"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Trạng thái động cơ và kết quả benchmark",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/messenger/close_docks": {
+      "post": {
+        "operationId": "fbCloseChatTabs",
+        "summary": "Đóng tất cả các khung chat / hộp thoại Messenger đang mở nổi trên Facebook",
+        "description": "Đóng các cửa sổ chat Messenger nổi ở góc dưới màn hình Facebook để giải phóng tầm nhìn và tránh bị che khuất khi lướt feed",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả đóng khung chat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "closedCount": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/feed/auto-engage": {
+      "post": {
+        "operationId": "fb_feed_auto_engage",
+        "summary": "Tự động lướt Bảng tin và bình luận giới thiệu nhóm",
+        "description": "Tự động cuộn lướt Bảng tin Facebook, lọc bài viết phù hợp, Thích bài và Bình luận tự động kèm lời giới thiệu khéo léo vào nhóm Facebook của bạn.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "maxPosts": { "type": "integer", "default": 2, "description": "Số lượng bài viết tối đa cần tương tác" },
+                  "groupName": { "type": "string", "default": "Vibe Code kiếm cơm", "description": "Tên nhóm cần giới thiệu" },
+                  "groupUrl": { "type": "string", "default": "https://www.facebook.com/groups/1385451906420187", "description": "Đường dẫn (URL) nhóm cần giới thiệu" },
+                  "customIntro": { "type": "string", "description": "Lời dẫn tùy chỉnh" },
+                  "intervalSeconds": { "type": "integer", "default": 15, "description": "Khoảng cách nghỉ an toàn giữa các bài (giây)" },
+                  "dryRun": { "type": "boolean", "default": false, "description": "Chế độ chạy thử không click/gõ thật" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả phiên tương tác Bảng tin Facebook",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/feed/scan": {
+      "post": {
+        "operationId": "fb_feed_scan",
+        "summary": "Quét và phân tích bài viết trên bảng tin Facebook",
+        "description": "Quét bài viết trên Bảng feed Facebook, tự động lọc an toàn (bỏ bài quảng cáo, bài của mình, bài đã tương tác) và đề xuất cảm xúc + câu bình luận tiếng Việt phù hợp ngữ cảnh.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Danh sách các bài viết khả dụng trên Feed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalFound": {
+                      "type": "integer"
+                    },
+                    "eligibleCount": {
+                      "type": "integer"
+                    },
+                    "posts": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/feed/engage": {
+      "post": {
+        "operationId": "fb_feed_engage_post",
+        "summary": "Tương tác Like/Love và Bình luận vào một bài viết Facebook",
+        "description": "Thực thi tương tác (Thích/Thả tim và Bình luận) vào một bài viết cụ thể trên Facebook qua Extension, sau đó lưu lịch sử SQLite chống trùng.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "author": {
+                    "type": "string",
+                    "description": "Tên tác giả / fanpage của bài viết"
+                  },
+                  "postSnippet": {
+                    "type": "string",
+                    "description": "Đoạn trích nội dung bài viết"
+                  },
+                  "likeIndex": {
+                    "type": "integer",
+                    "description": "Chỉ số phần tử nút Thích trên trang"
+                  },
+                  "commentIndex": {
+                    "type": "integer",
+                    "description": "Chỉ số phần tử nút Bình luận trên trang"
+                  },
+                  "reaction": {
+                    "type": "string",
+                    "enum": [
+                      "like",
+                      "love",
+                      "none"
+                    ],
+                    "default": "like",
+                    "description": "Cảm xúc cần bày tỏ"
+                  },
+                  "commentText": {
+                    "type": "string",
+                    "description": "Nội dung câu bình luận bằng tiếng Việt"
+                  }
+                },
+                "required": [
+                  "author",
+                  "postSnippet"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả tương tác bài viết",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/feed/history": {
+      "get": {
+        "operationId": "fb_feed_history",
+        "summary": "Xem lịch sử các bài viết Facebook đã tương tác",
+        "description": "Tra cứu danh sách bài viết trên Facebook đã được like/comment gần đây từ SQLite",
+        "responses": {
+          "200": {
+            "description": "Danh sách lịch sử tương tác",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "records": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/notifications": {
+      "get": {
+        "operationId": "fb_notifications_read",
+        "summary": "Đọc thông báo mới nhất trên Facebook",
+        "description": "Mở danh sách thông báo Facebook và trích xuất ai thích, bình luận, nhắc đến bạn",
+        "responses": {
+          "200": {
+            "description": "Danh sách thông báo"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/notifications/reply": {
+      "post": {
+        "operationId": "fb_notification_open_and_reply",
+        "summary": "Mở bài viết từ thông báo Facebook và trả lời bình luận",
+        "description": "Mở bài viết từ một thông báo cụ thể và tự động gửi câu trả lời bình luận",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "notificationIndex": {
+                    "type": "integer",
+                    "description": "Chỉ số thứ tự thông báo (0, 1, 2...)"
+                  },
+                  "href": {
+                    "type": "string",
+                    "description": "Liên kết bài viết cần mở nếu không dùng notificationIndex"
+                  },
+                  "customReply": {
+                    "type": "string",
+                    "description": "Nội dung câu trả lời bình luận"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả trả lời bình luận"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/messenger/open": {
+      "post": {
+        "operationId": "fb_messenger_open_list",
+        "summary": "Mở danh sách tin nhắn Messenger trên Facebook",
+        "description": "Bấm vào biểu tượng Messenger trên thanh điều hướng để mở danh sách hội thoại",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả mở Messenger"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/messenger/reply": {
+      "post": {
+        "operationId": "fb_messenger_sales_reply",
+        "summary": "Trả lời tin nhắn khách hàng Messenger theo Kịch bản bán hàng",
+        "description": "Đối chiếu tin nhắn khách với kịch bản bán hàng, tự động soạn thảo và gõ câu trả lời",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "recipientName": {
+                    "type": "string",
+                    "description": "Tên khách hàng"
+                  },
+                  "customerMessage": {
+                    "type": "string",
+                    "description": "Nội dung tin nhắn khách gửi"
+                  },
+                  "inputIndex": {
+                    "type": "integer",
+                    "description": "Chỉ số phần tử ô nhập tin nhắn"
+                  },
+                  "customReply": {
+                    "type": "string",
+                    "description": "Câu trả lời tùy chỉnh nếu có"
+                  }
+                },
+                "required": [
+                  "recipientName",
+                  "customerMessage"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả trả lời tin nhắn"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/messenger/listen/start": {
+      "post": {
+        "operationId": "fb_messenger_listen_start",
+        "summary": "Bật chế độ tự động lắng nghe tin nhắn mới 24/7 trên Messenger",
+        "description": "Bật tiến trình chạy ngầm phát hiện tin nhắn mới. Mặc định chế độ 'chatgpt' sẽ tự động chuyển tin nhắn của khách lên ChatGPT Web để AI đọc và trả lời thông minh.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "intervalSeconds": {
+                    "type": "integer",
+                    "default": 5,
+                    "description": "Chu kỳ kiểm tra tin nhắn mới (giây)"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "chatgpt",
+                      "playbook"
+                    ],
+                    "default": "chatgpt",
+                    "description": "Chế độ xử lý: 'chatgpt' (chuyển cho ChatGPT Web trả lời AI) hoặc 'playbook' (tự động trả lời offline bằng câu mẫu có sẵn)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Trạng thái khởi động Listener"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/messenger/listen/stop": {
+      "post": {
+        "operationId": "fb_messenger_listen_stop",
+        "summary": "Dừng tiến trình tự động lắng nghe tin nhắn Messenger",
+        "description": "Tắt tiến trình chạy ngầm lắng nghe tin nhắn Facebook Messenger",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả dừng Listener"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/messenger/listen/status": {
+      "get": {
+        "operationId": "fb_messenger_listen_status",
+        "summary": "Xem trạng thái tiến trình tự động lắng nghe tin nhắn Messenger",
+        "description": "Kiểm tra xem listener có đang chạy không, số tin nhắn đã trả lời và khách hàng gần nhất",
+        "responses": {
+          "200": {
+            "description": "Trạng thái chi tiết của Listener"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/browser/messenger/playbook": {
+      "get": {
+        "operationId": "fb_sales_get_playbook",
+        "summary": "Xem toàn bộ Kịch bản bán hàng Messenger và danh mục ý định",
+        "description": "Tra cứu các bước phễu chào hỏi, khai thác nhu cầu, giới thiệu giải pháp, xử lý từ chối, chốt đơn trong SQLite",
+        "responses": {
+          "200": {
+            "description": "Nội dung kịch bản bán hàng"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/desktop/screenshot": {
+      "post": {
+        "operationId": "desktop_screenshot",
+        "summary": "Chụp ảnh màn hình máy tính desktop thực tế",
+        "description": "Chụp toàn bộ màn hình desktop hiện tại (Windows/macOS) và lưu tệp PNG",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "outputPath": {
+                    "type": "string",
+                    "description": "Đường dẫn tệp PNG lưu ảnh"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Đường dẫn tệp ảnh và kích thước width/height"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/desktop/windows": {
+      "get": {
+        "operationId": "desktop_list_windows",
+        "summary": "Liệt kê các cửa sổ ứng dụng đang mở trên máy tính",
+        "description": "Trả về danh sách PID, tên tiến trình và tiêu đề các cửa sổ ứng dụng đang chạy",
+        "responses": {
+          "200": {
+            "description": "Danh sách cửa sổ đang mở"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/desktop/click": {
+      "post": {
+        "operationId": "desktop_click",
+        "summary": "Di chuyển và bấm chuột tại toạ độ (x, y) trên desktop",
+        "description": "Điều khiển chuột native bấm chuột trái, chuột phải, hoặc nhấp đúp vào toạ độ x, y",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "integer",
+                    "description": "Toạ độ ngang X trên màn hình"
+                  },
+                  "y": {
+                    "type": "integer",
+                    "description": "Toạ độ dọc Y trên màn hình"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "left_click",
+                      "right_click",
+                      "double_click",
+                      "move"
+                    ],
+                    "default": "left_click"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả thao tác chuột"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/desktop/type": {
+      "post": {
+        "operationId": "desktop_type",
+        "summary": "Gõ phím hoặc chuỗi văn bản vào ứng dụng desktop",
+        "description": "Gửi sự kiện bàn phím native (SendKeys/System Events) gõ chữ hoặc phím tắt",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "keys": {
+                    "type": "string",
+                    "description": "Chuỗi ký tự hoặc phím đặc biệt ({ENTER}, {TAB}, ^c, ^v...)"
+                  }
+                },
+                "required": [
+                  "keys"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả thao tác phím"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/skills/tts": {
+      "post": {
+        "operationId": "tts_generate_speech",
+        "summary": "Tạo giọng đọc AI tiếng Việt chất lượng phòng thu (Edge TTS)",
+        "description": "Chuyển văn bản thành tệp âm thanh giọng đọc AI tự nhiên (Hoài My, Nam Minh)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Nội dung văn bản tiếng Việt cần đọc"
+                  },
+                  "voice": {
+                    "type": "string",
+                    "default": "vi-VN-HoaiMyNeural",
+                    "description": "Giọng đọc (vi-VN-HoaiMyNeural hoặc vi-VN-NamMinhNeural)"
+                  },
+                  "outputPath": {
+                    "type": "string",
+                    "description": "Đường dẫn file .mp3 lưu âm thanh"
+                  }
+                },
+                "required": [
+                  "text"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Đường dẫn tệp âm thanh MP3 đã tạo"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/vps/exec": {
+      "post": {
+        "operationId": "vps_exec",
+        "summary": "Thực thi lệnh console từ xa trên máy chủ VPS qua SSH",
+        "description": "Kết nối SSH đến máy chủ Linux từ xa, chạy lệnh shell và nhận về stdout/stderr",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "type": "string",
+                    "description": "Địa chỉ IP hoặc tên miền VPS (ví dụ 160.250.181.51)"
+                  },
+                  "command": {
+                    "type": "string",
+                    "description": "Lệnh bash muốn thực thi trên VPS"
+                  },
+                  "user": {
+                    "type": "string",
+                    "default": "root",
+                    "description": "User SSH"
+                  },
+                  "key": {
+                    "type": "string",
+                    "description": "Tên hoặc đường dẫn SSH private key"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Mật khẩu SSH nếu không dùng key"
+                  }
+                },
+                "required": [
+                  "host",
+                  "command"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả thực thi stdout/stderr từ VPS"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/tools/call": {
+      "post": {
+        "operationId": "mcp_call_tool",
+        "summary": "Universal Gateway: Gọi bất kỳ công cụ nào trong 190+ tool MCP",
+        "description": "Cổng gọi vạn năng: truyền tên tool (ví dụ fb_feed_scan, fb_post_start, dbm_run_query, vps_sftp_upload, code_search...) và tham số để daemon thực thi",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "toolName": {
+                    "type": "string",
+                    "description": "Tên chính xác của công cụ MCP cần gọi"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "description": "Các tham số truyền vào công cụ dưới dạng JSON object"
+                  }
+                },
+                "required": [
+                  "toolName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả thực thi từ MCP Server"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/muse/ask": {
+      "post": {
+        "summary": "Giao nhiệm vụ cho AI đối tác Muse xử lý (viết code, giải thuật, tạo video, vẽ ảnh...)",
+        "operationId": "askMuseAgent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "Yêu cầu chi tiết muốn giao cho Muse AI làm"
+                  },
+                  "new_thread": {
+                    "type": "boolean",
+                    "description": "Mở thread mới để cách ly công việc (mặc định: true)"
+                  },
+                  "keep_tab_open": {
+                    "type": "boolean",
+                    "description": "Giữ tab Muse lại sau khi xong"
+                  }
+                },
+                "required": [
+                  "task"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả phản hồi từ Muse AI",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "replyText": {
+                      "type": "string"
+                    },
+                    "attachments": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/fb/media/post": {
+      "post": {
+        "summary": "Đăng ngay 1 bài viết kèm video hoặc ảnh lên Facebook (Trang cá nhân, Nhóm, Fanpage)",
+        "operationId": "fb_post_media",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "targetType": {
+                    "type": "string",
+                    "enum": ["profile", "group", "page"],
+                    "description": "Đích đăng bài: profile (cá nhân), group (nhóm), page (fanpage)"
+                  },
+                  "targetUrl": {
+                    "type": "string",
+                    "description": "URL nhóm hoặc fanpage đích"
+                  },
+                  "mediaPath": {
+                    "type": "string",
+                    "description": "Đường dẫn file video hoặc ảnh trên máy tính"
+                  },
+                  "caption": {
+                    "type": "string",
+                    "description": "Nội dung caption bài viết"
+                  }
+                },
+                "required": ["caption"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả đăng bài"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/fb/media/queue-folder": {
+      "post": {
+        "summary": "Quét thư mục máy tính, lập lịch đăng từng video/ảnh lên Facebook",
+        "operationId": "fb_queue_media_folder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "folderPath": {
+                    "type": "string",
+                    "description": "Đường dẫn thư mục chứa video/ảnh trên máy tính"
+                  },
+                  "targetType": {
+                    "type": "string",
+                    "enum": ["profile", "group", "page"]
+                  },
+                  "targetUrl": {
+                    "type": "string"
+                  },
+                  "targetName": {
+                    "type": "string"
+                  },
+                  "defaultCaption": {
+                    "type": "string",
+                    "default": "{filename}"
+                  },
+                  "intervalMinutes": {
+                    "type": "number",
+                    "default": 3
+                  },
+                  "sortBy": {
+                    "type": "string",
+                    "enum": ["name", "time", "random"],
+                    "default": "name"
+                  }
+                },
+                "required": ["folderPath"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả nạp thư mục"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/fb/media/queue-list": {
+      "post": {
+        "summary": "Nạp mảng danh sách bài viết video/ảnh vào hàng đợi",
+        "operationId": "fb_queue_media_list",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "targetType": { "type": "string" },
+                        "targetUrl": { "type": "string" },
+                        "targetName": { "type": "string" },
+                        "mediaPath": { "type": "string" },
+                        "caption": { "type": "string" },
+                        "scheduledAt": { "type": "number" }
+                      },
+                      "required": ["caption"]
+                    }
+                  },
+                  "defaultTargetType": {
+                    "type": "string",
+                    "default": "profile"
+                  },
+                  "defaultTargetUrl": {
+                    "type": "string"
+                  },
+                  "intervalMinutes": {
+                    "type": "number",
+                    "default": 3
+                  }
+                },
+                "required": ["items"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả nạp danh sách"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/fb/media/queue-muse": {
+      "post": {
+        "summary": "Tạo video bằng Muse AI, tải về và xếp hàng đăng lên Facebook",
+        "operationId": "fb_queue_muse_video",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "Prompt tạo video cho Muse AI"
+                  },
+                  "targetType": {
+                    "type": "string",
+                    "enum": ["profile", "group", "page"],
+                    "default": "profile"
+                  },
+                  "targetUrl": {
+                    "type": "string"
+                  },
+                  "targetName": {
+                    "type": "string"
+                  },
+                  "caption": {
+                    "type": "string"
+                  },
+                  "intervalMinutes": {
+                    "type": "number",
+                    "default": 3
+                  }
+                },
+                "required": ["task"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả giao việc cho Muse AI và lập lịch"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/fb/media/queue": {
+      "get": {
+        "summary": "Xem danh sách hàng đợi các bài đăng media",
+        "operationId": "fb_media_list_queue",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách hàng đợi"
+          }
+        }
+      }
+    }
+  }
+}

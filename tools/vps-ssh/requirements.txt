@@ -1,0 +1,4 @@
+# Dependencies for Otter VPS SSH & SFTP Engine (if running with Python)
+paramiko>=3.4.0
+cryptography>=42.0.0
+bcrypt>=4.1.0

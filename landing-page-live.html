@@ -1,0 +1,2682 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="theme-color" content="#090d16">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Otter Assistant">
+
+  <!-- Primary SEO Meta Tags -->
+  <title>Otter — Trợ Lý AI Agentic Tự Động Hóa Trình Duyệt & Máy Tính | Cài Đặt 1-Click</title>
+  <meta name="title" content="Otter — Trợ Lý AI Agentic Tự Động Hóa Trình Duyệt & Máy Tính | Cài Đặt 1-Click">
+  <meta name="description" content="Otter kết nối ChatGPT Web với máy tính: Tự động hóa duyệt web, chạy terminal, điều khiển chuột bàn phím, tạo video AI Remotion và hỗ trợ điều khiển từ xa an toàn. Tải trực tiếp tiện ích Chrome Extension hoặc cài đặt 1-dòng.">
+  <meta name="keywords" content="Otter AI, ChatMCP, Agentic AI, ChatGPT Chrome Extension, Browser Automation, Tự động hóa trình duyệt, Điều khiển máy tính bằng AI, Remotion Video AI, Phạm Thanh Nam, ptn1411, tải otter extension">
+  <meta name="author" content="Phạm Thanh Nam (@ptn1411)">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://otter.gpt.io.vn/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://otter.gpt.io.vn/">
+  <meta property="og:title" content="Otter — Trợ Lý AI Tự Động Hóa Trình Duyệt & Máy Tính">
+  <meta property="og:description" content="Kết nối ChatGPT Web với máy tính: Tự động hóa duyệt web, chạy terminal, tạo video AI và hỗ trợ điều khiển từ xa an toàn. Tải tiện ích trực tiếp.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/ptn1411/skill/main/qr-sepay.png">
+  <meta property="og:site_name" content="Otter Assistant">
+  <meta property="og:locale" content="vi_VN">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://otter.gpt.io.vn/">
+  <meta name="twitter:title" content="Otter — Trợ Lý AI Tự Động Hóa Trình Duyệt & Máy Tính">
+  <meta name="twitter:description" content="Kết nối ChatGPT Web với máy tính: Tự động hóa duyệt web, chạy terminal, tạo video AI và hỗ trợ điều khiển từ xa an toàn.">
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/ptn1411/skill/main/qr-sepay.png">
+
+  <!-- Schema.org JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Otter Assistant",
+    "operatingSystem": "Windows, macOS, Linux, Chrome",
+    "applicationCategory": "BusinessApplication, UtilitiesApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "VND"
+    },
+    "description": "Agentic AI Browser Controller & Desktop Automation Suite for ChatGPT Web",
+    "downloadUrl": "https://otter.gpt.io.vn/otter-extension.zip",
+    "author": {
+      "@type": "Person",
+      "name": "Phạm Thanh Nam",
+      "url": "https://facebook.com/ptn1411"
+    }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Firebase App, Auth, Analytics & Messaging SDK (Compat CDN nhẹ) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+  <style>
+    :root {
+      --bg: #070a12;
+      --bg-card: rgba(14, 20, 36, 0.7);
+      --bg-card-hover: rgba(20, 29, 52, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(16, 185, 129, 0.4);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-soft: #64748b;
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --primary-glow: rgba(16, 185, 129, 0.2);
+      --accent: #38bdf8;
+      --accent-purple: #818cf8;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 18px;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 20% 15%, rgba(16, 185, 129, 0.07) 0%, transparent 45%),
+        radial-gradient(circle at 80% 50%, rgba(56, 189, 248, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 50% 90%, rgba(129, 140, 248, 0.05) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navigation Bar (Sleek 60px Linear/Raycast Style) */
+    header.navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(7, 10, 18, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+    .brand-icon {
+      font-size: 20px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+    .brand-text {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .brand-name {
+      font-weight: 750;
+      font-size: 18px;
+      letter-spacing: -0.4px;
+      color: #fff;
+    }
+    .brand-badge {
+      font-size: 10px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      padding: 1px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    /* Navigation Tabs (Center Segmented Control - Modern Apple Pill) */
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.72);
+      padding: 4px;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      gap: 3px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 550;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .tab-btn.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+    .tab-btn:hover:not(.active) {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .nav-link-subtle {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-weight: 550;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-link-subtle:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Refined Button System (No Bloated Pills) */
+    .btn-primary, .btn-secondary, .btn-download-ext, .btn-google, .btn-fb, .btn-push {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 38px;
+      padding: 0 16px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+      user-select: none;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+    .btn-sm {
+      height: 32px;
+      padding: 0 12px;
+      font-size: 12.5px;
+      border-radius: 6px;
+    }
+    .btn-primary {
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      color: #022c22;
+      border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 0 12px rgba(16, 185, 129, 0.2);
+    }
+    .btn-primary:hover {
+      background: #10b981;
+      color: #000;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 12px rgba(16, 185, 129, 0.35);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.09);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+    .btn-download-ext {
+      background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%);
+      color: #ffffff;
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 0 14px rgba(14, 165, 233, 0.25);
+    }
+    .btn-download-ext:hover {
+      background: #0284c7;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 12px rgba(14, 165, 233, 0.45);
+    }
+    .btn-google {
+      background: #ffffff;
+      color: #1e293b;
+      border-color: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+    .btn-google:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+      transform: translateY(-1px);
+    }
+    .btn-google svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    .btn-fb {
+      background: rgba(24, 119, 242, 0.12);
+      color: #60a5fa;
+      border-color: rgba(24, 119, 242, 0.3);
+    }
+    .btn-fb:hover {
+      background: #1877f2;
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 12px rgba(24, 119, 242, 0.3);
+    }
+    .btn-push {
+      background: rgba(255, 255, 255, 0.04);
+      color: #94a3b8;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    .btn-push:hover {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+    .btn-push.active {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 6px;
+    }
+
+    /* Author & Community Ribbon */
+    .author-ribbon {
+      margin: -10px auto 32px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-soft);
+      backdrop-filter: blur(8px);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .author-ribbon a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .author-ribbon a:hover {
+      text-decoration: underline;
+    }
+    .author-ribbon strong {
+      color: #fff;
+    }
+    .ribbon-sep {
+      color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Tab Page Views */
+    .view-content {
+      display: none;
+    }
+    .view-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 70px 0 50px;
+      text-align: center;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .hero-title {
+      font-size: clamp(34px, 5.5vw, 56px);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -1.5px;
+      max-width: 860px;
+      margin: 0 auto 20px;
+      background: linear-gradient(180deg, #ffffff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-title span.highlight {
+      background: linear-gradient(135deg, #34d399 0%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
+      font-size: clamp(16px, 2vw, 19px);
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
+    }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 50px;
+    }
+
+    /* Stats strip */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      max-width: 900px;
+      margin: 0 auto 60px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: var(--radius-md);
+      text-align: left;
+      backdrop-filter: blur(10px);
+    }
+    .stat-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: #34d399;
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Live Interactive Demo Box */
+    .demo-wrapper {
+      max-width: 920px;
+      margin: 0 auto 80px;
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(16, 185, 129, 0.15);
+      text-align: left;
+    }
+    .demo-header {
+      background: #1f2937;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .window-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .demo-title-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .demo-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .chat-bubble {
+      padding: 14px 18px;
+      border-radius: 14px;
+      font-size: 14px;
+      max-width: 85%;
+      line-height: 1.5;
+    }
+    .chat-user {
+      align-self: flex-end;
+      background: #2563eb;
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-otter {
+      align-self: flex-start;
+      background: #1e293b;
+      border: 1px solid var(--border);
+      color: #f1f5f9;
+      border-bottom-left-radius: 4px;
+    }
+    .otter-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 700;
+      color: #34d399;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    /* Simulated Toolbar in Demo */
+    .sim-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .sim-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #10b981;
+    }
+    .sim-chip {
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sim-chip:hover {
+      background: #334155;
+      border-color: #10b981;
+      transform: translateY(-1px);
+    }
+    .sim-composer {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .composer-text {
+      font-size: 14px;
+      color: #e2e8f0;
+      flex: 1;
+      min-height: 20px;
+    }
+    .composer-text.typing::after {
+      content: '|';
+      animation: blink 0.8s infinite;
+      color: #34d399;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .send-icon {
+      background: #10b981;
+      color: #000;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* Benefits Section */
+    .section-title-area {
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto 50px;
+    }
+    .section-tag {
+      color: #34d399;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .section-heading {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      color: var(--text-muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 80px;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 28px;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(56, 189, 248, 0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, #10b981, #38bdf8);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+    .feat-icon-box {
+      font-size: 32px;
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .feat-title {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+    .feat-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .feat-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+    }
+
+    /* Comparison Table */
+    .compare-section {
+      margin-bottom: 80px;
+    }
+    .compare-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      overflow-x: auto;
+    }
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .compare-table th {
+      padding: 16px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      border-bottom: 2px solid var(--border);
+      color: var(--text-muted);
+    }
+    .compare-table th.otter-col {
+      color: #34d399;
+      font-size: 16px;
+    }
+    .compare-table td {
+      padding: 16px 20px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .compare-table tr:last-child td {
+      border-bottom: none;
+    }
+    .bad-text {
+      color: #f87171;
+    }
+    .good-text {
+      color: #34d399;
+      font-weight: 600;
+    }
+
+    /* Docs View Styles */
+    .docs-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 40px;
+      padding: 40px 0 80px;
+    }
+    .docs-sidebar {
+      position: sticky;
+      top: 96px;
+      height: fit-content;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+    }
+    .docs-menu-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    .docs-nav-link {
+      display: block;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      transition: all 0.15s ease;
+    }
+    .docs-nav-link:hover, .docs-nav-link.active {
+      background: rgba(255, 255, 255, 0.06);
+      color: #34d399;
+    }
+
+    .docs-main {
+      min-width: 0;
+    }
+    .doc-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 32px;
+      margin-bottom: 32px;
+    }
+    .doc-block h3 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .doc-block p {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+
+    /* Step Cards */
+    .steps-container {
+      display: grid;
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .step-item {
+      display: flex;
+      gap: 16px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border);
+      padding: 18px 20px;
+      border-radius: 12px;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #10b981;
+      color: #000;
+      font-weight: 800;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-content h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+    .step-content p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+
+    /* Command Snippet Card */
+    .prompt-box {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin: 12px 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .prompt-text {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #38bdf8;
+      word-break: break-all;
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: #e2e8f0;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    /* FAQ Accordion */
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      overflow: hidden;
+    }
+    .faq-question {
+      padding: 16px 20px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    .faq-question:hover {
+      color: #34d399;
+    }
+    .faq-answer {
+      padding: 0 20px 16px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      display: none;
+    }
+    .faq-item.open .faq-answer {
+      display: block;
+    }
+    .faq-item.open .faq-toggle {
+      transform: rotate(180deg);
+    }
+    .faq-toggle {
+      transition: transform 0.2s ease;
+      font-size: 14px;
+    }
+
+    /* Support & Donate Box */
+    .support-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      text-align: center;
+      margin: 60px 0;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+    .support-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    .support-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 24px;
+    }
+    .bank-info {
+      display: inline-block;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 14px 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      font-size: 14px;
+      line-height: 1.8;
+      text-align: left;
+    }
+    .qr-img {
+      max-width: 240px;
+      border-radius: 16px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+    footer a {
+      color: #38bdf8;
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Mobile / iPhone Responsive UI/UX Optimization (Apple iOS Standard) */
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: max(90px, calc(72px + env(safe-area-inset-bottom)));
+      }
+      .container {
+        padding: 0 16px;
+      }
+      header.navbar {
+        height: 54px;
+        padding: 0;
+        position: sticky;
+        top: 0;
+        z-index: 900;
+        background: rgba(7, 10, 18, 0.96);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border-bottom: 1px solid var(--border);
+      }
+      .nav-inner {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        height: 54px;
+        gap: 8px;
+        padding: 0 14px;
+        max-width: 100vw;
+        box-sizing: border-box;
+      }
+      .desktop-only {
+        display: none !important;
+      }
+      .brand {
+        flex-shrink: 0;
+      }
+      .nav-cta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      .nav-cta .btn-download-ext {
+        display: none !important;
+      }
+      .nav-cta .btn-google {
+        height: 33px;
+        padding: 0 12px;
+        font-size: 12px;
+        border-radius: 8px;
+        font-weight: 650;
+        white-space: nowrap;
+      }
+
+      /* Apple iOS Floating Bottom Tab Bar Dock */
+      .nav-tabs {
+        position: fixed !important;
+        bottom: max(16px, env(safe-area-inset-bottom)) !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 1000 !important;
+        background: rgba(13, 20, 36, 0.95);
+        backdrop-filter: blur(28px);
+        -webkit-backdrop-filter: blur(28px);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 9999px;
+        padding: 4px;
+        gap: 4px;
+        box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08);
+        width: max-content;
+        max-width: calc(100vw - 24px);
+        margin: 0;
+        display: inline-flex !important;
+        align-items: center;
+        touch-action: manipulation;
+      }
+      .tab-btn {
+        padding: 7px 14px !important;
+        font-size: 12px !important;
+        font-weight: 600;
+        border-radius: 9999px;
+        min-height: 34px !important;
+        color: #94a3b8;
+        background: transparent;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .tab-btn.active {
+        background: rgba(255, 255, 255, 0.16) !important;
+        color: #ffffff !important;
+        font-weight: 750;
+        border: 1px solid rgba(255, 255, 255, 0.24) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+      }
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+      }
+      .hero {
+        padding: 36px 0 24px;
+      }
+      .hero-title {
+        font-size: clamp(26px, 7.5vw, 42px);
+        letter-spacing: -0.8px;
+        margin-bottom: 16px;
+      }
+      .hero-desc {
+        font-size: 15px;
+        line-height: 1.55;
+        margin-bottom: 24px;
+      }
+      .hero-actions {
+        flex-direction: column;
+        width: 100%;
+        max-width: 360px;
+        margin: 0 auto 28px;
+        gap: 10px;
+      }
+      .hero-actions .btn-download-ext,
+      .hero-actions .btn-google,
+      .hero-actions .btn-primary,
+      .hero-actions .btn-secondary,
+      .hero-actions .btn-fb {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+        height: 44px;
+        min-height: 44px;
+        font-size: 14px;
+        font-weight: 650;
+        padding: 0 16px;
+        border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+      }
+      .hero-actions .btn-download-ext:active,
+      .hero-actions .btn-google:active,
+      .hero-actions .btn-primary:active {
+        transform: scale(0.98);
+      }
+      .stats-strip {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 40px;
+      }
+      .stat-card {
+        padding: 16px;
+      }
+      .demo-wrapper {
+        border-radius: 16px;
+        margin-bottom: 50px;
+      }
+      .demo-body {
+        padding: 16px;
+        gap: 12px;
+      }
+      .chat-bubble {
+        max-width: 95%;
+        font-size: 13.5px;
+        padding: 12px 14px;
+      }
+      .sim-toolbar {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-wrap: nowrap;
+        padding: 8px;
+      }
+      .sim-toolbar::-webkit-scrollbar {
+        display: none;
+      }
+      .sim-chip {
+        flex-shrink: 0;
+        font-size: 11.5px;
+        min-height: 38px;
+      }
+      .compare-card {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .compare-table {
+        min-width: 540px;
+      }
+      .docs-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .docs-sidebar {
+        position: static;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+        display: flex;
+        gap: 6px;
+        padding: 8px 0;
+      }
+      .docs-sidebar .docs-menu-title {
+        display: none;
+      }
+      .docs-nav-link {
+        flex-shrink: 0;
+        padding: 8px 14px;
+        font-size: 12.5px;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.04);
+      }
+      .support-card {
+        padding: 24px 16px;
+        border-radius: 16px;
+      }
+      .bank-info {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 14px 16px;
+        font-size: 13px;
+      }
+      .qr-img {
+        max-width: 200px;
+      }
+      .modal-box {
+        width: calc(100% - 24px);
+        max-width: 420px;
+        margin: 12px auto;
+        padding: 20px 16px;
+        max-height: 88vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 18px;
+      }
+      .prompt-box {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 12px;
+      }
+      .prompt-text {
+        font-size: 12px;
+      }
+      .copy-btn {
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+      }
+    }
+
+    /* Google Auth & Web Push Buttons */
+    .btn-google {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #ffffff;
+      color: #1f2937;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 9px 18px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+      font-family: inherit;
+      text-decoration: none;
+    }
+    .btn-google:hover {
+      background: #f1f5f9;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.25);
+      color: #000;
+    }
+    .btn-google svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .btn-push {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 8px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .btn-push:hover {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: rgba(56, 189, 248, 0.6);
+      transform: translateY(-1px);
+    }
+    .btn-push.active {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .user-profile-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      padding: 4px 12px 4px 6px;
+      font-size: 13px;
+    }
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #10b981;
+    }
+    .user-name {
+      font-weight: 600;
+      color: #f1f5f9;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .btn-logout {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: 4px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .btn-logout:hover {
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(4, 7, 13, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-box {
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 20px;
+      max-width: 540px;
+      width: 100%;
+      padding: 32px 28px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+      position: relative;
+      animation: popIn 0.25s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: #94a3b8;
+      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .modal-close:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .key-display-box {
+      background: #090e1a;
+      border: 1px dashed #38bdf8;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 18px 0;
+      word-break: break-all;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+    .modal-input {
+      width: 100%;
+      box-sizing: border-box;
+      background: #090e1a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      font-size: 14px;
+      margin: 8px 0 16px;
+      outline: none;
+      font-family: inherit;
+    }
+    .modal-input:focus {
+      border-color: #10b981;
+    }
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      border: 1px solid #38bdf8;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      z-index: 2000;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideInRight 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <!-- Brand Logo -->
+      <a href="#" class="brand" onclick="switchView('landing'); return false;">
+        <div class="brand-icon">🦦</div>
+        <div class="brand-text">
+          <span class="brand-name">Otter</span>
+          <span class="brand-badge">v2.0</span>
+        </div>
+      </a>
+
+      <!-- Center Segmented Tabs -->
+      <nav class="nav-tabs" aria-label="Điều hướng chính">
+        <button class="tab-btn active" id="tab-btn-landing" onclick="switchView('landing')">
+          🌟 Tính Năng
+        </button>
+        <button class="tab-btn" id="tab-btn-docs" onclick="switchView('docs')">
+          📖 Hướng Dẫn Cài Đặt
+        </button>
+      </nav>
+
+      <!-- Right CTAs & Links -->
+      <div class="nav-cta">
+        <a href="https://otter.gpt.io.vn/otter-extension.zip" download class="btn-download-ext btn-sm" title="Tải file zip tiện ích Chrome cài đặt trực tiếp">
+          <span>📦</span> <span>Tải Tiện Ích</span>
+        </a>
+
+        <button class="btn-secondary btn-sm" onclick="switchView('docs')" style="padding: 6px 12px; font-size: 13px;">
+          <span>⚡</span> <span>Bắt Đầu Ngay</span>
+        </button>
+
+        <button class="btn-push btn-icon desktop-only" id="btn-web-push" onclick="requestWebNotificationPermission()" title="Bật thông báo Web khi có cập nhật">
+          <span id="push-icon">🔔</span>
+        </button>
+
+        <a href="https://facebook.com/ptn1411" target="_blank" rel="noreferrer" class="nav-link-subtle desktop-only" title="Liên hệ Facebook tác giả: Phạm Thanh Nam">
+          <span>👤</span> <span>@ptn1411</span>
+        </a>
+
+        <a href="https://www.facebook.com/share/g/1CN8sjFYDH/?mibextid=wwXIfr" target="_blank" rel="noreferrer" class="nav-link-subtle desktop-only" title="Nhóm Facebook Cộng Đồng Hỗ Trợ Otter">
+          <span>💬</span> <span>Nhóm</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- 1. LANDING PAGE OVERVIEW VIEW               -->
+  <!-- ========================================== -->
+  <main id="view-landing" class="view-content active">
+    
+    <!-- Hero Section -->
+    <section class="hero container">
+      <div class="eyebrow">
+        <span>✨ Trợ Lý AI Agentic Cho ChatGPT Web</span>
+      </div>
+      <h1 class="hero-title">
+        Otter — Thay bạn làm mọi việc <br><span class="highlight">nhàm chán trên máy tính</span>
+      </h1>
+      <p class="hero-desc">
+        Chỉ cần nói một câu trên ChatGPT, Otter sẽ tự động đọc web, chạy terminal, quản lý máy chủ từ xa và <strong>tự dựng video AI có thuyết minh tiếng Việt chuẩn truyền hình</strong>. Tiết kiệm 3–5 tiếng mỗi ngày!
+      </p>
+
+      <!-- Primary Action Buttons (Sleek, refined) -->
+      <div class="hero-actions">
+        <a href="https://otter.gpt.io.vn/otter-extension.zip" download class="btn-download-ext">
+          <span>📦</span> <span>Tải Tiện Ích Chrome (.zip)</span>
+        </a>
+
+        <a href="#features" class="btn-primary" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; padding:12px 22px;">
+          <span>⚡</span> <span>Khám Phá Tính Năng</span>
+        </a>
+
+        <button onclick="switchView('docs')" class="btn-secondary">
+          <span>📖</span> <span>Hướng Dẫn Cài Đặt (30s)</span>
+        </button>
+      </div>
+
+      <!-- Author Credibility Ribbon -->
+      <div class="author-ribbon">
+        <span>👤 Tác giả: <a href="https://facebook.com/ptn1411" target="_blank" rel="noreferrer">Phạm Thanh Nam (@ptn1411)</a></span>
+        <span class="ribbon-sep">•</span>
+        <span>💬 <a href="https://www.facebook.com/share/g/1CN8sjFYDH/?mibextid=wwXIfr" target="_blank" rel="noreferrer">Nhóm Facebook Hỗ Trợ 24/7</a></span>
+        <span class="ribbon-sep">•</span>
+        <span>🛡️ 100% Bảo mật nội bộ máy tính</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-strip">
+        <div class="stat-card">
+          <div class="stat-value">3 – 5 giờ</div>
+          <div class="stat-label">Thời gian rảnh mỗi ngày khi không còn phải làm việc lặp lại thủ công</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">1 Click</div>
+          <div class="stat-label">Cài đặt duy nhất bằng file install.bat, tự động chạy ngầm sẵn sàng phục vụ</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">Bảo mật riêng tư trực tiếp trên máy của bạn, không gửi dữ liệu ra ngoài</div>
+        </div>
+      </div>
+
+      <!-- Simulated ChatGPT Demo Interactive Box -->
+      <div class="demo-wrapper">
+        <div class="demo-header">
+          <div class="window-dots">
+            <span class="dot dot-red"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
+          </div>
+          <div class="demo-title-text">Giao diện ChatGPT Web tích hợp thanh công cụ Otter</div>
+          <div style="font-size:11px; color:#10b981; font-weight:700;">🟢 ĐÃ KẾT NỐI</div>
+        </div>
+
+        <div class="demo-body">
+          <!-- Chat history simulation -->
+          <div class="chat-bubble chat-user" id="demo-user-msg">
+            Otter ơi, đọc trang web đang mở và tóm tắt giúp tôi những ý chính nhé!
+          </div>
+
+          <div class="chat-bubble chat-otter" id="demo-otter-reply">
+            <div class="otter-tag">🦦 Otter Assistant • Vừa xong</div>
+            Tôi đã quét toàn bộ trang web bạn đang xem. Dưới đây là 3 nội dung quan trọng nhất:<br>
+            1. <strong>Tiết kiệm thời gian</strong>: Tự động hóa hoàn toàn các thao tác lặp đi lặp lại.<br>
+            2. <strong>Đa năng</strong>: Hỗ trợ từ đọc bài viết, quản trị máy tính, đến tạo video ngắn tự động.<br>
+            3. <strong>Bảo mật tối đa</strong>: Toàn bộ quá trình chạy trực tiếp trên máy tính của bạn!
+          </div>
+
+          <!-- Toolbar simulation with clickable chips -->
+          <div class="sim-toolbar">
+            <span class="sim-label">⚡ LỆNH NHANH:</span>
+            <button class="sim-chip" onclick="simulatePrompt('/browse', 'Đọc trang web đang mở, phân tích nội dung và tóm tắt các ý quan trọng.')">
+              <span>🌐</span> <strong>/browse</strong> (Đọc trang web)
+            </button>
+            <button class="sim-chip" onclick="simulatePrompt('/video', 'Tạo video ngắn 30 giây giới thiệu sản phẩm có giọng đọc tiếng Việt truyền cảm.')">
+              <span>🎬</span> <strong>/video</strong> (Dựng video AI)
+            </button>
+            <button class="sim-chip" onclick="simulatePrompt('/vps', 'Kiểm tra tài nguyên CPU, RAM và độ an toàn của máy chủ từ xa.')">
+              <span>🚀</span> <strong>/vps</strong> (Kiểm tra máy chủ)
+            </button>
+            <button class="sim-chip" onclick="simulatePrompt('/bookmark', 'Lưu trang web này vào kho tri thức cá nhân để sau này tìm lại.')">
+              <span>🔖</span> <strong>/bookmark</strong> (Lưu bài hay)
+            </button>
+          </div>
+
+          <!-- Composer simulation -->
+          <div class="sim-composer">
+            <div class="composer-text" id="demo-composer-text">Bấm thử một nút lệnh nhanh ở trên để xem Otter gõ lệnh tự động...</div>
+            <div class="send-icon" onclick="simulateSend()">➔</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- What Otter Does For You Section -->
+    <section class="container" id="features" style="padding-bottom: 60px;">
+      <div class="section-title-area">
+        <div class="section-tag">Công Việc Otter Gánh Vác Thay Bạn</div>
+        <h2 class="section-heading">Bạn ra lệnh — Otter thực hiện từ A đến Z</h2>
+        <p class="section-sub">Không cần học câu lệnh phức tạp. Không cần mở hàng chục phần mềm khác nhau. Mọi việc đều bắt đầu từ một tin nhắn tự nhiên trên ChatGPT.</p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feat-icon-box">🌐</div>
+          <h3 class="feat-title">Tự Động Đọc & Tóm Tắt Trang Web</h3>
+          <p class="feat-desc">
+            Thay vì phải căng mắt đọc bài viết dài 10 trang hoặc copy từng đoạn chữ dài dằng dặc, bạn chỉ cần gõ <code>/browse</code>. Otter tự đọc hiểu toàn bộ nội dung trang web bạn đang mở và trả lời mọi thắc mắc ngay tức thì.
+          </p>
+          <span class="feat-badge-pill">⚡ Tiết kiệm 45 phút mỗi tài liệu</span>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feat-icon-box">🎬</div>
+          <h3 class="feat-title">Tự Dựng Video & Lồng Tiếng AI</h3>
+          <p class="feat-desc">
+            Cần làm video ngắn cho TikTok, Facebook Reels hay YouTube Shorts? Chỉ cần đưa chủ đề, Otter tự lên kịch bản, tự lồng tiếng Việt chuẩn phát thanh viên và ghép chữ hoạt họa thành video hoàn chỉnh sẵn sàng đăng tải.
+          </p>
+          <span class="feat-badge-pill">⚡ Xong video sau 60 giây</span>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feat-icon-box">🚀</div>
+          <h3 class="feat-title">Trông Nom & Quản Lý Máy Chủ Từ Xa</h3>
+          <p class="feat-desc">
+            Bạn có máy chủ hoặc VPS? Không cần mở phần mềm đen trắng nhức đầu. Otter tự vào kiểm tra máy chủ có bị quá tải không, tự động cài phần mềm, dọn rác và thiết lập tường lửa bảo vệ suốt 24/7.
+          </p>
+          <span class="feat-badge-pill">⚡ Không cần nhớ câu lệnh</span>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card">
+          <div class="feat-icon-box">📁</div>
+          <h3 class="feat-title">Chọn File & Thư Mục Bằng 1 Nút Bấm</h3>
+          <p class="feat-desc">
+            Quên đi việc phải gõ đường dẫn dài dòng như <code>C:\Users\Documents\...</code>. Ngay cạnh khung chat ChatGPT luôn có nút <strong>📁 Chọn thư mục</strong> và <strong>📄 Chọn file</strong> trực tiếp từ máy tính cực kỳ tiện lợi.
+          </p>
+          <span class="feat-badge-pill">⚡ Thao tác trực quan 1 chạm</span>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="feature-card">
+          <div class="feat-icon-box">📚</div>
+          <h3 class="feat-title">Thư Viện Tri Thức Cá Nhân Thông Minh</h3>
+          <p class="feat-desc">
+            Thấy bài viết hoặc video hay trên mạng? Gõ <code>/bookmark</code> để Otter cất giữ vào kho tri thức cá nhân. Vài tuần sau cần tìm lại, bạn chỉ cần hỏi bằng lời như: <em>"Hôm trước tôi có lưu mẹo gì về Excel không?"</em>.
+          </p>
+          <span class="feat-badge-pill">⚡ Tìm kiếm theo ý nghĩa</span>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="feature-card">
+          <div class="feat-icon-box">🛡️</div>
+          <h3 class="feat-title">An Toàn Tuyệt Đối & Minh Bạch</h3>
+          <p class="feat-desc">
+            Otter chỉ làm đúng những gì bạn cho phép. Trước khi thực hiện bất kỳ chuỗi công việc quan trọng nào, Otter sẽ gửi một bảng kế hoạch câu hỏi để bạn bấm nút <strong>Tiếp tục</strong> hoặc <strong>Hủy bỏ</strong>.
+          </p>
+          <span class="feat-badge-pill">⚡ Bạn luôn nắm quyền kiểm soát</span>
+        </div>
+
+        <!-- Feature 7 -->
+        <div class="feature-card">
+          <div class="feat-icon-box">⚡</div>
+          <h3 class="feat-title">Động Cơ Kép (Extension + CDP Siêu Tốc 2ms)</h3>
+          <p class="feat-desc">
+            Tự động hóa trình duyệt qua cả Chrome Extension lẫn Chrome DevTools Protocol (CDP). Độ trễ phản hồi chỉ <strong>2ms</strong>, tương thích 100% với GPM Login, Antidetect Browser và tự động chạy nền không lo bị ngắt.
+          </p>
+          <span class="feat-badge-pill">⚡ Tự động fallback 2 lớp an toàn</span>
+        </div>
+      </div>
+
+      <!-- Comparison Section -->
+      <div class="compare-section">
+        <div class="section-title-area" style="margin-bottom: 30px;">
+          <div class="section-tag">Bảng So Sánh Hiệu Quả</div>
+          <h2 class="section-heading">Làm thủ công vs Để Otter lo</h2>
+        </div>
+
+        <div class="compare-card">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th style="width: 28%;">Công việc hàng ngày</th>
+                <th style="width: 36%;">Làm thủ công trước đây</th>
+                <th style="width: 36%;" class="otter-col">✨ Khi có trợ lý Otter</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Đọc tài liệu & web</strong></td>
+                <td class="bad-text">Mở 10 tab, copy paste từng đoạn chữ, tốn 30–45 phút đọc dò.</td>
+                <td class="good-text">Gõ <code>/browse</code>, nhận ngay tóm tắt 3 ý cốt lõi trong 5 giây.</td>
+              </tr>
+              <tr>
+                <td><strong>Làm video ngắn thuyết minh</strong></td>
+                <td class="bad-text">Tốn 2 tiếng tìm giọng đọc, cắt ghép trên phần mềm dựng video.</td>
+                <td class="good-text">Gõ <code>/video</code>, AI tự lồng tiếng Việt chuẩn & xuất video mp4.</td>
+              </tr>
+              <tr>
+                <td><strong>Chăm sóc máy chủ VPS</strong></td>
+                <td class="bad-text">Phải học thuộc lệnh Terminal, lo sợ gõ sai làm hỏng máy chủ.</td>
+                <td class="good-text">Dặn một câu: "Kiểm tra an toàn máy chủ", Otter tự chạy và báo cáo.</td>
+              </tr>
+              <tr>
+                <td><strong>Chọn tệp dự án</strong></td>
+                <td class="bad-text">Mở File Explorer, copy đường dẫn dài ngoằng dán vào chat.</td>
+                <td class="good-text">Bấm nút "📁 Chọn thư mục" ngay trên khung chat ChatGPT.</td>
+              </tr>
+              <tr>
+                <td><strong>Bảo mật & quyền riêng tư</strong></td>
+                <td class="bad-text">Sợ dữ liệu cá nhân bị tải lên máy chủ lạ của bên thứ 3.</td>
+                <td class="good-text">Chạy 100% nội bộ trên máy tính của bạn (Offline-first).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- GET STARTED / INSTALLATION CTA SECTION     -->
+    <!-- ========================================== -->
+    <section class="container" id="get-started" style="padding: 40px 0 70px;">
+      <div class="support-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(56, 189, 248, 0.08) 100%); border: 1px solid rgba(16, 185, 129, 0.25); text-align: center; padding: 40px 24px;">
+        <div class="support-title" style="font-size: 26px; margin-bottom: 8px;">🚀 Bắt Đầu Trải Nghiệm Otter Hoàn Toàn Miễn Phí</div>
+        <p class="support-desc" style="max-width: 650px; margin: 0 auto 20px; font-size: 15px; color: var(--text-muted);">
+          Otter giải phóng bạn khỏi mọi thao tác máy tính nhàm chán lặp đi lặp lại. Cài đặt chỉ với 1 dòng lệnh duy nhất, tự động kết nối ngay với ChatGPT Web hoặc Claude Desktop.
+        </p>
+
+        <div class="prompt-box" style="max-width: 580px; margin: 0 auto 24px;">
+          <span class="prompt-text">irm https://otter.gpt.io.vn/setup.ps1 | iex</span>
+          <button class="copy-btn" onclick="copyText('irm https://otter.gpt.io.vn/setup.ps1 | iex', this)">Sao chép</button>
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <a href="https://otter.gpt.io.vn/otter-extension.zip" download class="btn-download-ext" style="font-size: 15px; padding: 12px 24px;">
+            <span>📦</span> <span>Tải Tiện Ích Chrome (.zip)</span>
+          </a>
+          <button onclick="switchView('docs')" class="btn-secondary" style="font-size: 15px; padding: 12px 24px;">
+            <span>📖</span> <span>Xem Hướng Dẫn Cài Đặt Chi Tiết</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- ========================================== -->
+  <!-- 2. DOCUMENTATION & USER GUIDE VIEW         -->
+  <!-- ========================================== -->
+  <main id="view-docs" class="view-content">
+    <div class="container docs-layout">
+      
+      <!-- Sticky Sidebar Navigation -->
+      <aside class="docs-sidebar">
+        <div class="docs-menu-title">Mục lục tài liệu</div>
+        <a href="#cai-dat" class="docs-nav-link active">1. Cài đặt 1-chạm (30s)</a>
+        <a href="#extension" class="docs-nav-link">2. Cài Chrome Extension</a>
+        <a href="#cach-dung" class="docs-nav-link">3. Cách dùng trên ChatGPT</a>
+        <a href="#cau-lenh" class="docs-nav-link">4. Mẫu câu lệnh phổ biến</a>
+        <a href="#faq" class="docs-nav-link">5. Câu hỏi thường gặp (FAQ)</a>
+        <a href="#cong-dong" class="docs-nav-link">6. Nhóm Hỗ Trợ & Ủng Hộ</a>
+      </aside>
+
+      <!-- Main Docs Content -->
+      <div class="docs-main">
+        
+        <!-- Step 1: Install -->
+        <div class="doc-block" id="cai-dat">
+          <h3><span>⚡</span> Bước 1: Khởi động Otter trên máy tính (30 giây)</h3>
+          <p>Chỉ cần sao chép và dán <strong>1 dòng lệnh duy nhất</strong> vào Terminal/PowerShell, hệ thống sẽ tự động tải file, thiết lập và kích hoạt Otter chạy ngầm an toàn.</p>
+          
+          <div class="steps-container">
+            <div class="step-item">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <h4>Dành cho máy tính Windows (PowerShell):</h4>
+                <p>Mở <strong>PowerShell</strong> (bấm phím <code>Windows + X</code> chọn <em>Terminal</em> hoặc <em>PowerShell</em>), dán dòng lệnh sau và nhấn Enter:</p>
+                <div class="prompt-box" style="margin: 8px 0;">
+                  <span class="prompt-text">irm https://otter.gpt.io.vn/setup.ps1 | iex</span>
+                  <button class="copy-btn" onclick="copyText('irm https://otter.gpt.io.vn/setup.ps1 | iex', this)">Sao chép</button>
+                </div>
+                <p style="margin-top:6px; font-size:12px; color:#38bdf8;">💡 <em>Mẹo: Lệnh sẽ tự động kéo file otter.exe, tạo service chạy ngầm và tải sẵn Chrome Extension. Hoặc nếu đã tải thư mục bộ cài về máy, bạn chỉ cần click đúp vào file <code>install.bat</code>.</em></p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <h4>Dành cho máy tính macOS (Apple Silicon & Intel) hoặc Linux:</h4>
+                <p>Mở ứng dụng <strong>Terminal</strong>, dán dòng lệnh sau và nhấn Enter:</p>
+                <div class="prompt-box" style="margin: 8px 0;">
+                  <span class="prompt-text">curl -fsSL https://otter.gpt.io.vn/setup.sh | bash</span>
+                  <button class="copy-btn" onclick="copyText('curl -fsSL https://otter.gpt.io.vn/setup.sh | bash', this)">Sao chép</button>
+                </div>
+                <p style="margin-top:6px; font-size:12px; color:#38bdf8;">💡 <em>Tự động nhận diện chip M1/M2/M3/M4 hoặc chip Intel x64 và nạp dịch vụ chạy ngầm LaunchAgent/Systemd.</em></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Extension -->
+        <div class="doc-block" id="extension">
+          <h3><span>🧩</span> Bước 2: Thêm Tiện Ích Mở Rộng Vào Trình Duyệt Chrome</h3>
+          <p>Tiện ích Otter sẽ gắn các nút bấm thông minh và thanh lệnh nhanh ngay bên cạnh khung chat ChatGPT của bạn.</p>
+
+          <div style="margin: 16px 0 24px;">
+            <a href="https://otter.gpt.io.vn/otter-extension.zip" download class="btn-download-ext" style="font-size:15px; padding:12px 24px;">
+              <span style="font-size:24px;">📦</span>
+              <span>
+                <strong>Tải File Tiện Ích: otter-extension.zip (1.7 MB)</strong>
+                <small style="display:block; font-size:11.5px; opacity:0.85;">Tải về máy tính và giải nén để trải nghiệm ngay lập tức</small>
+              </span>
+            </a>
+          </div>
+
+          <div class="steps-container">
+            <div class="step-item">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <h4>Tải về và giải nén file ZIP tiện ích</h4>
+                <p>Bấm vào nút tải ở trên để lưu file <code>otter-extension.zip</code> về máy tính. Click chuột phải vào file vừa tải và chọn <strong>Extract All (Giải nén)</strong> ra một thư mục riêng.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <h4>Mở trang quản lý Tiện ích & Bật Developer mode</h4>
+                <p>Gõ địa chỉ <code>chrome://extensions/</code> vào thanh duyệt web của Chrome, Edge, Cốc Cốc hoặc Brave. Gạt công tắc <strong>Developer mode</strong> (Chế độ dành cho nhà phát triển) ở góc trên bên phải màn hình sang trạng thái BẬT.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <h4>Tải tiện ích đã giải nén (Load Unpacked)</h4>
+                <p>Bấm nút <strong>"Tải tiện ích đã giải nén" (Load unpacked)</strong> ở góc trái trên và chọn thư mục bạn vừa giải nén ở Bước 1. Hoặc bạn có thể kéo trực tiếp file <code>otter-extension.zip</code> thả vào cửa sổ <code>chrome://extensions/</code>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Usage -->
+        <div class="doc-block" id="cach-dung">
+          <h3><span>💬</span> Bước 3: Trò Chuyện & Ra Lệnh Cho Otter Trên ChatGPT</h3>
+          <p>Mở trang web <strong>chatgpt.com</strong>. Bạn sẽ thấy ngay giao diện mới được gắn thêm:</p>
+
+          <div class="steps-container">
+            <div class="step-item">
+              <div class="step-num">⚡</div>
+              <div class="step-content">
+                <h4>Thanh Lệnh Nhanh (Quick Action Chips):</h4>
+                <p>Nằm ngay phía trên khung nhập tin nhắn. Bấm 1 chạm vào các nút như <code>/browse</code>, <code>/video</code>, <code>/vps</code> để tự động điền mẫu câu lệnh mà không cần phải gõ tay.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-num">/</div>
+              <div class="step-content">
+                <h4>Gõ dấu gạch chéo <code>/</code> để tìm lệnh:</h4>
+                <p>Chỉ cần gõ ký tự <code>/</code> vào ô chat, một danh mục câu lệnh sẽ tự động hiện lên để bạn chọn bằng phím mũi tên và Enter.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-num">📁</div>
+              <div class="step-content">
+                <h4>Nút Chọn Thư Mục & File:</h4>
+                <p>Bấm nút <strong>📁 Chọn thư mục dự án</strong> để mở hộp thoại Windows quen thuộc và chọn thư mục bạn muốn AI phân tích.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Prompts -->
+        <div class="doc-block" id="cau-lenh">
+          <h3><span>📋</span> Bước 4: Mẫu Câu Lệnh Đời Thường Hay Dùng Nhất</h3>
+          <p>Bạn có thể bấm nút <strong>Sao chép</strong> để dán thẳng vào ô chat ChatGPT:</p>
+
+          <h4 style="margin: 16px 0 8px; color: #fff;">1. Đọc và tóm tắt bài viết trên trang web:</h4>
+          <div class="prompt-box">
+            <span class="prompt-text">Đọc trang web đang mở, phân tích cấu trúc nội dung và cho tôi biết các điểm chính quan trọng nhất.</span>
+            <button class="copy-btn" onclick="copyText('Đọc trang web đang mở, phân tích cấu trúc nội dung và cho tôi biết các điểm chính quan trọng nhất.', this)">Sao chép</button>
+          </div>
+
+          <h4 style="margin: 16px 0 8px; color: #fff;">2. Dựng video ngắn có thuyết minh tiếng Việt:</h4>
+          <div class="prompt-box">
+            <span class="prompt-text">Tạo video ngắn hoàn chỉnh bằng Remotion giới thiệu 3 thói quen buổi sáng giúp làm việc hiệu quả, có giọng đọc tiếng Việt truyền cảm.</span>
+            <button class="copy-btn" onclick="copyText('Tạo video ngắn hoàn chỉnh bằng Remotion giới thiệu 3 thói quen buổi sáng giúp làm việc hiệu quả, có giọng đọc tiếng Việt truyền cảm.', this)">Sao chép</button>
+          </div>
+
+          <h4 style="margin: 16px 0 8px; color: #fff;">3. Kiểm tra máy chủ VPS từ xa:</h4>
+          <div class="prompt-box">
+            <span class="prompt-text">Mở phiên kết nối VPS và kiểm tra tình trạng sử dụng CPU, dung lượng ổ đĩa xem có bị quá tải không.</span>
+            <button class="copy-btn" onclick="copyText('Mở phiên kết nối VPS và kiểm tra tình trạng sử dụng CPU, dung lượng ổ đĩa xem có bị quá tải không.', this)">Sao chép</button>
+          </div>
+
+          <h4 style="margin: 16px 0 8px; color: #fff;">4. Lưu bài viết hay vào kho tri thức cá nhân:</h4>
+          <div class="prompt-box">
+            <span class="prompt-text">Lưu bookmark trang web này vào kho tri thức cá nhân với tóm tắt ý chính và gắn tag liên quan.</span>
+            <button class="copy-btn" onclick="copyText('Lưu bookmark trang web này vào kho tri thức cá nhân với tóm tắt ý chính và gắn tag liên quan.', this)">Sao chép</button>
+          </div>
+        </div>
+
+        <!-- Step 5: FAQ -->
+        <div class="doc-block" id="faq">
+          <h3><span>❓</span> Câu Hỏi Thường Gặp (Giải Đáp Dễ Hiểu)</h3>
+          
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <span>Otter có miễn phí không?</span>
+              <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+              <strong>CÓ!</strong> Otter được phát triển để phục vụ cộng đồng và cá nhân tự động hóa công việc. Bạn có thể tải tiện ích Chrome Extension hoặc chạy dòng lệnh cài đặt 1-Click để trải nghiệm trọn bộ các tính năng duyệt web, quản trị máy tính, điều khiển trình duyệt và tạo video AI hoàn toàn miễn phí.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <span>Người không biết lập trình có dùng được không?</span>
+              <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+              Chắc chắn có! Otter được tạo ra chính là để giúp những người bình thường không cần phải học kỹ thuật vẫn có thể sai bảo máy tính làm việc tự động chỉ bằng ngôn ngữ nói chuyện hàng ngày.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <span>Dữ liệu của tôi có bị tải lên máy chủ của ai không?</span>
+              <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+              Không. Otter chạy trực tiếp ngay trên chính máy tính của bạn (cổng cục bộ 1993). Toàn bộ file, bookmark hay lịch sử đều được bảo mật trên máy bạn, không gửi cho bất kỳ bên thứ 3 nào.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <span>Nếu tôi muốn gỡ cài đặt thì làm thế nào?</span>
+              <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+              Chỉ cần click đúp vào file <code>uninstall.bat</code> trong thư mục <code>deploy/</code>. Chương trình sẽ dọn dẹp sạch sẽ và trả máy tính về trạng thái ban đầu trong tích tắc.
+            </div>
+          </div>
+        </div>
+
+        <!-- Community & Support Block -->
+        <div class="support-card" id="cong-dong">
+          <div class="support-title">💬 Cộng Đồng & Liên Hệ Hỗ Trợ</div>
+          <p class="support-desc">
+            Tham gia nhóm Facebook để giao lưu chia sẻ hoặc nhắn tin trực tiếp cho tác giả để được hỗ trợ kỹ thuật cài đặt 24/7:
+          </p>
+
+          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom: 28px;">
+            <a href="https://facebook.com/ptn1411" target="_blank" rel="noreferrer" class="btn-fb" style="font-size:14px; padding:12px 24px;">
+              <span>👤</span> <strong>Nhắn Tin FB Tác Giả: @ptn1411</strong>
+            </a>
+            <a href="https://www.facebook.com/share/g/1CN8sjFYDH/?mibextid=wwXIfr" target="_blank" rel="noreferrer" class="btn-primary" style="font-size:14px; padding:12px 24px;">
+              <span>💬</span> <strong>Tham Gia Nhóm Facebook Otter</strong>
+            </a>
+          </div>
+
+          <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin: 30px 0;">
+
+          <div class="support-title" style="font-size: 20px;">Ủng Hộ Duy Trì Dự Án</div>
+          <p class="support-desc">
+            Nếu Otter giúp ích cho công việc hàng ngày của bạn, bạn có thể ủng hộ để duy trì tài liệu và các tính năng mới. Mọi đóng góp đều hoàn toàn tự nguyện:
+          </p>
+
+          <div class="bank-info">
+            <div>• Ngân hàng: <strong>TPBank (Tiên Phong Bank)</strong></div>
+            <div>• Chủ tài khoản: <strong>PHAM THANH NAM</strong></div>
+            <div>• Số tài khoản: <strong>69238686888</strong></div>
+          </div>
+          <br>
+          <img src="https://raw.githubusercontent.com/ptn1411/skill/main/qr-sepay.png" alt="QR SePay TPBank" class="qr-img">
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Global Footer -->
+  <footer>
+    <div class="container">
+      <p style="margin-bottom: 8px;"><strong>Otter AI Desktop Assistant</strong> — Tự động hóa công việc máy tính bằng ngôn ngữ tự nhiên.</p>
+      <p style="margin-bottom: 8px;">
+        Tác giả: <a href="https://facebook.com/ptn1411" target="_blank" rel="noreferrer" style="font-weight:700;">Phạm Thanh Nam (@ptn1411)</a> • 
+        Cộng đồng: <a href="https://www.facebook.com/share/g/1CN8sjFYDH/?mibextid=wwXIfr" target="_blank" rel="noreferrer">Nhóm Facebook Hỗ Trợ</a> • 
+        Tải tiện ích: <a href="https://otter.gpt.io.vn/otter-extension.zip" download>otter-extension.zip</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- ========================================== -->
+  <!-- MODALS & DIALOGS                            -->
+  <!-- ========================================== -->
+
+  <!-- Modal 1: Nhận Key Dùng Thử Thành Công -->
+  <div class="modal-overlay" id="modal-trial-success">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('modal-trial-success')">✕</button>
+      <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
+      <h3 style="color: #fff; font-size: 22px; margin-bottom: 8px;">Kích Hoạt 30 Ngày Dùng Thử Thành Công!</h3>
+      <p style="color: var(--text-muted); font-size: 14px;">
+        Chào mừng <strong id="trial-user-name" style="color:#10b981;">Bạn</strong>! Mã bản quyền Otter của bạn đã được tạo và gửi đồng thời vào email <strong id="trial-user-email" style="color:#38bdf8;"></strong>.
+      </p>
+
+      <div class="key-display-box" id="trial-key-display">
+        OTTER-TRIAL-30D-XXXXXX
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:center; margin-bottom: 20px;">
+        <button class="btn-primary" style="font-size:13px; padding:10px 18px;" onclick="copyTrialKey()">
+          📋 Sao Chép Mã Key
+        </button>
+        <button class="btn-push" style="font-size:13px; padding:10px 16px;" onclick="requestWebNotificationPermission()">
+          🔔 Bật Thông Báo Web
+        </button>
+      </div>
+
+      <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:16px; text-align:left; font-size:13px; line-height:1.6; color:#cbd5e1; border:1px solid var(--border);">
+        <strong style="color:#fff;">🚀 3 bước kích hoạt trên máy tính:</strong>
+        <ol style="margin-left: 20px; margin-top: 6px;">
+          <li>Khởi động Otter bằng file <code>install.bat</code>.</li>
+          <li>Mở trình duyệt truy cập <code>http://127.0.0.1:1993</code> (hoặc bấm biểu tượng Tiện ích Otter trên Chrome).</li>
+          <li>Dán mã key ở trên vào ô <strong>Kích Hoạt Bản Quyền</strong> và nhấn Xác nhận.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Thử Nghiệm Nhập Email (Chế độ chờ cấu hình Firebase) -->
+  <div class="modal-overlay" id="modal-demo-login">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('modal-demo-login')">✕</button>
+      <div style="font-size: 40px; margin-bottom: 8px;">🔑</div>
+      <h3 style="color: #fff; font-size: 20px; margin-bottom: 6px;">Đăng Nhập Nhận 30 Ngày Dùng Thử</h3>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
+        Nhập địa chỉ email của bạn để nhận ngay 30 ngày dùng thử (mỗi email 1 lần duy nhất):
+      </p>
+
+      <form onsubmit="handleDirectEmailTrial(event)">
+        <input type="text" id="demo-name-input" class="modal-input" placeholder="Họ và tên của bạn" required>
+        <input type="email" id="demo-email-input" class="modal-input" placeholder="dia-chi-email@gmail.com" required>
+        <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:12px;" id="btn-submit-trial">
+          🎁 Xác Nhận Nhận 30 Ngày Dùng Thử
+        </button>
+      </form>
+
+      <div style="margin-top:16px; font-size:12px; color:#64748b; line-height:1.5;">
+        💡 <em>Khi bạn cấu hình Firebase Console thực tế vào <code>FIREBASE_CONFIG</code>, nút này sẽ tự động mở popup Google Đăng nhập 1-chạm.</em>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========================================================
+    // TÍN HIỆU XÁC MINH THIẾT BỊ (OTTER SIGNALS / GUARD)
+    // Tín hiệu xác minh máy cho guard.py (vân tay fp/hw, múi giờ, IP qua WebRTC, vị trí) — mọi tool công khai dùng chung.
+    // Giữ nguyên cách tính: đổi một chi tiết là đổi vân tay của mọi máy, quota (khoá fp:/hw:) bị tính lại từ đầu.
+    // ========================================================
+    window.OtterSignals = (() => {
+      'use strict';
+
+      async function sha256(s) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+        return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      function canvasPrint() {
+        try {
+          const c = document.createElement('canvas');
+          c.width = 280; c.height = 60;
+          const x = c.getContext('2d');
+          x.textBaseline = 'top';
+          x.font = '16px Arial';
+          x.fillStyle = '#f60'; x.fillRect(100, 1, 62, 20);
+          x.fillStyle = '#069'; x.fillText('Otter ptn1411 ẩ ơ ữ 1.23 ✓', 2, 15);
+          x.fillStyle = 'rgba(102,204,0,0.7)'; x.fillText('Otter ptn1411 ẩ ơ ữ 1.23 ✓', 4, 17);
+          x.beginPath(); x.arc(50, 50, 20, 0, Math.PI * 2); x.stroke();
+          return c.toDataURL();
+        } catch (e) { return ''; }
+      }
+
+      function webglPrint() {
+        try {
+          const gl = document.createElement('canvas').getContext('webgl');
+          if (!gl) return '';
+          const ext = gl.getExtension('WEBGL_debug_renderer_info');
+          return [
+            gl.getParameter(ext ? ext.UNMASKED_VENDOR_WEBGL : gl.VENDOR),
+            gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER),
+            gl.getParameter(gl.MAX_TEXTURE_SIZE),
+          ].join('|');
+        } catch (e) { return ''; }
+      }
+
+      // IP công khai mà trình duyệt thấy qua STUN; khác IP máy chủ thấy -> đang đi qua VPN/proxy.
+      function webrtcIps(timeout = 2500) {
+        return new Promise((resolve) => {
+          const ips = new Set();
+          let pc, finished = false;
+          const finish = () => {
+            if (finished) return;
+            finished = true;
+            try { pc && pc.close(); } catch (e) { /* bỏ qua */ }
+            resolve([...ips]);
+          };
+          try {
+            pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.cloudflare.com:3478' }, { urls: 'stun:stun.l.google.com:19302' }] });
+          } catch (e) { return resolve([]); }
+          pc.createDataChannel('x');
+          pc.onicecandidate = (ev) => {
+            if (!ev.candidate) return finish();
+            const c = ev.candidate.candidate || '';
+            if (!/ typ srflx/.test(c)) return;
+            const parts = c.split(' ');
+            if (parts[4]) ips.add(parts[4]);
+          };
+          pc.createOffer().then((o) => pc.setLocalDescription(o)).catch(finish);
+          setTimeout(finish, timeout);
+        });
+      }
+
+      let baseSignals = null;
+      async function collectBase() {
+        if (baseSignals) return baseSignals;
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        // hw: chỉ thông số giống nhau giữa mọi trình duyệt trên cùng máy, để đổi Chrome -> Firefox/Safari không ra máy mới.
+        // deviceMemory (chỉ Chromium có) và chuỗi WebGL (Firefox rút gọn, Chrome trả ANGLE) khác theo trình duyệt -> chỉ vào fp.
+        const hwParts = [
+          screen.width, screen.height, screen.colorDepth,
+          navigator.hardwareConcurrency || 0, navigator.platform || '', tz,
+        ];
+        const ua = navigator.userAgent.replace(/[\d._]+/g, '');
+        const fpParts = hwParts.concat([
+          navigator.deviceMemory || 0, webglPrint(), canvasPrint(), (navigator.languages || []).join(','), ua, navigator.maxTouchPoints || 0,
+        ]);
+        const [hw, fp, webrtc] = await Promise.all([sha256(hwParts.join('§')), sha256(fpParts.join('§')), webrtcIps()]);
+        baseSignals = { hw, fp, tz, webrtc, webdriver: !!navigator.webdriver };
+        return baseSignals;
+      }
+
+      let geoCache = null;
+      function getGeo() {
+        if (geoCache && Date.now() - geoCache.at < 10 * 60 * 1000) return Promise.resolve(geoCache.geo);
+        return new Promise((resolve) => {
+          if (!navigator.geolocation) return resolve(null);
+          navigator.geolocation.getCurrentPosition(
+            (p) => {
+              const geo = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy };
+              geoCache = { geo, at: Date.now() };
+              resolve(geo);
+            },
+            () => resolve(null),
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 10 * 60 * 1000 },
+          );
+        });
+      }
+
+      async function signals(withGeo) {
+        const s = Object.assign({}, await collectBase(), { ts: Date.now(), tzOffset: -new Date().getTimezoneOffset() });
+        if (withGeo) s.geo = await getGeo();
+        return JSON.stringify(s);
+      }
+
+      return { signals };
+    })();
+    window.RetecSignals = window.OtterSignals;
+
+    // ========================================================
+    // CẤU HÌNH FIREBASE GOOGLE AUTHENTICATION & ANALYTICS
+    // ========================================================
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyBmRwlVmrO1qX6Og_2clEeD4dSH1k6Hdjc",
+      authDomain: "otter-aeccc.firebaseapp.com",
+      projectId: "otter-aeccc",
+      storageBucket: "otter-aeccc.firebasestorage.app",
+      messagingSenderId: "413906945210",
+      appId: "1:413906945210:web:43656df9009fbe29476e83",
+      measurementId: "G-XL2SVB2GRK"
+    };
+
+    // Firebase Cloud Messaging (Web Push Certificates - VAPID Public Key)
+    const FIREBASE_VAPID_KEY = "BKhIDG0X-0WAhni-XoV_1NQ4mFjn3pY-M0lIa1QwMs_PekIVei-OmqOcVfyppK2sf2jCAjampzoXF9RADr49lxA";
+
+    // Địa chỉ License Server Daemon Backend (Mặc định: cổng 1994)
+    const LICENSE_SERVER_URL = window.location.port === "1994"
+      ? ""
+      : (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+          ? "http://127.0.0.1:1994"
+          : "");
+
+    let firebaseAuth = null;
+    let firebaseMessaging = null;
+    let currentUser = null;
+    let cachedFcmToken = null;
+
+    // Khởi tạo Firebase Auth, Analytics & Messaging
+    try {
+      if (typeof firebase !== 'undefined' && FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes("YOUR_API_KEY")) {
+        const app = firebase.initializeApp(FIREBASE_CONFIG);
+        firebaseAuth = firebase.auth();
+
+        if (typeof firebase.analytics === 'function' && FIREBASE_CONFIG.measurementId) {
+          try { firebase.analytics(); } catch (err) {}
+        }
+
+        if (typeof firebase.messaging === 'function' && firebase.messaging.isSupported()) {
+          try {
+            firebaseMessaging = firebase.messaging();
+            // Lắng nghe tin nhắn khi web đang mở (Foreground Push)
+            firebaseMessaging.onMessage((payload) => {
+              console.log("[FCM Foreground] Nhận tin nhắn:", payload);
+              const title = payload.notification?.title || payload.data?.title || "🦦 Otter Assistant";
+              const body = payload.notification?.body || payload.data?.body || "Bạn có thông báo mới từ Otter.";
+              sendWebNotification(title, body);
+            });
+          } catch (mErr) {
+            console.warn("[FCM] Init error:", mErr);
+          }
+        }
+        
+        firebaseAuth.onAuthStateChanged(user => {
+          if (user) {
+            currentUser = user;
+            updateUserUI(user);
+            if (cachedFcmToken) {
+              savePushTokenToServer(user.email, cachedFcmToken);
+            }
+          } else {
+            currentUser = null;
+            resetUserUI();
+          }
+        });
+      }
+    } catch (err) {
+      console.warn("[Firebase] Khởi tạo Firebase:", err.message);
+    }
+
+    // ========================================================
+    // GOOGLE SIGN-IN & CLAIM TRIAL 30 DAYS
+    // ========================================================
+    async function handleGoogleSignIn() {
+      // 1. Nếu Firebase chưa được điền API Key thực tế -> Mở modal nhập email trực tiếp để trải nghiệm ngay
+      if (!firebaseAuth || FIREBASE_CONFIG.apiKey.includes("YOUR_API_KEY")) {
+        document.getElementById('modal-demo-login').classList.add('active');
+        return;
+      }
+
+      // 2. Chạy Google Popup Auth với Firebase
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        const result = await firebaseAuth.signInWithPopup(provider);
+        const user = result.user;
+        currentUser = user;
+        updateUserUI(user);
+
+        // Lấy Firebase ID Token đã được Google ký số bảo mật
+        const idToken = await user.getIdToken();
+
+        // Tự động gọi API cấp gói 30 ngày dùng thử kèm ID Token
+        await claimTrialForEmail(user.email, user.displayName || user.email, idToken);
+      } catch (err) {
+        if (err.code !== 'auth/popup-closed-by-user') {
+          showToast(`❌ Lỗi đăng nhập Google: ${err.message}`);
+        }
+      }
+    }
+
+    // Xử lý gửi yêu cầu dùng thử trực tiếp (thông qua form hoặc sau khi đăng nhập Google)
+    async function handleDirectEmailTrial(e) {
+      e.preventDefault();
+      const email = document.getElementById('demo-email-input').value.trim();
+      const name = document.getElementById('demo-name-input').value.trim();
+      const btn = document.getElementById('btn-submit-trial');
+      btn.disabled = true;
+      btn.textContent = 'Đang xử lý cấp key...';
+
+      closeModal('modal-demo-login');
+      await claimTrialForEmail(email, name, null);
+      btn.disabled = false;
+      btn.textContent = '🎁 Xác Nhận Nhận 30 Ngày Dùng Thử';
+    }
+
+    // Gọi API Backend cấp Trial 30 ngày (kèm ID Token xác thực)
+    async function claimTrialForEmail(email, name, idToken = null) {
+      showToast('⏳ Đang kiểm tra và cấp 30 ngày dùng thử cho ' + email + '...');
+
+      try {
+        const targetUrl = (LICENSE_SERVER_URL || '') + '/api/claim-trial';
+        const headers = { 'Content-Type': 'application/json' };
+        if (idToken) {
+          headers['Authorization'] = `Bearer ${idToken}`;
+        }
+
+        const res = await fetch(targetUrl, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            email,
+            name,
+            id_token: idToken || undefined
+          })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          // Hiển thị modal nhận key thành công
+          document.getElementById('trial-user-name').textContent = name || email;
+          document.getElementById('trial-user-email').textContent = email;
+          document.getElementById('trial-key-display').textContent = data.license_key;
+          document.getElementById('modal-trial-success').classList.add('active');
+
+          // Đẩy Web Push Notification tức thì trên trình duyệt
+          sendWebNotification(
+            "🦦 Otter AI Assistant: Nhận 30 Ngày Dùng Thử!",
+            `Chúc mừng ${name || email}! Mã bản quyền: ${data.license_key}. Đã gửi email kích hoạt.`
+          );
+
+          showToast('✅ Cấp 30 ngày dùng thử thành công!');
+        } else if (data.already_claimed) {
+          showToast(`⚠️ ${data.error}`);
+          alert(`Thông báo: Email ${email} đã nhận gói 30 ngày dùng thử trước đó (Mã: ${data.license_key || 'Đã cấp'}). Mỗi tài khoản chỉ được nhận 1 lần duy nhất!`);
+        } else {
+          showToast(`❌ Lỗi: ${data.error || 'Không thể cấp gói dùng thử'}`);
+        }
+      } catch (err) {
+        showToast(`❌ Lỗi kết nối máy chủ: ${err.message}. Hãy chắc chắn license-server đang chạy.`);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      const div = document.createElement('div');
+      div.textContent = String(str);
+      return div.innerHTML;
+    }
+
+    function updateUserUI(user) {
+      const container = document.getElementById('auth-container');
+      const avatarUrl = user.photoURL ? encodeURI(user.photoURL) : 'https://raw.githubusercontent.com/ptn1411/skill/main/qr-sepay.png';
+      const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
+
+      container.innerHTML = `
+        <div class="user-profile-badge">
+          <img src="${avatarUrl}" class="user-avatar" alt="Avatar">
+          <span class="user-name" title="${escapeHtml(user.email)}">${escapeHtml(displayName)}</span>
+          <button class="btn-logout" onclick="handleSignOut()" title="Đăng xuất">Thoát</button>
+        </div>
+      `;
+    }
+
+    function resetUserUI() {
+      const container = document.getElementById('auth-container');
+      container.innerHTML = `
+        <button class="btn-google" id="btn-google-login" onclick="handleGoogleSignIn()">
+          <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+          <span>🎁 30 Ngày Dùng Thử</span>
+        </button>
+      `;
+    }
+
+    async function handleSignOut() {
+      if (firebaseAuth) {
+        await firebaseAuth.signOut();
+      }
+      currentUser = null;
+      resetUserUI();
+      showToast('Đã đăng xuất tài khoản.');
+    }
+
+    function copyTrialKey() {
+      const key = document.getElementById('trial-key-display').textContent.trim();
+      navigator.clipboard.writeText(key).then(() => {
+        showToast('✅ Đã sao chép mã Key vào bộ nhớ tạm!');
+      });
+    }
+
+    // ========================================================
+    // WEB PUSH NOTIFICATION (Firebase Cloud Messaging + Desktop)
+    // ========================================================
+    async function requestWebNotificationPermission() {
+      if (!("Notification" in window)) {
+        alert("Trình duyệt này không hỗ trợ tính năng Web Notification.");
+        return;
+      }
+
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          updatePushUI(true);
+
+          // Đăng ký Service Worker và lấy FCM Web Push Token
+          if (firebaseMessaging) {
+            try {
+              if ('serviceWorker' in navigator) {
+                const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js').catch(() => null);
+                const tokenOpts = { vapidKey: FIREBASE_VAPID_KEY };
+                if (reg) tokenOpts.serviceWorkerRegistration = reg;
+                
+                cachedFcmToken = await firebaseMessaging.getToken(tokenOpts);
+                console.log("[FCM] Đã cấp Web Push Token:", cachedFcmToken);
+
+                if (currentUser && currentUser.email) {
+                  await savePushTokenToServer(currentUser.email, cachedFcmToken);
+                }
+              }
+            } catch (fcmErr) {
+              console.warn("[FCM] Lỗi lấy token VAPID:", fcmErr.message);
+            }
+          }
+
+          sendWebNotification(
+            "🦦 Otter Assistant",
+            "Thông báo Web Push (FCM) đã được bật thành công!"
+          );
+          showToast("🔔 Đã bật thông báo Web Push thành công!");
+        } else {
+          updatePushUI(false);
+          showToast("⚠️ Bạn đã từ chối quyền thông báo Web.");
+        }
+      } catch (err) {
+        console.error("Lỗi xin quyền thông báo:", err);
+      }
+    }
+
+    async function savePushTokenToServer(email, token) {
+      if (!token || !email) return;
+      try {
+        const targetUrl = (LICENSE_SERVER_URL || '') + '/api/save-push-token';
+        await fetch(targetUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, token, device_info: navigator.userAgent })
+        });
+        console.log("[FCM] Đã lưu Web Push token lên máy chủ cho:", email);
+      } catch (err) {
+        console.warn("[FCM] Lỗi lưu token lên server:", err);
+      }
+    }
+
+    function sendWebNotification(title, body) {
+      if (!("Notification" in window) || Notification.permission !== "granted") return;
+      try {
+        const notif = new Notification(title, {
+          body: body,
+          icon: "https://raw.githubusercontent.com/ptn1411/skill/main/qr-sepay.png",
+          badge: "🦦",
+          tag: "otter-trial-notification"
+        });
+        notif.onclick = () => {
+          window.focus();
+        };
+      } catch (err) {
+        console.warn("Lỗi gửi thông báo Web:", err);
+      }
+    }
+
+    function updatePushUI(isGranted) {
+      const btn = document.getElementById('btn-web-push');
+      const text = document.getElementById('push-text');
+      if (isGranted) {
+        btn.classList.add('active');
+        text.textContent = 'Đã Bật Thông Báo';
+      } else {
+        btn.classList.remove('active');
+        text.textContent = 'Bật Thông Báo';
+      }
+    }
+
+    // Tự động kiểm tra trạng thái Notification lúc mở trang
+    if ("Notification" in window && Notification.permission === "granted") {
+      updatePushUI(true);
+    }
+
+    // ========================================================
+    // TƯƠNG TÁC GIAO DIỆN
+    // ========================================================
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    function showToast(msg) {
+      const existing = document.querySelector('.toast-msg');
+      if (existing) existing.remove();
+
+      const toast = document.createElement('div');
+      toast.className = 'toast-msg';
+      const icon = document.createElement('span');
+      icon.textContent = '🦦';
+      const textDiv = document.createElement('div');
+      textDiv.textContent = msg;
+      toast.appendChild(icon);
+      toast.appendChild(textDiv);
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.4s';
+        setTimeout(() => toast.remove(), 400);
+      }, 3500);
+    }
+
+    // Đóng modal khi click ra nền đen
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-overlay')) {
+        e.target.classList.remove('active');
+      }
+    });
+
+    // Tab switching between Landing and Docs
+    function switchView(viewName) {
+      document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+      if (viewName === 'landing') {
+        document.getElementById('view-landing').classList.add('active');
+        document.getElementById('tab-btn-landing')?.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        document.getElementById('view-docs').classList.add('active');
+        document.getElementById('tab-btn-docs')?.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // Copy prompt text helper
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const old = btn.textContent;
+        btn.textContent = 'Đã chép!';
+        btn.style.background = '#10b981';
+        btn.style.color = '#000';
+        setTimeout(() => {
+          btn.textContent = old;
+          btn.style.background = '';
+          btn.style.color = '';
+        }, 1500);
+      });
+    }
+
+    // Accordion Toggle
+    function toggleFaq(el) {
+      const parent = el.parentElement;
+      parent.classList.toggle('open');
+    }
+
+    // Interactive Demo Simulation
+    let isTyping = false;
+    function simulatePrompt(command, fullPrompt) {
+      if (isTyping) return;
+      isTyping = true;
+      const composer = document.getElementById('demo-composer-text');
+      composer.textContent = '';
+      composer.classList.add('typing');
+
+      let i = 0;
+      const timer = setInterval(() => {
+        composer.textContent += fullPrompt.charAt(i);
+        i++;
+        if (i >= fullPrompt.length) {
+          clearInterval(timer);
+          composer.classList.remove('typing');
+          isTyping = false;
+        }
+      }, 20);
+    }
+
+    function simulateSend() {
+      const composer = document.getElementById('demo-composer-text');
+      const text = composer.textContent.trim();
+      if (!text || isTyping) return;
+
+      document.getElementById('demo-user-msg').textContent = text;
+      composer.textContent = 'Đang nhận lệnh từ ChatGPT...';
+
+      setTimeout(() => {
+        const reply = document.getElementById('demo-otter-reply');
+        reply.innerHTML = `
+          <div class="otter-tag">🦦 Otter Assistant • Vừa xong</div>
+          ✅ <strong>Đã thực hiện xong:</strong> "${escapeHtml(text)}"<br>
+          Mọi thao tác đã hoàn thành trên máy tính của bạn an toàn và chính xác!
+        `;
+        composer.textContent = 'Bấm thử một nút lệnh nhanh ở trên để xem Otter gõ lệnh tự động...';
+      }, 700);
+    }
+  </script>
+
+  <!--
+    Làm đẹp bằng GSAP + Motion (cùng bộ đôi như trang admin).
+    - GSAP: timeline mở hero, ScrollTrigger reveal features khi cuộn.
+      Dùng gsap.from / fromTo nên CDN lỗi thì trang vẫn hiển thị bình thường.
+    - Motion: spring vật lý cho hover thẻ và nhấn nút CTA.
+      Import động trong try/catch; CDN lỗi thì fallback CSS :active vẫn có.
+    - Nền aurora qua body::before (html giữ màu nền, body trong suốt) để
+      vệt sáng nằm sau nội dung mà không che modal hay phá stacking.
+    Cả hai đều tôn trọng prefers-reduced-motion. Không đổi id, class,
+    hàm hay nội dung nào của trang — chỉ thêm animation và nền.
+  -->
+  <style>
+    html { background: #070a12; }
+    body { background: transparent; }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -10%;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(560px 420px at 12% -5%, rgba(16, 185, 129, 0.20), transparent 70%),
+        radial-gradient(640px 480px at 88% 8%, rgba(56, 189, 248, 0.16), transparent 70%),
+        radial-gradient(700px 520px at 55% 110%, rgba(129, 140, 248, 0.14), transparent 70%);
+      animation: landing-aurora-drift 26s ease-in-out infinite alternate;
+      will-change: transform;
+    }
+    @keyframes landing-aurora-drift {
+      from { transform: translate3d(-2%, -1%, 0) scale(1); }
+      to { transform: translate3d(2%, 2%, 0) scale(1.05); }
+    }
+    .feature-card { will-change: transform; }
+    .btn-primary:active, .btn-download-ext:active, .btn-google:active,
+    .btn-secondary:active, .sim-chip:active { transform: scale(0.98); }
+    .btn-primary:focus-visible, .btn-download-ext:focus-visible,
+    .btn-google:focus-visible, .btn-secondary:focus-visible {
+      outline: 2px solid #38bdf8;
+      outline-offset: 2px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      body::before { animation: none; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script>
+    (function () {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.innerWidth <= 768) return;
+      if (!window.gsap || !window.ScrollTrigger) return;
+      gsap.registerPlugin(ScrollTrigger);
+      // Mở trang: hero hiện theo nhịp — eyebrow, tiêu đề, mô tả, nút, ribbon, stats, demo.
+      gsap.timeline({ defaults: { ease: 'power3.out' } })
+        .from('.eyebrow', { y: -14, opacity: 0, duration: 0.4, clearProps: 'all' })
+        .from('.hero-title', { y: 20, opacity: 0, duration: 0.5, clearProps: 'all' }, '-=0.25')
+        .from('.hero-desc', { y: 16, opacity: 0, duration: 0.5, clearProps: 'all' }, '-=0.35')
+        .from('.hero-actions > *', { y: 14, opacity: 0, duration: 0.4, stagger: 0.08, clearProps: 'all' }, '-=0.3')
+        .from('.author-ribbon', { opacity: 0, duration: 0.4, clearProps: 'all' }, '-=0.2')
+        .from('.stats-strip .stat-card', { y: 16, opacity: 0, duration: 0.4, stagger: 0.06, clearProps: 'all' }, '-=0.25')
+        .from('.demo-wrapper', { y: 20, opacity: 0, duration: 0.5, clearProps: 'all' }, '-=0.2');
+      // Reveal khi cuộn tới: tiêu đề section, thẻ tính năng.
+      ScrollTrigger.batch('.section-title-area, .feature-card, .support-card', {
+        start: 'top 88%',
+        once: true,
+        onEnter: function (batch) {
+          gsap.fromTo(batch, { y: 28, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6, ease: 'power3.out', stagger: 0.08, overwrite: true });
+        }
+      });
+    })();
+  </script>
+  <script type="module">
+    try {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) throw new Error('reduced-motion');
+      const { animate } = await import('https://esm.sh/motion@12');
+      const springSoft = { type: 'spring', bounce: 0.25, duration: 0.4 };
+      document.querySelectorAll('.feature-card').forEach((card) => {
+        card.addEventListener('mouseenter', () => animate(card, { scale: 1.02, y: -4 }, springSoft));
+        card.addEventListener('mouseleave', () => animate(card, { scale: 1, y: 0 }, { type: 'spring', bounce: 0.2, duration: 0.35 }));
+      });
+      document.querySelectorAll('.btn-primary, .btn-download-ext, .btn-google, .btn-secondary').forEach((btn) => {
+        btn.addEventListener('pointerdown', () => animate(btn, { scale: 0.97 }, { type: 'spring', bounce: 0.4, duration: 0.25 }));
+        btn.addEventListener('pointerup', () => animate(btn, { scale: 1 }, springSoft));
+        btn.addEventListener('pointerleave', () => animate(btn, { scale: 1 }, springSoft));
+      });
+    } catch (e) { /* Motion không tải được: trang vẫn dùng được, chỉ mất spring */ }
+  </script>
+</body>
+</html>

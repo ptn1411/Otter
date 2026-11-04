@@ -1,0 +1,8 @@
+body { margin: 0; padding: 0; background: #11111b; color: #cdd6f4; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; }
+.header { padding: 12px; background: #181825; border-bottom: 1px solid #313244; display: flex; justify-content: space-between; align-items: center; }
+.tabs { display: flex; gap: 8px; }
+.tab-btn { padding: 6px 12px; border-radius: 6px; background: transparent; border: 1px solid #45475a; color: #a6adc8; cursor: pointer; font-size: 12px; }
+.tab-btn.active { background: #89b4fa; color: #11111b; font-weight: 600; border-color: #89b4fa; }
+.content { flex: 1; padding: 12px; overflow-y: auto; }
+.status-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #a6e3a1; color: #11111b; font-weight: 600; }
+.panel-btn { padding: 7px 14px; border-radius: 6px; background: #89b4fa; color: #11111b; font-weight: 600; border: none; cursor: pointer; margin: 4px 4px 4px 0; }
