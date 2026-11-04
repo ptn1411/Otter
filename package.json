@@ -2,6 +2,8 @@
   "name": "otter",
   "version": "2.0.0",
   "description": "Otter — Agentic AI Desktop & Browser Controller built with Bun + TypeScript (Port 1993)",
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "PHAM THANH NAM (@ptn1411)",
   "module": "src/daemon/index.ts",
   "type": "module",
   "scripts": {

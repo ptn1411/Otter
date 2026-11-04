@@ -18,6 +18,7 @@
 <p align="center">
   <a href="https://otter.gpt.io.vn"><img src="https://img.shields.io/badge/Trang_Chủ-otter.gpt.io.vn-0284c7?style=for-the-badge&logo=google-chrome" alt="Trang chủ"></a>
   <a href="https://otter.gpt.io.vn"><img src="https://img.shields.io/badge/Cài_Đặt_1--Click-irm_otter.gpt.io.vn-10b981?style=for-the-badge&logo=powershell" alt="1-Click Install"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Source--Available_Non--Commercial-red?style=for-the-badge" alt="License"></a>
   <a href="https://www.facebook.com/share/g/1CN8sjFYDH/?mibextid=wwXIfr"><img src="https://img.shields.io/badge/Facebook-Cộng_Đồng_Otter-1877F2?style=for-the-badge&logo=facebook" alt="Facebook Community"></a>
 </p>
 
@@ -157,7 +158,8 @@ Lưu bài viết này vào kho tri thức cá nhân của tôi, tóm tắt ý ch
 ## 5. Giải Đáp Thắc Mắc Thường Gặp (FAQ)
 
 - **Otter có thu phí hàng tháng không?**  
-  👉 Hoàn toàn **KHÔNG**. Otter là phần mềm nguồn mở, cài đặt trực tiếp trên máy của bạn và miễn phí trọn đời.
+  👉 Hoàn toàn **KHÔNG**. Otter mở mã nguồn, cài đặt trực tiếp trên máy của bạn và miễn phí 100% cho mục đích cá nhân, học tập và nghiên cứu.
+  ⚠️ **Chính sách Thương Mại**: Giấy phép [LICENSE](LICENSE) **nghiêm cấm** lấy mã nguồn về đóng gói bán lại, kinh doanh hoặc cung cấp dịch vụ thu phí. Bất kỳ cá nhân/doanh nghiệp nào muốn khai thác thương mại **bắt buộc phải liên hệ tác giả để mua bản quyền thương mại (Commercial License)**.
 - **Người không biết lập trình có dùng được không?**  
   👉 Chắc chắn có! Otter được tạo ra chính là để người bình thường không cần học kỹ thuật vẫn sai bảo được máy tính làm việc tự động chỉ bằng lời nói hàng ngày.
 - **Dữ liệu của tôi có bị tải lên máy chủ của ai không?**  
@@ -283,13 +285,26 @@ Save this current webpage into my personal knowledge base, summarize its main in
 ## 5. Frequently Asked Questions (FAQ)
 
 - **Is Otter free to use?**  
-  👉 Yes, 100% **FREE** and open source. It runs locally on your own machine forever.
+  👉 Yes, 100% **FREE** for personal, research, and non-commercial educational use.
+  ⚠️ **Commercial Restriction**: Under the [LICENSE](LICENSE), commercial distribution, repackaging, selling, or offering as a paid SaaS/service is **strictly prohibited**. Commercial use requires purchasing a Commercial License from the author.
 - **Can non-technical people use it?**  
   👉 Absolutely! Otter is specifically designed for non-technical users so you never have to touch complicated code.
 - **Is my personal data sent to third-party cloud servers?**  
   👉 No. Otter runs on your personal machine (`127.0.0.1:1993`). All documents, bookmarks, and files stay strictly on your local disk.
 - **How do I uninstall Otter?**  
   👉 Simply double-click `uninstall.bat` inside `deploy/`. It cleans up everything cleanly in seconds.
+
+---
+
+## 📄 Bản Quyền & Giấy Phép Sử Dụng (License & Commercial Rights)
+
+Dự án phát hành theo giấy phép **[Otter Source-Available Non-Commercial License (Version 1.0)](LICENSE)**:
+- ✅ **Cá nhân & Nghiên cứu**: Miễn phí 100% cho cá nhân sử dụng, nghiên cứu, kiểm thử bảo mật, học tập và tự vận hành nội bộ phi thương mại.
+- ❌ **Nghiêm cấm kinh doanh**: Tuyệt đối không được sao chép, đóng gói lại, bán lại mã nguồn, tích hợp vào sản phẩm thương mại hoặc chạy dịch vụ đám mây thu phí nếu **chưa mua bản quyền thương mại**.
+- 💼 **Mua bản quyền thương mại (Commercial License / Source Code Buyout)**:
+  - Tác giả & Chủ sở hữu: **Phạm Thanh Nam (@ptn1411)**
+  - Facebook: [https://facebook.com/ptn1411](https://facebook.com/ptn1411)
+  - Trang chủ chính thức: [https://otter.gpt.io.vn](https://otter.gpt.io.vn)
 
 ---
 

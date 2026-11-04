@@ -1,17 +1,44 @@
-MIT License
+Otter Source-Available Non-Commercial License (Version 1.0)
+Copyright (c) 2026 PHAM THANH NAM (@ptn1411). All rights reserved.
 
-Copyright (c) 2026 PHAM THANH NAM
+==============================================================================
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+==============================================================================
 
+1. PERMITTED USES (PERSONAL & NON-COMMERCIAL):
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+of this software and associated documentation files (the "Software"), to inspect,
+study, modify, and run locally solely for personal, research, testing, and 
+non-commercial educational purposes, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+- The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+- Any modifications, derivative works, or bugfixes created must retain this notice.
 
+2. STRICT COMMERCIAL RESTRICTIONS (COMMERCIAL USE PROHIBITED):
+You MAY NOT, under any circumstances, without express prior written permission
+and a valid Commercial License agreement executed by the Copyright Holder (PHAM THANH NAM):
+
+- Sell, resell, rent, lease, sublicense, distribute, or repackage the Software
+  (or any substantial portion thereof) for commercial profit, revenue generation,
+  or financial consideration.
+- Include the Software in any commercial product, proprietary suite, or enterprise offering.
+- Host, deploy, or operate the Software as a public/private Cloud SaaS, hosted service,
+  managed automation API, or paid proxy service.
+- Provide commercial services, paid customer integrations, or commercial consulting
+  directly based upon or powered by the Software's source code and engines.
+
+3. COMMERCIAL LICENSING & BUYOUT:
+Any commercial use, enterprise deployment, proprietary embedding, white-labeling,
+or private code acquisition requires a separate, legally binding Commercial License.
+
+For commercial licensing, enterprise inquiries, or source code buyout:
+- Author / Copyright Owner: PHAM THANH NAM
+- Facebook: https://facebook.com/ptn1411
+- Official Website: https://otter.gpt.io.vn
+- Repository: https://github.com/ptn1411/Otter
+
+4. DISCLAIMER OF WARRANTY:
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,4 +46,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
