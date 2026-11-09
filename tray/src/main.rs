@@ -220,7 +220,16 @@ fn configure_tray(tray: &mut TrayItem) {
         open_url("http://127.0.0.1:1993/mcp");
     });
 
-    // 3. Sao chép Quick Tunnel URL
+    // 3. Mở Quick Tunnel trên Trình duyệt
+    let _ = tray.add_menu_item("🚀 Mở Quick Tunnel (Trình duyệt)", || {
+        if let Some(url) = get_tunnel_url() {
+            open_url(&url);
+        } else {
+            open_url("http://127.0.0.1:1993/activity");
+        }
+    });
+
+    // 4. Sao chép Quick Tunnel URL
     let _ = tray.add_menu_item("🔗 Sao chép Quick Tunnel URL", || {
         if let Some(url) = get_tunnel_url() {
             copy_to_clipboard(&url);

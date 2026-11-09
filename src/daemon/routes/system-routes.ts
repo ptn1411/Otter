@@ -7,7 +7,7 @@ import { getExternalToolsOpenApiPaths } from "../mcp-gateway";
 import { corsHeaders, jsonResponse, errorResponse } from "./common";
 import { getLicenseStatus, activateLicense } from "../license";
 import { activateOnline, DEFAULT_LICENSE_SERVER_URL } from "../license/hybrid-client";
-import { getQuickTunnelStatus, startQuickTunnel, stopQuickTunnel } from "../tunnel";
+import { getQuickTunnelStatus, startQuickTunnel, stopQuickTunnel, openTunnelInBrowser } from "../tunnel";
 import { matchDaemonRoute } from "./lcg-routes";
 
 export async function handleSystemRoutes(req: Request, url: URL, port: number): Promise<Response | null> {
@@ -77,6 +77,11 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
   if (matchDaemonRoute(url.pathname, "SYS_TUNNEL_STOP") && req.method === "POST") {
     stopQuickTunnel();
     return jsonResponse({ success: true, message: "Đã dừng Quick Tunnel" });
+  }
+
+  if (url.pathname === "/api/system/tunnel/open" && req.method === "POST") {
+    const success = openTunnelInBrowser();
+    return jsonResponse({ success, status: getQuickTunnelStatus() });
   }
 
   // 1. Native Folder Picker
@@ -238,10 +243,14 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
               <p style="margin:4px 0; font-size:13px; color:#cbd5e1;" data-i18n="tunnel_active">URL Công khai hiện tại:</p>
               <pre style="margin:8px 0; color:#38bdf8;">${tunnel.url}</pre>
               <p style="margin:4px 0; font-size:12px; color:#94a3b8;">🔗 MCP Endpoint: <code>${tunnel.url}/mcp</code></p>
-              <button onclick="fetch('/api/system/tunnel/stop', {method:'POST'}).then(()=>location.reload())" style="background:#ef4444; margin-top:8px;" data-i18n="tunnel_stop">🛑 Dừng Quick Tunnel</button>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                <a href="${tunnel.url}" target="_blank" rel="noopener noreferrer" style="background:#10b981; color:#000; text-decoration:none; padding:8px 16px; border-radius:8px; font-weight:bold; display:inline-flex; align-items:center; gap:6px;" data-i18n="tunnel_open">🌐 Mở Tunnel</a>
+                <button onclick="navigator.clipboard.writeText('${tunnel.url}'); this.innerText='Đã sao chép!'; setTimeout(()=>this.innerText='📋 Sao chép', 2000)" style="background:#334155;" data-i18n="tunnel_copy">📋 Sao chép</button>
+                <button onclick="fetch('/api/system/tunnel/stop', {method:'POST'}).then(()=>location.reload())" style="background:#ef4444;" data-i18n="tunnel_stop">🛑 Dừng Quick Tunnel</button>
+              </div>
             ` : `
               <p style="margin:4px 0; font-size:13px; color:#94a3b8;" data-i18n="tunnel_inactive">Chưa bật Quick Tunnel. Bạn có thể bật chỉ với 1 click để có domain HTTPS dùng tạm:</p>
-              <button onclick="this.disabled=true; this.innerText='Connecting...'; fetch('/api/system/tunnel/start', {method:'POST'}).then(()=>location.reload())" style="margin-top:8px;" data-i18n="tunnel_start">🚀 Bật Cloudflare Quick Tunnel</button>
+              <button onclick="this.disabled=true; this.innerText='Connecting...'; fetch('/api/system/tunnel/start', {method:'POST'}).then(()=>location.reload())" style="margin-top:8px;" data-i18n="tunnel_start">🚀 Mở / Bật Cloudflare Quick Tunnel</button>
             `}
           </div>
 
@@ -269,7 +278,9 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
               tunnel_heading: "🌐 Cloudflare Quick Tunnel (Miễn phí 1 lần - 0 Cấu hình)",
               tunnel_active: "URL Công khai hiện tại:",
               tunnel_inactive: "Chưa bật Quick Tunnel. Bạn có thể bật chỉ với 1 click để có domain HTTPS dùng tạm:",
-              tunnel_start: "🚀 Bật Cloudflare Quick Tunnel",
+              tunnel_start: "🚀 Mở / Bật Cloudflare Quick Tunnel",
+              tunnel_open: "🌐 Mở Tunnel",
+              tunnel_copy: "📋 Sao chép URL",
               tunnel_stop: "🛑 Dừng Quick Tunnel",
               f_dom: "<strong>Alibaba Page Agent DOM:</strong> Nén DOM thông minh, phân tích sâu Shadow DOM & iframe",
               f_hwid: "<strong>Mã thiết bị (Support Code):</strong>",
@@ -289,7 +300,9 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
               tunnel_heading: "🌐 Cloudflare Quick Tunnel (Ephemeral Free - Zero Config)",
               tunnel_active: "Current Public HTTPS URL:",
               tunnel_inactive: "Quick Tunnel is not running. Start it with 1 click to get a temporary public HTTPS domain:",
-              tunnel_start: "🚀 Start Cloudflare Quick Tunnel",
+              tunnel_start: "🚀 Start / Open Cloudflare Quick Tunnel",
+              tunnel_open: "🌐 Open Tunnel",
+              tunnel_copy: "📋 Copy URL",
               tunnel_stop: "🛑 Stop Quick Tunnel",
               f_dom: "<strong>Alibaba Page Agent DOM:</strong> Smart DOM compression, deep Shadow DOM & iframe parsing",
               f_hwid: "<strong>Hardware ID (Support Code):</strong>",

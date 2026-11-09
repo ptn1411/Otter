@@ -1047,6 +1047,10 @@
     "message": "💎 Gói Đang Dùng & Bản Quyền",
     "description": "tab_license"
   },
+  "tab_gpm": {
+    "message": "🤖 GPM Studio",
+    "description": "tab_gpm"
+  },
   "tab_manage": {
     "message": "🎛️ Quản Lý Tổng",
     "description": "tab_manage"

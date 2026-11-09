@@ -193,6 +193,25 @@ export function getQuickTunnelStatus() {
   };
 }
 
+/**
+ * Mở URL Quick Tunnel hiện tại trên trình duyệt mặc định của hệ thống
+ */
+export function openTunnelInBrowser(): boolean {
+  if (!currentTunnelUrl) return false;
+  try {
+    if (process.platform === "win32") {
+      spawn({ cmd: ["cmd.exe", "/c", "start", currentTunnelUrl] });
+    } else if (process.platform === "darwin") {
+      spawn({ cmd: ["open", currentTunnelUrl] });
+    } else {
+      spawn({ cmd: ["xdg-open", currentTunnelUrl] });
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Đảm bảo dọn dẹp tiến trình ngầm khi thoát daemon
 process.on("exit", () => stopQuickTunnel());
 process.on("SIGINT", () => {

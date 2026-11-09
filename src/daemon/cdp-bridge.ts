@@ -41,16 +41,68 @@ export class CdpBridge {
   /**
    * Kiểm tra xem cổng CDP có đang mở và sẵn sàng không
    */
-  async isAvailable(port?: number): Promise<boolean> {
+  async isAvailable(port?: number, profileId?: string): Promise<boolean> {
     const targetPort = port || this.defaultPort;
     try {
       const res = await fetch(`http://127.0.0.1:${targetPort}/json/version`, {
-        signal: AbortSignal.timeout(1500)
+        signal: AbortSignal.timeout(1000)
       });
-      return res.ok;
-    } catch {
-      return false;
+      if (res.ok) return true;
+    } catch {}
+
+    // Nếu người dùng không chỉ định cổng cụ thể, thử các cổng ứng viên và tự động dò profile GPM
+    if (!port) {
+      // 1. Kiểm tra các cổng ứng viên thông dụng
+      const candidatePorts = [
+        process.env.OTTER_CDP_PORT ? Number(process.env.OTTER_CDP_PORT) : null,
+        Number(process.env.CDP_PORT) || null,
+        32934
+      ].filter(Boolean) as number[];
+
+      for (const p of candidatePorts) {
+        if (p === targetPort) continue;
+        try {
+          const res = await fetch(`http://127.0.0.1:${p}/json/version`, { signal: AbortSignal.timeout(500) });
+          if (res.ok) {
+            this.defaultPort = p;
+            return true;
+          }
+        } catch {}
+      }
+
+      // 2. Thử lấy port từ GPM Login Profile đang mở (dò tự động tất cả profile đang hoạt động)
+      try {
+        const gpmPort = process.env.OTTER_GPM_PORT ? Number(process.env.OTTER_GPM_PORT) : 9495;
+        const profRes = await fetch(`http://127.0.0.1:${gpmPort}/api/v1/profiles?page=1&page_size=20`, {
+          signal: AbortSignal.timeout(1500)
+        });
+        if (profRes.ok) {
+          const profData = await profRes.json() as any;
+          const profiles = profData?.data?.data || profData?.data || [];
+          for (const p of profiles) {
+            try {
+              const startRes = await fetch(`http://127.0.0.1:${gpmPort}/api/v1/profiles/start/${p.id}`, {
+                signal: AbortSignal.timeout(1000)
+              });
+              if (startRes.ok) {
+                const sData = await startRes.json() as any;
+                const testPort = Number(sData.data?.remote_debugging_port);
+                if (testPort) {
+                  const testRes = await fetch(`http://127.0.0.1:${testPort}/json/version`, { signal: AbortSignal.timeout(800) });
+                  if (testRes.ok) {
+                    console.log(`[CDP Bridge] 🎯 Đã tự động phát hiện cổng CDP từ GPM Profile "${p.name}" (${p.id}): Port ${testPort}`);
+                    this.defaultPort = testPort;
+                    return true;
+                  }
+                }
+              }
+            } catch {}
+          }
+        }
+      } catch {}
     }
+
+    return false;
   }
 
   /**

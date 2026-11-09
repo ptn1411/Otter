@@ -165,9 +165,49 @@ document.addEventListener("DOMContentLoaded", async () => {
         daemonStatusText.textContent = t("daemon_online");
         daemonStatusText.style.color = "#10b981";
 
-        if (data && data.url && tunnelInfoBox) {
+        if (tunnelInfoBox) {
           tunnelInfoBox.style.display = "block";
-          tunnelInfoBox.innerHTML = `🌐 <b>Quick Tunnel URL:</b> <code>${data.url}</code> (${t("tunnel_ready")})`;
+          if (data && data.url) {
+            tunnelInfoBox.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div>
+                  🌐 <b>Quick Tunnel:</b> <code style="word-break:break-all;">${data.url}</code>
+                  <span style="color:#10b981; font-weight:600; margin-left:6px;">(${t("tunnel_ready")})</span>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <a href="${data.url}" target="_blank" rel="noopener noreferrer" style="background:#10b981; color:#000; padding:4px 10px; border-radius:6px; font-weight:700; text-decoration:none; font-size:12px; display:inline-flex; align-items:center; gap:4px;">🌐 Mở Tunnel</a>
+                  <button type="button" id="btn-copy-tunnel" style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:4px 10px; border-radius:6px; font-size:12px; cursor:pointer;">📋 Sao chép</button>
+                  <button type="button" id="btn-stop-tunnel" style="background:rgba(239,68,68,0.2); color:#fca5a5; border:1px solid rgba(239,68,68,0.3); padding:4px 10px; border-radius:6px; font-size:12px; cursor:pointer;">🛑 Dừng</button>
+                </div>
+              </div>
+            `;
+            document.getElementById("btn-copy-tunnel")?.addEventListener("click", () => {
+              navigator.clipboard.writeText(data.url);
+              const btn = document.getElementById("btn-copy-tunnel");
+              if (btn) btn.textContent = "✅ Đã chép!";
+              setTimeout(() => { if (btn) btn.textContent = "📋 Sao chép"; }, 2000);
+            });
+            document.getElementById("btn-stop-tunnel")?.addEventListener("click", async () => {
+              await fetch("http://127.0.0.1:1993/api/system/tunnel/stop", { method: "POST" });
+              checkDaemonLiveStatus();
+            });
+          } else {
+            tunnelInfoBox.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <span style="color:#94a3b8;">Chưa bật Quick Tunnel (Truy cập từ xa).</span>
+                <button type="button" id="btn-start-tunnel" style="background:#3b82f6; color:#fff; border:none; padding:4px 12px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">🚀 Mở / Bật Quick Tunnel</button>
+              </div>
+            `;
+            document.getElementById("btn-start-tunnel")?.addEventListener("click", async () => {
+              const btn = document.getElementById("btn-start-tunnel") as HTMLButtonElement | null;
+              if (btn) {
+                btn.disabled = true;
+                btn.textContent = "Connecting...";
+              }
+              await fetch("http://127.0.0.1:1993/api/system/tunnel/start", { method: "POST" });
+              checkDaemonLiveStatus();
+            });
+          }
         }
         return true;
       }

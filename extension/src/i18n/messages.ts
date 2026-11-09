@@ -130,6 +130,7 @@ export type TranslationKey =
   | "manage_doctor_fail"
   | "manage_empty_plans"
   | "manage_empty_skills"
+  | "manage_engine_title"
   | "manage_enter_browser"
   | "manage_enter_fleet"
   | "manage_enter_goal"
@@ -182,7 +183,6 @@ export type TranslationKey =
   | "manage_tool_plans_desc"
   | "manage_tool_plans_name"
   | "manage_tools_desc"
-  | "manage_engine_title"
   | "manage_tools_title"
   | "manage_zero_risk_copy"
   | "mcp_none"
@@ -262,6 +262,7 @@ export type TranslationKey =
   | "sub_title"
   | "tab_commands"
   | "tab_fb_sales"
+  | "tab_gpm"
   | "tab_guide"
   | "tab_license"
   | "tab_manage"
@@ -553,6 +554,7 @@ export const messages: Record<"vi" | "en", Record<TranslationKey, string>> = {
   "tab_fb_sales": "💬 Kịch Bản Bán Hàng & FB",
   "tab_guide": "📖 Hướng Dẫn Cấu Hình",
   "tab_license": "💎 Gói Đang Dùng & Bản Quyền",
+  "tab_gpm": "🤖 GPM Studio",
   "tab_manage": "🎛️ Quản Lý Tổng",
   "tab_manual": "📚 Cẩm Nang Lệnh Chi Tiết",
   "tab_settings": "🔌 Kết Nối & Máy Chủ MCP",
@@ -841,6 +843,7 @@ export const messages: Record<"vi" | "en", Record<TranslationKey, string>> = {
   "tab_fb_sales": "💬 FB Sales Playbook",
   "tab_guide": "📖 Setup Guide",
   "tab_license": "💎 Active Plan & License",
+  "tab_gpm": "🤖 GPM Studio",
   "tab_manage": "🎛️ Management Center",
   "tab_manual": "📚 Command Handbook",
   "tab_settings": "🔌 Connection & MCP",
