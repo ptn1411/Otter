@@ -137,22 +137,86 @@ export async function takeScreenshot(outputPath?: string): Promise<{ filePath: s
     const psScript = `
       Add-Type -AssemblyName System.Windows.Forms;
       Add-Type -AssemblyName System.Drawing;
-      $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds;
-      $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height;
-      $g = [System.Drawing.Graphics]::FromImage($bmp);
-      $g.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size);
-      $bmp.Save('${targetPath.replace(/'/g, "''")}', [System.Drawing.Imaging.ImageFormat]::Png);
-      $g.Dispose();
-      $bmp.Dispose();
-      Write-Output "$($bounds.Width)x$($bounds.Height)"
+      Add-Type @"
+      using System;
+      using System.Runtime.InteropServices;
+      using System.Drawing;
+      using System.Drawing.Imaging;
+      using System.Threading;
+      using System.Windows.Forms;
+
+      public class DesktopCapture {
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern IntPtr OpenDesktop(string lpszDesktop, uint dwFlags, bool fInherit, uint dwDesiredAccess);
+
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern IntPtr OpenInputDesktop(uint dwFlags, bool fInherit, uint dwDesiredAccess);
+
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern bool SetThreadDesktop(IntPtr hDesktop);
+
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern bool CloseDesktop(IntPtr hDesktop);
+
+          const uint DESKTOP_ALL_ACCESS = 0x01FF;
+
+          public static string Capture(string outputPath) {
+              Exception lastEx = null;
+              string res = "";
+              IntPtr hDesk = OpenDesktop("Default", 0, false, DESKTOP_ALL_ACCESS);
+              if (hDesk == IntPtr.Zero) hDesk = OpenInputDesktop(0, false, DESKTOP_ALL_ACCESS);
+
+              Thread t = new Thread(() => {
+                  if (hDesk != IntPtr.Zero) SetThreadDesktop(hDesk);
+                  try {
+                      Rectangle bounds = Screen.PrimaryScreen.Bounds;
+                      using (Bitmap bmp = new Bitmap(bounds.Width, bounds.Height)) {
+                          using (Graphics g = Graphics.FromImage(bmp)) {
+                              g.CopyFromScreen(bounds.Location, Point.Empty, bounds.Size);
+                          }
+                          bmp.Save(outputPath, ImageFormat.Png);
+                      }
+                      res = bounds.Width + "x" + bounds.Height;
+                  } catch (Exception ex) {
+                      lastEx = ex;
+                  }
+              });
+
+              t.SetApartmentState(ApartmentState.STA);
+              t.Start();
+              t.Join();
+              if (hDesk != IntPtr.Zero) CloseDesktop(hDesk);
+              if (lastEx != null) throw lastEx;
+              return res;
+          }
+      }
+"@ -ReferencedAssemblies "System.Drawing", "System.Windows.Forms";
+
+      [DesktopCapture]::Capture('${targetPath.replace(/'/g, "''")}')
     `;
 
-    const res = await executeCommand(psScript.replace(/\r?\n/g, " "));
+    const res = await executeCommand(psScript);
     const [w, h] = (res.stdout?.trim() || "1920x1080").split("x").map(Number);
     const verified = await pngSize(targetPath);
     if (!verified && !(await exists(targetPath))) {
-      throw new Error(`Chụp màn hình thất bại (PowerShell): không ghi được file ${targetPath}.`);
+      throw new Error(`Chụp màn hình thất bại (PowerShell): ${res.stderr || "không ghi được file " + targetPath}`);
     }
+
+    // Kiểm tra xem ảnh chụp có bị đen thui hoàn toàn không (Black screen detection)
+    try {
+      const buf = await fs.readFile(targetPath);
+      let nonZeroCount = 0;
+      for (let i = 0; i < buf.length; i++) {
+        if (buf[i] !== 0) nonZeroCount++;
+        if (nonZeroCount > 500) break;
+      }
+      if (nonZeroCount <= 200 && buf.length < 20000) {
+        throw new Error(
+          "Ảnh chụp màn hình bị đen hoàn toàn: Màn hình máy tính hiện đang bị khóa (Win+L), tắt hoặc ở chế độ chờ (Sleep/DPMS). Vui lòng mở khóa hoặc bật màn hình máy tính."
+        );
+      }
+    } catch {}
+
     return {
       filePath: targetPath,
       width: verified?.width || w || 1920,
@@ -212,6 +276,15 @@ export async function mouseAction(action: "left_click" | "right_click" | "double
       using System.Threading;
 
       public class NativeMouse {
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern IntPtr OpenDesktop(string lpszDesktop, uint dwFlags, bool fInherit, uint dwDesiredAccess);
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern IntPtr OpenInputDesktop(uint dwFlags, bool fInherit, uint dwDesiredAccess);
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern bool SetThreadDesktop(IntPtr hDesktop);
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern bool CloseDesktop(IntPtr hDesktop);
+
           [DllImport("user32.dll")]
           public static extern bool SetCursorPos(int X, int Y);
           [DllImport("user32.dll")]
@@ -223,24 +296,34 @@ export async function mouseAction(action: "left_click" | "right_click" | "double
           private const uint MOUSEEVENTF_RIGHTUP   = 0x0010;
 
           public static void Act(string act, int x, int y) {
-              SetCursorPos(x, y);
-              Thread.Sleep(30);
-              if (act == "left_click") {
-                  mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, 0);
-              } else if (act == "right_click") {
-                  mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, (uint)x, (uint)y, 0, 0);
-              } else if (act == "double_click") {
-                  mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, 0);
-                  Thread.Sleep(80);
-                  mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, 0);
-              }
+              IntPtr hDesk = OpenDesktop("Default", 0, false, 0x01FF);
+              if (hDesk == IntPtr.Zero) hDesk = OpenInputDesktop(0, false, 0x01FF);
+
+              Thread t = new Thread(() => {
+                  if (hDesk != IntPtr.Zero) SetThreadDesktop(hDesk);
+                  SetCursorPos(x, y);
+                  Thread.Sleep(30);
+                  if (act == "left_click") {
+                      mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, 0);
+                  } else if (act == "right_click") {
+                      mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, (uint)x, (uint)y, 0, 0);
+                  } else if (act == "double_click") {
+                      mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, 0);
+                      Thread.Sleep(80);
+                      mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, 0);
+                  }
+              });
+              t.SetApartmentState(ApartmentState.STA);
+              t.Start();
+              t.Join();
+              if (hDesk != IntPtr.Zero) CloseDesktop(hDesk);
           }
       }
 "@
       [NativeMouse]::Act('${action}', ${x}, ${y})
     `;
 
-    await executeCommand(psScript.replace(/\r?\n/g, " "));
+    await executeCommand(psScript);
     return `Thực hiện ${action} tại tọa độ (${x}, ${y}) thành công.`;
   }
 
@@ -273,11 +356,41 @@ export async function keyboardAction(keys: string): Promise<string> {
 
   if (isWindows) {
     const psScript = `
-      Add-Type -AssemblyName System.Windows.Forms;
-      [System.Windows.Forms.SendKeys]::SendWait('${keys.replace(/'/g, "''")}')
+      Add-Type @"
+      using System;
+      using System.Runtime.InteropServices;
+      using System.Threading;
+      using System.Windows.Forms;
+
+      public class NativeKeyboard {
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern IntPtr OpenDesktop(string lpszDesktop, uint dwFlags, bool fInherit, uint dwDesiredAccess);
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern IntPtr OpenInputDesktop(uint dwFlags, bool fInherit, uint dwDesiredAccess);
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern bool SetThreadDesktop(IntPtr hDesktop);
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern bool CloseDesktop(IntPtr hDesktop);
+
+          public static void Send(string keys) {
+              IntPtr hDesk = OpenDesktop("Default", 0, false, 0x01FF);
+              if (hDesk == IntPtr.Zero) hDesk = OpenInputDesktop(0, false, 0x01FF);
+
+              Thread t = new Thread(() => {
+                  if (hDesk != IntPtr.Zero) SetThreadDesktop(hDesk);
+                  SendKeys.SendWait(keys);
+              });
+              t.SetApartmentState(ApartmentState.STA);
+              t.Start();
+              t.Join();
+              if (hDesk != IntPtr.Zero) CloseDesktop(hDesk);
+          }
+      }
+"@ -ReferencedAssemblies "System.Windows.Forms";
+      [NativeKeyboard]::Send('${keys.replace(/'/g, "''")}')
     `;
 
-    await executeCommand(psScript.replace(/\r?\n/g, " "));
+    await executeCommand(psScript);
     return `Đã gửi phím / văn bản: "${keys}"`;
   }
 
