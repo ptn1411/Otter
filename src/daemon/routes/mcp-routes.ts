@@ -146,6 +146,37 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
         const output = body.wrapInBlock !== false ? generateGscriptBlock([node], body.comment || "Otter Action") : [node];
         return jsonResponse({ success: true, pasteReadyJson: JSON.stringify(body.wrapInBlock !== false ? [output] : output, null, 2) });
       }
+
+      if (toolName === "cua_get_inventory") {
+        const { getCuaToolList } = await import("../desktop");
+        try {
+          const tools = await getCuaToolList();
+          const query = (body.query || "").toLowerCase();
+          const filtered = query
+            ? tools.filter((t: any) =>
+                (t.name && t.name.toLowerCase().includes(query)) ||
+                (t.description && t.description.toLowerCase().includes(query))
+              )
+            : tools;
+          handleMcpActivity({ type: "cua_action", action: "inventory", count: filtered.length });
+          return jsonResponse({ ok: true, tools: filtered });
+        } catch (err: any) {
+          return errorResponse(err.message, 500);
+        }
+      }
+
+      if (toolName === "cua_execute_tool") {
+        const targetTool = body.toolName || body.tool;
+        if (!targetTool) return errorResponse("Thiếu tham số 'toolName'", 400);
+        const { executeCuaTool } = await import("../desktop");
+        try {
+          const res = await executeCuaTool(targetTool, body.arguments || body.args || {});
+          handleMcpActivity({ type: "cua_action", action: "execute_tool", toolName: targetTool });
+          return jsonResponse({ ok: true, result: res });
+        } catch (err: any) {
+          return errorResponse(err.message, 500);
+        }
+      }
     }
 
     const result = await executeExternalTool(serverKey, toolName, body, handleMcpActivity);
@@ -298,6 +329,18 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
           qualifiedName: "otter_core_gpm_generate_script",
           title: "Tạo kịch bản GPM Automate V3 (.NET JSON)",
           description: "Sinh mã JSON .NET paste-ready sao chép dán trực tiếp vào GPM Automate Editor."
+        },
+        {
+          name: "cua_get_inventory",
+          qualifiedName: "otter_core_cua_get_inventory",
+          title: "Tra cứu danh sách công cụ CUA (Computer-Use Agent)",
+          description: "Tra cứu danh sách công cụ native CUA SDK từ trycua/cua để tự động hóa màn hình, chuột, phím."
+        },
+        {
+          name: "cua_execute_tool",
+          qualifiedName: "otter_core_cua_execute_tool",
+          title: "Thực thi công cụ CUA (Computer-Use Agent)",
+          description: "Gọi trực tiếp bất kỳ công cụ nào của CUA trycua/cua: click, type_text, hotkey, get_screen_size, get_window_state, list_windows..."
         }
       ],
       lastChecked: Date.now(),

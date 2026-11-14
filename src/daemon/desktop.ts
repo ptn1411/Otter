@@ -511,3 +511,65 @@ export async function getCuaToolList(): Promise<any[]> {
     return [{ error: `Cannot load CUA library (${ext}): ${err.message}` }];
   }
 }
+
+/**
+ * Thực thi một công cụ CUA (Computer-Use Agent) từ trycua/cua
+ */
+export async function executeCuaTool(toolName: string, args: Record<string, any> = {}): Promise<any> {
+  const isWindows = process.platform === "win32";
+  const ext = isWindows ? ".exe" : "";
+  const exeDir = path.dirname(process.execPath);
+  const candidates = [
+    path.resolve(`tools/cua/cua-driver${ext}`),
+    path.join(exeDir, "tools", "cua", `cua-driver${ext}`),
+    path.join(process.cwd(), "tools", "cua", `cua-driver${ext}`),
+    process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, "Otter", "tools", "cua", `cua-driver${ext}`) : "",
+    path.resolve(`bin/cua/cua-driver${ext}`),
+    process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, "Programs", "Cua", "cua-driver", "bin", `cua-driver${ext}`) : "",
+    path.join(os.homedir(), ".cua-driver", "packages", "current", `cua-driver${ext}`)
+  ].filter(Boolean);
+
+  let driverExe = "";
+  for (const c of candidates) {
+    try {
+      await fs.access(c);
+      driverExe = c;
+      break;
+    } catch {}
+  }
+
+  if (!driverExe) {
+    throw new Error(`Không tìm thấy file thực thi cua-driver tại tools/cua/cua-driver${ext}`);
+  }
+
+  // Đảm bảo daemon CUA đang chạy
+  try {
+    const statusRes = await executeCommand(`"${driverExe}" status`);
+    if (!statusRes.stdout?.toLowerCase().includes("running")) {
+      const { spawn } = await import("bun");
+      spawn({
+        cmd: [driverExe, "serve", "--no-overlay"],
+        stdout: "ignore",
+        stderr: "ignore",
+        stdin: "ignore"
+      });
+      await new Promise(r => setTimeout(r, 600));
+    }
+  } catch {}
+
+  const jsonArg = JSON.stringify(args || {});
+  const cmd = isWindows
+    ? `& "${driverExe}" call ${toolName} '${jsonArg.replace(/'/g, "''")}'`
+    : `"${driverExe}" call ${toolName} '${jsonArg.replace(/'/g, "'\\''")}'`;
+  const res = await executeCommand(cmd);
+
+  if (res.exitCode !== 0 && (!res.stdout || res.stderr)) {
+    throw new Error(`Lỗi CUA (${res.exitCode}): ${res.stderr || res.stdout}`);
+  }
+
+  try {
+    return JSON.parse(res.stdout);
+  } catch {
+    return res.stdout || "Success";
+  }
+}

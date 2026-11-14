@@ -1205,6 +1205,71 @@
         }
       }
     },
+    "/api/activity/v1/desktop/cua/inventory": {
+      "get": {
+        "operationId": "cua_get_inventory",
+        "summary": "Tra cứu danh sách công cụ Computer-Use Agent (CUA)",
+        "description": "Lấy danh sách các công cụ native của CUA SDK (trycua/cua) hỗ trợ tự động hóa màn hình, chuột, phím, cửa sổ ứng dụng",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "description": "Từ khóa lọc công cụ (ví dụ: 'window', 'click', 'browser', 'cursor')",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách các công cụ CUA khả dụng"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/desktop/cua/execute": {
+      "post": {
+        "operationId": "cua_execute_tool",
+        "summary": "Thực thi công cụ Computer-Use Agent (CUA) native",
+        "description": "Thực thi trực tiếp bất kỳ công cụ nào của Computer-Use Agent (trycua/cua) như click, type_text, hotkey, get_screen_size, get_cursor_position, list_windows, bring_to_front, v.v.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "toolName": {
+                    "type": "string",
+                    "description": "Tên công cụ CUA cần gọi (ví dụ: 'get_screen_size', 'get_cursor_position', 'get_window_state', 'click', 'type_text', 'hotkey')"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "description": "Tham số JSON truyền vào công cụ (mặc định: {})",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "toolName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả thực thi công cụ CUA"
+          },
+          "400": {
+            "description": "Thiếu tham số hoặc tham số không hợp lệ"
+          },
+          "500": {
+            "description": "Lỗi khi thực thi công cụ CUA"
+          }
+        }
+      }
+    },
     "/api/activity/v1/skills/tts": {
       "post": {
         "operationId": "tts_generate_speech",

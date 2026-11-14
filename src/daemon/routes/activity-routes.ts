@@ -26,7 +26,7 @@ import {
   cancelAllPendingMediaPosts,
   tickMediaPostScheduler
 } from "../fb-media-post";
-import { listWindows, takeScreenshot, mouseAction, keyboardAction } from "../desktop";
+import { listWindows, takeScreenshot, mouseAction, keyboardAction, executeCuaTool, getCuaToolList } from "../desktop";
 import { invokeVpsSsh } from "../vps";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
@@ -505,6 +505,38 @@ export async function handleActivityRoutes(
         const msg = await keyboardAction(body.keys || body.text || "");
         handleMcpActivity({ type: "desktop_action", action: "type", text: body.keys || body.text });
         return jsonResponse({ ok: true, message: msg });
+      } catch (err: any) {
+        return errorResponse(err.message, 500);
+      }
+    }
+
+    if (desktopAction === "cua/inventory" && req.method === "GET") {
+      try {
+        const query = url.searchParams.get("query") || "";
+        const tools = await getCuaToolList();
+        let filtered = tools;
+        if (query) {
+          const q = query.toLowerCase();
+          filtered = tools.filter((t: any) =>
+            (t.name && t.name.toLowerCase().includes(q)) ||
+            (t.description && t.description.toLowerCase().includes(q))
+          );
+        }
+        handleMcpActivity({ type: "cua_action", action: "inventory", count: filtered.length });
+        return jsonResponse({ ok: true, tools: filtered });
+      } catch (err: any) {
+        return errorResponse(err.message, 500);
+      }
+    }
+
+    if (desktopAction === "cua/execute" && req.method === "POST") {
+      try {
+        const body: any = await req.json();
+        const toolName = body.toolName || body.tool;
+        if (!toolName) return errorResponse("Thiếu tham số 'toolName'", 400);
+        const result = await executeCuaTool(toolName, body.arguments || body.args || {});
+        handleMcpActivity({ type: "cua_action", action: "execute_tool", toolName });
+        return jsonResponse({ ok: true, result });
       } catch (err: any) {
         return errorResponse(err.message, 500);
       }

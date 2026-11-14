@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { listWindows, takeScreenshot, mouseAction, keyboardAction, getCuaToolList } from "../desktop";
+import { listWindows, takeScreenshot, mouseAction, keyboardAction, getCuaToolList, executeCuaTool } from "../desktop";
 
 export function registerDesktopTools(mcp: McpServer, onActivity?: (event: any) => void): void {
   // Tool 17: Liệt kê các cửa sổ ứng dụng đang mở trên màn hình Desktop Windows
@@ -127,6 +127,33 @@ export function registerDesktopTools(mcp: McpServer, onActivity?: (event: any) =
       } catch (err: any) {
         return {
           content: [{ type: "text", text: `Error loading CUA inventory: ${err.message}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // Tool 22: Thực thi trực tiếp công cụ CUA (Computer-Use Agent)
+  mcp.tool(
+    "cua_execute_tool",
+    "Thực thi trực tiếp bất kỳ công cụ nào của Computer-Use Agent (CUA) từ trycua/cua (ví dụ: 'click', 'double_click', 'right_click', 'drag', 'scroll', 'type_text', 'press_key', 'hotkey', 'get_screen_size', 'get_cursor_position', 'get_window_state', 'list_windows', 'bring_to_front', 'launch_app',...). Tự động chạy daemon CUA nếu chưa khởi động.",
+    {
+      toolName: z.string().describe("Tên công cụ CUA cần gọi (ví dụ: 'get_screen_size', 'get_cursor_position', 'get_window_state', 'click', 'type_text', 'hotkey')"),
+      arguments: z.record(z.any()).default({}).describe("Tham số JSON truyền vào công cụ (mặc định: {})")
+    },
+    async ({ toolName, arguments: toolArgs }) => {
+      try {
+        const result = await executeCuaTool(toolName, toolArgs);
+        onActivity?.({ type: "cua_action", action: "execute_tool", toolName });
+        return {
+          content: [{
+            type: "text",
+            text: typeof result === "object" ? JSON.stringify(result, null, 2) : String(result)
+          }]
+        };
+      } catch (err: any) {
+        return {
+          content: [{ type: "text", text: `Error executing CUA tool '${toolName}': ${err.message}` }],
           isError: true
         };
       }
