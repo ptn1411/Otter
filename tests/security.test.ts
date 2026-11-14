@@ -7,7 +7,9 @@ import {
   isRequestAuthorized,
   setAuthToken,
   isTrustedHostOrIp,
-  getTailscaleIp
+  getTailscaleIp,
+  isFullAccessEnabled,
+  setFullAccess
 } from "../src/daemon/security";
 import { interpolateEnvVars } from "../src/daemon/mcp-gateway";
 import { getCorsHeaders } from "../src/daemon/routes/common";
@@ -31,6 +33,28 @@ describe("Security & Hardening Tests", () => {
     expect(getAllowedWorkspaces()).toContain(tempWorkspace);
     const subFile = path.resolve(tempWorkspace, "test.txt");
     expect(() => assertSafePath(subFile)).not.toThrow();
+  });
+
+  it("allows access to any path when Full Access is enabled, and enforces restriction when disabled", () => {
+    const outsidePath = path.resolve("..", "..", "..", "Windows", "System32", "drivers", "etc", "hosts");
+
+    // 1. By default in tests, outsidePath is blocked
+    setFullAccess(false, false);
+    expect(isFullAccessEnabled()).toBe(false);
+    expect(() => assertSafePath(outsidePath)).toThrow(/Truy cập bị từ chối/);
+
+    // 2. Enable Full Access -> outsidePath is allowed
+    setFullAccess(true, false);
+    expect(isFullAccessEnabled()).toBe(true);
+    expect(getAllowedWorkspaces()).toContain("*");
+    expect(() => assertSafePath(outsidePath)).not.toThrow();
+    expect(assertSafePath(outsidePath)).toBe(outsidePath);
+
+    // 3. Disable Full Access -> outsidePath is blocked again
+    setFullAccess(false, false);
+    expect(isFullAccessEnabled()).toBe(false);
+    expect(getAllowedWorkspaces()).not.toContain("*");
+    expect(() => assertSafePath(outsidePath)).toThrow(/Truy cập bị từ chối/);
   });
 
   it("strictly enforces token verification for external/tunnel hosts", () => {

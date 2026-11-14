@@ -1,8 +1,9 @@
 import * as path from "node:path";
 import * as fs from "node:fs";
+import * as os from "node:os";
 import defaultOpenApi from "../../../openapi.json";
 import { openFolderPicker, openFilePicker } from "../system";
-import { registerAllowedWorkspace, isTrustedHostOrIp, getTailscaleIp } from "../security";
+import { registerAllowedWorkspace, isTrustedHostOrIp, getTailscaleIp, isFullAccessEnabled, setFullAccess, getAllowedWorkspaces } from "../security";
 import { getExternalToolsOpenApiPaths } from "../mcp-gateway";
 import { corsHeaders, jsonResponse, errorResponse } from "./common";
 import { getLicenseStatus, activateLicense } from "../license";
@@ -90,6 +91,30 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
   if (url.pathname === "/api/system/tunnel/open" && req.method === "POST") {
     const success = openTunnelInBrowser();
     return jsonResponse({ success, status: getQuickTunnelStatus() });
+  }
+
+  // 0.2 Quản lý quyền truy cập Full Access (Cho phép tạo dự án và truy cập file tự do)
+  if (url.pathname === "/api/system/security/full-access" && req.method === "GET") {
+    return jsonResponse({
+      fullAccess: isFullAccessEnabled(),
+      workspaces: getAllowedWorkspaces(),
+      homeDir: os.homedir()
+    });
+  }
+
+  if (url.pathname === "/api/system/security/full-access" && req.method === "POST") {
+    let body: any = {};
+    try { body = await req.json(); } catch {}
+    const enabled = Boolean(body?.enabled ?? true);
+    setFullAccess(enabled, true);
+    return jsonResponse({
+      success: true,
+      fullAccess: isFullAccessEnabled(),
+      workspaces: getAllowedWorkspaces(),
+      message: enabled
+        ? "Đã bật chế độ Full Access (Cho phép truy cập toàn bộ tệp tin và tạo dự án tự do trên máy tính)"
+        : "Đã tắt chế độ Full Access (Chỉ cho phép truy cập các workspace an toàn)"
+    });
   }
 
   // 1. Native Folder Picker
@@ -209,6 +234,7 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
     const lic = await getLicenseStatus();
     const tailscaleIp = getTailscaleIp();
     const tailscaleUrl = tailscaleIp ? `http://${tailscaleIp}:${port}` : null;
+    const fullAccess = isFullAccessEnabled();
 
     return new Response(`
       <!doctype html>
@@ -239,6 +265,7 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
             <div style="display:flex; gap:8px; align-items:center;">
               <span class="badge" data-i18n="badge_online">ONLINE</span>
               <span class="${lic.licensed ? 'badge' : 'badge-warn'}">🔒 <span data-i18n="${lic.licensed ? 'lic_ok' : 'lic_no'}">${lic.licensed ? 'BẢN QUYỀN: ' + (lic.payload?.license_type?.toUpperCase() || 'OK') : 'CHƯA KÍCH HOẠT'}</span></span>
+              <span class="${fullAccess ? 'badge' : 'badge-warn'}">⚡ <span>${fullAccess ? 'FULL ACCESS' : 'RESTRICTED'}</span></span>
             </div>
             <div style="display:flex; gap:6px;">
               <button class="lang-btn" id="btn-vi" onclick="setLang('vi')">🇻🇳 Tiếng Việt</button>
@@ -278,6 +305,7 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
           </div>
           ` : ""}
 
+          <div class="feature">⚡ <span data-i18n="f_full_access"><strong>Quyền tệp tin & dự án:</strong></span> <span style="color:${fullAccess ? '#34d399' : '#f59e0b'}; font-weight:700;">${fullAccess ? 'Toàn quyền (Full Access)' : 'Giới hạn trong Workspace'}</span> <button onclick="toggleFullAccess(!${fullAccess})" style="padding:2px 10px; font-size:12px; margin-left:8px; background:${fullAccess ? '#ef4444' : '#10b981'};">${fullAccess ? 'Tắt Full Access' : 'Bật Full Access'}</button></div>
           <div class="feature">✅ <span data-i18n="f_dom"><strong>Alibaba Page Agent DOM:</strong> Nén DOM thông minh, phân tích sâu Shadow DOM & iframe</span></div>
           <div class="feature">✅ <span data-i18n="f_hwid"><strong>Mã thiết bị (Support Code):</strong></span> <code>${lic.supportCode}</code></div>
           <div class="feature">✅ <span data-i18n="f_hud"><strong>Interactive HUD & Inspector:</strong> Viền sáng trạng thái và di chuột soi phần tử</span></div>
@@ -310,6 +338,7 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
               ts_ip_label: "IP Tailscale máy chủ:",
               ts_copy_url: "📋 Sao chép URL",
               ts_copy_mcp: "📋 Sao chép MCP",
+              f_full_access: "<strong>Quyền tệp tin & dự án:</strong>",
               f_dom: "<strong>Alibaba Page Agent DOM:</strong> Nén DOM thông minh, phân tích sâu Shadow DOM & iframe",
               f_hwid: "<strong>Mã thiết bị (Support Code):</strong>",
               f_hud: "<strong>Interactive HUD & Inspector:</strong> Viền sáng trạng thái và di chuột soi phần tử",
@@ -336,6 +365,7 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
               ts_ip_label: "Server Tailscale IP:",
               ts_copy_url: "📋 Copy URL",
               ts_copy_mcp: "📋 Copy MCP",
+              f_full_access: "<strong>File & Project Access:</strong>",
               f_dom: "<strong>Alibaba Page Agent DOM:</strong> Smart DOM compression, deep Shadow DOM & iframe parsing",
               f_hwid: "<strong>Hardware ID (Support Code):</strong>",
               f_hud: "<strong>Interactive HUD & Inspector:</strong> Real-time highlight border and element inspector",
@@ -346,6 +376,17 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
               openapi_label: "OpenAPI Documentation:"
             }
           };
+
+          function toggleFullAccess(enabled) {
+            fetch('/api/system/security/full-access', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ enabled })
+            }).then(r => r.json()).then(res => {
+              alert(res.message);
+              location.reload();
+            }).catch(e => alert(e.message));
+          }
 
           function setLang(lang) {
             localStorage.setItem("otter_lang", lang);

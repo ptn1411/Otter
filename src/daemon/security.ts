@@ -7,6 +7,16 @@ const allowedWorkspaces = new Set<string>([
   path.resolve(".")
 ]);
 
+// Auto-register user's home directory if available, for convenient project access
+try {
+  const home = os.homedir();
+  if (home && !process.env.OTTER_STRICT_WORKSPACE) {
+    if (process.env.NODE_ENV !== "test") {
+      allowedWorkspaces.add(path.resolve(home));
+    }
+  }
+} catch {}
+
 // Fleet / multi-project (2026-10-31): OTTER_PROJECTS là danh sách
 // project root mà daemon này được phép chạm vào, cách nhau bằng dấu
 // phẩy (dấu phẩy, không phải path.delimiter, vì đường dẫn Windows có
@@ -19,7 +29,78 @@ if (process.env.OTTER_PROJECTS) {
   }
 }
 
+let fullAccessOverride: boolean | null = null;
 let cachedAuthToken: string | null | undefined = undefined;
+
+/**
+ * Kiểm tra xem chế độ Full Access (Cho phép truy cập toàn bộ hệ thống file / tạo dự án tự do) có đang được bật không.
+ * Các nguồn kích hoạt:
+ * 1. Runtime override (setFullAccess)
+ * 2. Biến môi trường OTTER_FULL_ACCESS=true / 1
+ * 3. File cấu hình ~/.otter/full-access chứa 'true' hoặc '1' (hoặc tồn tại không rỗng)
+ * 4. allowedWorkspaces chứa "*"
+ */
+export function isFullAccessEnabled(): boolean {
+  if (fullAccessOverride !== null) {
+    return fullAccessOverride;
+  }
+
+  // Trong môi trường test tự động, mặc định không bật trừ khi có biến môi trường
+  if (process.env.NODE_ENV === "test" && !process.env.OTTER_FULL_ACCESS) {
+    return false;
+  }
+
+  if (process.env.OTTER_FULL_ACCESS === "true" || process.env.OTTER_FULL_ACCESS === "1") {
+    return true;
+  }
+
+  if (allowedWorkspaces.has("*")) {
+    return true;
+  }
+
+  try {
+    const flagFile = path.join(os.homedir(), ".otter", "full-access");
+    if (fs.existsSync(flagFile)) {
+      const content = fs.readFileSync(flagFile, "utf-8").trim().toLowerCase();
+      if (content === "" || content === "true" || content === "1" || content === "yes") {
+        return true;
+      }
+    }
+  } catch {}
+
+  return false;
+}
+
+/**
+ * Bật hoặc tắt chế độ Full Access. Có thể lưu bền vững vào ~/.otter/full-access.
+ */
+export function setFullAccess(enabled: boolean, persist = true): void {
+  fullAccessOverride = enabled;
+  if (enabled) {
+    allowedWorkspaces.add("*");
+  } else {
+    allowedWorkspaces.delete("*");
+  }
+
+  if (persist) {
+    try {
+      const dir = path.join(os.homedir(), ".otter");
+      const flagFile = path.join(dir, "full-access");
+      if (enabled) {
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(flagFile, "true\n", "utf-8");
+      } else {
+        if (fs.existsSync(flagFile)) {
+          fs.unlinkSync(flagFile);
+        }
+      }
+    } catch (err) {
+      console.warn("[Security] Could not persist full-access setting:", err);
+    }
+  }
+}
 
 /**
  * Đăng ký thêm thư mục làm việc an toàn (ví dụ: khi người dùng chọn qua Folder Picker)
@@ -38,12 +119,16 @@ export function registerAllowedWorkspace(folderPath: string): void {
  * Lấy danh sách các thư mục an toàn hiện tại
  */
 export function getAllowedWorkspaces(): string[] {
+  if (isFullAccessEnabled()) {
+    return ["*", ...Array.from(allowedWorkspaces)];
+  }
   return Array.from(allowedWorkspaces);
 }
 
 /**
  * Kiểm tra và bảo vệ chống Path Traversal (Arbitrary File Read/Write).
  * Ném ngoại lệ nếu đường dẫn nằm ngoài các workspace được phép.
+ * Khi chế độ Full Access được bật, cho phép mọi đường dẫn hợp lệ trên hệ thống.
  */
 export function assertSafePath(targetPath: string): string {
   if (!targetPath) {
@@ -51,7 +136,14 @@ export function assertSafePath(targetPath: string): string {
   }
 
   const resolved = path.resolve(targetPath);
+
+  // Nếu chế độ Full Access được bật: cho phép mọi đường dẫn
+  if (isFullAccessEnabled()) {
+    return resolved;
+  }
+
   const isAllowed = Array.from(allowedWorkspaces).some(ws => {
+    if (ws === "*") return true;
     return resolved === ws || resolved.startsWith(ws + path.sep);
   });
 

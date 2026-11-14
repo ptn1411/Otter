@@ -21,7 +21,7 @@
 import * as crypto from "node:crypto";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getAllowedWorkspaces } from "./security";
+import { getAllowedWorkspaces, isFullAccessEnabled } from "./security";
 import { createPlan, getPlanStatus, resumePlan, cancelPlan, refreshPlanStatus, type PlanTaskInput } from "./plan";
 import { enqueueInjection } from "./continuous-loop";
 
@@ -196,8 +196,9 @@ export function sweepTimedOutDispatches(db: DbLike): string[] {
 /** Project allowlist check, shared by worker receive + hub dispatch. */
 export function isProjectAllowed(projectRoot: string | null | undefined): boolean {
   if (!projectRoot) return true; // no explicit project: worker uses its own cwd
+  if (isFullAccessEnabled()) return true;
   const resolved = path.resolve(projectRoot);
-  return getAllowedWorkspaces().some((ws) => resolved === ws || resolved.startsWith(ws + path.sep));
+  return getAllowedWorkspaces().some((ws) => ws === "*" || resolved === ws || resolved.startsWith(ws + path.sep));
 }
 
 /**
