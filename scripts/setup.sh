@@ -149,6 +149,17 @@ if [ -n "$FOUND_LOCAL" ]; then
             break
         fi
     done
+
+    # Đồng bộ thư mục bin và tools nếu có
+    if [ -d "./bin" ]; then
+        cp -rf ./bin/* "$BIN_DIR/" 2>/dev/null || true
+        echo "[+] Đã đồng bộ thư mục bin/ vào: $BIN_DIR"
+    fi
+    if [ -d "./tools" ]; then
+        mkdir -p "$INSTALL_DIR/tools"
+        cp -rf ./tools/* "$INSTALL_DIR/tools/" 2>/dev/null || true
+        echo "[+] Đã đồng bộ thư mục tools/ vào: $INSTALL_DIR/tools"
+    fi
 else
     echo "[*] Đang tự động kéo bản build ($BINARY_NAME) từ $SERVER..."
     CANDIDATE_URLS=(
@@ -172,6 +183,14 @@ else
         echo "[!] Không thể tự động tải file từ máy chủ: $SERVER"
         echo "    Vui lòng kiểm tra kết nối mạng hoặc truy cập $SERVER để tải thủ công."
         exit 1
+    fi
+
+    # Tải gói tools.tar.gz từ server nếu có
+    curl -fsSL --connect-timeout 15 "$SERVER/tools.tar.gz" -o "$INSTALL_DIR/tools.tar.gz" 2>/dev/null || true
+    if [ -f "$INSTALL_DIR/tools.tar.gz" ]; then
+        tar -xzf "$INSTALL_DIR/tools.tar.gz" -C "$INSTALL_DIR" 2>/dev/null || true
+        rm -f "$INSTALL_DIR/tools.tar.gz"
+        echo "[+] Đã tải và giải nén tools từ: $SERVER/tools.tar.gz"
     fi
 fi
 
