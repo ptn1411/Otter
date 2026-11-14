@@ -3,6 +3,24 @@ import type { ServerConfig } from "../types";
 const STORAGE_SERVERS_KEY = "activityServersV1";
 const STORAGE_TAB_SERVERS_KEY = "activityTabServersV1";
 
+export function isLocalHost(host: string): boolean {
+  let h = host.toLowerCase().trim();
+  if (h.startsWith("::ffff:") || h.startsWith("[::ffff:")) {
+    h = h.replace(/^\[?::ffff:/i, "").replace(/\](:\d+)?$/, "");
+  }
+  if (["localhost", "127.0.0.1", "[::1]", "::1", "0.0.0.0"].includes(h)) return true;
+  if (h.endsWith(".ts.net")) return true;
+  if (h.startsWith("fd7a:115c:a1e0:")) return true;
+  const parts = h.split(".").map(Number);
+  if (parts.length === 4 && parts.every(p => !isNaN(p) && p >= 0 && p <= 255)) {
+    if (parts[0] === 100 && parts[1] >= 64 && parts[1] <= 127) return true;
+    if (parts[0] === 192 && parts[1] === 168) return true;
+    if (parts[0] === 10) return true;
+    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
+  }
+  return false;
+}
+
 export const DEFAULT_SERVERS: ServerConfig[] = [
   {
     id: "localhost",
@@ -36,7 +54,7 @@ export async function getServers(): Promise<ServerConfig[]> {
 export async function addServer(name: string, apiBase: string, apiKey?: string): Promise<ServerConfig> {
   const cleanBase = apiBase.replace(/\/+$/, "");
   const id = "server-" + Math.random().toString(36).slice(2, 10);
-  const isLocal = ["localhost", "127.0.0.1", "[::1]"].includes(new URL(cleanBase).hostname);
+  const isLocal = isLocalHost(new URL(cleanBase).hostname);
   const newServer: ServerConfig = {
     id,
     name: name.trim() || cleanBase,
@@ -85,7 +103,7 @@ export async function importServers(payload: any): Promise<{ imported: number; s
     try { new URL(raw.apiBase); } catch { skipped++; continue; }
     if (byBase.has(raw.apiBase)) { skipped++; continue; }
     const id = raw.id && !existing.some((s) => s.id === raw.id) ? raw.id : "server-" + Math.random().toString(36).slice(2, 10);
-    const isLocal = ["localhost", "127.0.0.1", "[::1]"].includes(new URL(raw.apiBase).hostname);
+    const isLocal = isLocalHost(new URL(raw.apiBase).hostname);
     toStore.push({ id, name: String(raw.name || raw.apiBase), apiBase: String(raw.apiBase).replace(/\/+$/, ""), local: isLocal, apiKey: raw.apiKey });
     imported++;
   }

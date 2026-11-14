@@ -93,8 +93,10 @@ export function decryptPayload<T = any>(
   }
 }
 
+import { isTrustedHostOrIp } from '../security';
+
 /**
- * Kiểm tra tính hợp lệ của URL kết nối: Bắt buộc HTTPS/WSS cho các server ngoài localhost
+ * Kiểm tra tính hợp lệ của URL kết nối: Bắt buộc HTTPS/WSS cho các server ngoài localhost/Tailscale
  */
 export function validateSecureUrl(urlStr: string): {
   secure: boolean;
@@ -104,10 +106,10 @@ export function validateSecureUrl(urlStr: string): {
   try {
     const parsed = new URL(urlStr);
     const host = parsed.hostname.toLowerCase();
-    const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '[::1]';
+    const isLocalOrTrusted = host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || isTrustedHostOrIp(host);
 
-    // Nếu là host ngoài localhost, bắt buộc phải dùng giao thức bảo mật SSL/TLS
-    if (!isLocal) {
+    // Nếu là host ngoài mạng tin cậy (không phải localhost hay Tailscale/LAN), bắt buộc phải dùng giao thức bảo mật SSL/TLS
+    if (!isLocalOrTrusted) {
       if (parsed.protocol !== 'https:' && parsed.protocol !== 'wss:') {
         return {
           secure: false,

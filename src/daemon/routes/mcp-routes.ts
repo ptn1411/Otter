@@ -8,6 +8,7 @@ import {
   removeExternalServer
 } from "../mcp-gateway";
 import { jsonResponse, errorResponse } from "./common";
+import { isTrustedHostOrIp } from "../security";
 import { matchDaemonRoute, matchDaemonRoutePrefix, getDaemonRoute } from "./lcg-routes";
 import { browserBridge } from "../browser-bridge";
 import { getDatabase } from "../db";
@@ -168,10 +169,14 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
       error: s.error
     }));
 
+    const isTrusted = isTrustedHostOrIp(url.host);
+    const proto = req.headers.get("x-forwarded-proto") || (url.protocol.startsWith("https") ? "https" : (isTrusted ? "http" : "https"));
+    const serverBaseUrl = `${proto}://${url.host}`;
+
     const builtInServer = {
       name: "otter_core",
       status: "connected",
-      url: `http://127.0.0.1:${process.env.PORT || 1993}/mcp`,
+      url: `${serverBaseUrl}/mcp`,
       toolsCount: 14,
       tools: [
         {

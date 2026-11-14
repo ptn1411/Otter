@@ -2,7 +2,7 @@ import * as path from "node:path";
 import * as fs from "node:fs";
 import defaultOpenApi from "../../../openapi.json";
 import { openFolderPicker, openFilePicker } from "../system";
-import { registerAllowedWorkspace } from "../security";
+import { registerAllowedWorkspace, isTrustedHostOrIp, getTailscaleIp } from "../security";
 import { getExternalToolsOpenApiPaths } from "../mcp-gateway";
 import { corsHeaders, jsonResponse, errorResponse } from "./common";
 import { getLicenseStatus, activateLicense } from "../license";
@@ -56,7 +56,15 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
 
   // 0.1 Quản lý Cloudflare Quick Tunnel tự động (TryCloudflare 1 lần)
   if (matchDaemonRoute(url.pathname, "SYS_TUNNEL") && req.method === "GET") {
-    return jsonResponse(getQuickTunnelStatus());
+    const tunnel = getQuickTunnelStatus();
+    const tailscaleIp = getTailscaleIp();
+    return jsonResponse({
+      ...tunnel,
+      tailscaleIp: tailscaleIp || null,
+      tailscaleUrl: tailscaleIp ? `http://${tailscaleIp}:${port}` : null,
+      tailscaleMcpUrl: tailscaleIp ? `http://${tailscaleIp}:${port}/mcp` : null,
+      tailscaleSseUrl: tailscaleIp ? `http://${tailscaleIp}:${port}/sse` : null
+    });
   }
 
   if (matchDaemonRoute(url.pathname, "SYS_TUNNEL_START") && req.method === "POST") {
@@ -118,7 +126,8 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
           json = JSON.parse(raw);
         } catch {}
       }
-      const proto = req.headers.get("x-forwarded-proto") || (url.protocol.startsWith("https") ? "https" : (url.host.includes("localhost") || url.host.includes("127.0.0.1") ? "http" : "https"));
+      const isTrusted = isTrustedHostOrIp(url.host);
+      const proto = req.headers.get("x-forwarded-proto") || (url.protocol.startsWith("https") ? "https" : (isTrusted ? "http" : "https"));
       const serverUrl = `${proto}://${url.host}`;
       json.servers = [
         {
@@ -162,7 +171,8 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
 
   // 5. OpenAI Plugin Manifest
   if (url.pathname === "/.well-known/ai-plugin.json" && req.method === "GET") {
-    const proto = req.headers.get("x-forwarded-proto") || (url.protocol.startsWith("https") ? "https" : (url.host.includes("localhost") || url.host.includes("127.0.0.1") ? "http" : "https"));
+    const isTrusted = isTrustedHostOrIp(url.host);
+    const proto = req.headers.get("x-forwarded-proto") || (url.protocol.startsWith("https") ? "https" : (isTrusted ? "http" : "https"));
     const origin = `${proto}://${url.host}`;
     const authType = process.env.OTTER_AUTH_TYPE || "oauth";
     const authConfig = authType === "oauth" ? {
@@ -197,6 +207,8 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
   if (url.pathname === "/dashboard" || url.pathname === "/status" || url.pathname === "/activity") {
     const tunnel = getQuickTunnelStatus();
     const lic = await getLicenseStatus();
+    const tailscaleIp = getTailscaleIp();
+    const tailscaleUrl = tailscaleIp ? `http://${tailscaleIp}:${port}` : null;
 
     return new Response(`
       <!doctype html>
@@ -254,6 +266,18 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
             `}
           </div>
 
+          ${tailscaleIp ? `
+          <div class="tunnel-box" style="border-color: #10b981; background: #06201b;">
+            <h4 style="margin:0 0 8px 0; color:#34d399;" data-i18n="ts_heading">🦎 Mạng Tailscale WireGuard (Bảo mật Cao)</h4>
+            <p style="margin:4px 0; font-size:13px; color:#cbd5e1;"><span data-i18n="ts_ip_label">IP Tailscale máy chủ:</span> <strong style="color:#38bdf8;">${tailscaleIp}</strong></p>
+            <pre style="margin:8px 0; color:#34d399;">${tailscaleUrl}&#10;MCP: ${tailscaleUrl}/mcp&#10;SSE: ${tailscaleUrl}/sse</pre>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+              <button onclick="navigator.clipboard.writeText('${tailscaleUrl}'); this.innerText='Đã sao chép!'; setTimeout(()=>this.innerText='📋 Sao chép URL', 2000)" style="background:#059669;" data-i18n="ts_copy_url">📋 Sao chép URL</button>
+              <button onclick="navigator.clipboard.writeText('${tailscaleUrl}/mcp'); this.innerText='Đã sao chép!'; setTimeout(()=>this.innerText='📋 Sao chép MCP', 2000)" style="background:#334155;" data-i18n="ts_copy_mcp">📋 Sao chép MCP</button>
+            </div>
+          </div>
+          ` : ""}
+
           <div class="feature">✅ <span data-i18n="f_dom"><strong>Alibaba Page Agent DOM:</strong> Nén DOM thông minh, phân tích sâu Shadow DOM & iframe</span></div>
           <div class="feature">✅ <span data-i18n="f_hwid"><strong>Mã thiết bị (Support Code):</strong></span> <code>${lic.supportCode}</code></div>
           <div class="feature">✅ <span data-i18n="f_hud"><strong>Interactive HUD & Inspector:</strong> Viền sáng trạng thái và di chuột soi phần tử</span></div>
@@ -262,8 +286,8 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
           <div class="feature">💬 <span data-i18n="f_community"><strong>Cộng đồng Facebook:</strong> <a href="https://www.facebook.com/share/g/1CN8sjFYDH/?mibextid=wwXIfr" target="_blank" style="color:#60a5fa; text-decoration:none;">Tham gia nhóm hỗ trợ Otter</a></span></div>
           <div class="feature">📖 <a href="/docs" target="_blank" style="color:#34d399; font-weight:700; text-decoration:none;">🌟 Xem Trang Giới Thiệu & Hướng Dẫn Sử Dụng (/docs) ➔</a></div>
 
-          <p><strong data-i18n="endpoints_title">Điểm cuối cục bộ (Localhost):</strong></p>
-          <pre>SSE: /sse&#10;Streamable HTTP: /mcp&#10;WebSocket: ws://127.0.0.1:${port}/api/activity/v1/stream</pre>
+          <p><strong data-i18n="endpoints_title">Điểm cuối kết nối (Endpoints):</strong></p>
+          <pre>SSE: /sse&#10;Streamable HTTP: /mcp&#10;WebSocket: ws://${url.host}/api/activity/v1/stream</pre>
           <p><span data-i18n="openapi_label">Tài liệu OpenAPI:</span> <a href="/openapi.json" target="_blank">/openapi.json</a></p>
         </div>
 
@@ -282,13 +306,17 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
               tunnel_open: "🌐 Mở Tunnel",
               tunnel_copy: "📋 Sao chép URL",
               tunnel_stop: "🛑 Dừng Quick Tunnel",
+              ts_heading: "🦎 Mạng Tailscale WireGuard (Bảo mật Cao)",
+              ts_ip_label: "IP Tailscale máy chủ:",
+              ts_copy_url: "📋 Sao chép URL",
+              ts_copy_mcp: "📋 Sao chép MCP",
               f_dom: "<strong>Alibaba Page Agent DOM:</strong> Nén DOM thông minh, phân tích sâu Shadow DOM & iframe",
               f_hwid: "<strong>Mã thiết bị (Support Code):</strong>",
               f_hud: "<strong>Interactive HUD & Inspector:</strong> Viền sáng trạng thái và di chuột soi phần tử",
               f_term: "<strong>Live Persistent Terminal:</strong> Tích hợp stream PTY và xterm liên tục",
               f_sub: "<strong>Continuous Mode:</strong> Phối hợp sub-agent liên tục không ngắt quãng",
               f_community: "<strong>Cộng đồng Facebook:</strong> <a href=\"https://www.facebook.com/share/g/1CN8sjFYDH/?mibextid=wwXIfr\" target=\"_blank\" style=\"color:#60a5fa; text-decoration:none;\">Tham gia nhóm hỗ trợ Otter</a>",
-              endpoints_title: "Điểm cuối cục bộ (Localhost):",
+              endpoints_title: "Điểm cuối kết nối (Endpoints):",
               openapi_label: "Tài liệu OpenAPI:"
             },
             en: {
@@ -304,13 +332,17 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
               tunnel_open: "🌐 Open Tunnel",
               tunnel_copy: "📋 Copy URL",
               tunnel_stop: "🛑 Stop Quick Tunnel",
+              ts_heading: "🦎 Tailscale WireGuard Network (Encrypted)",
+              ts_ip_label: "Server Tailscale IP:",
+              ts_copy_url: "📋 Copy URL",
+              ts_copy_mcp: "📋 Copy MCP",
               f_dom: "<strong>Alibaba Page Agent DOM:</strong> Smart DOM compression, deep Shadow DOM & iframe parsing",
               f_hwid: "<strong>Hardware ID (Support Code):</strong>",
               f_hud: "<strong>Interactive HUD & Inspector:</strong> Real-time highlight border and element inspector",
               f_term: "<strong>Live Persistent Terminal:</strong> Continuous PTY streaming and xterm integration",
               f_sub: "<strong>Continuous Mode:</strong> Uninterrupted sub-agent coordination",
               f_community: "<strong>Facebook Community:</strong> <a href=\"https://www.facebook.com/share/g/1CN8sjFYDH/?mibextid=wwXIfr\" target=\"_blank\" style=\"color:#60a5fa; text-decoration:none;\">Join Otter Support Group</a>",
-              endpoints_title: "Localhost Endpoints:",
+              endpoints_title: "Connection Endpoints:",
               openapi_label: "OpenAPI Documentation:"
             }
           };

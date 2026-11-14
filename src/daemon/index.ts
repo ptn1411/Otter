@@ -1,4 +1,5 @@
 import * as path from "node:path";
+import { getTailscaleIp } from "./security";
 import { initDatabase } from "./db";
 import { createMcpServer } from "./mcp";
 import { recoverTaskQueue, sweepStaleBridgeTasks } from "./tools/task-bridge";
@@ -329,7 +330,8 @@ const server = Bun.serve<WsClientData>({
       url.pathname === "/oauth/register";
 
     if (!isPublicPath) {
-      const authErr = checkAuth(req, url);
+      const clientIp = server.requestIP(req)?.address;
+      const authErr = checkAuth(req, url, clientIp);
       if (authErr) return authErr;
     }
 
@@ -682,6 +684,12 @@ console.log(`[+] MCP Streamable HTTP: http://127.0.0.1:${PORT}/mcp`);
 console.log(`[+] Realtime Stream: ws://127.0.0.1:${PORT}/api/activity/v1/stream`);
 console.log(`[+] Folder Picker: http://127.0.0.1:${PORT}/api/local/system/folder-picker`);
 console.log(`[+] OpenAPI Schema: http://127.0.0.1:${PORT}/openapi.json`);
+const tailscaleIp = getTailscaleIp();
+if (tailscaleIp) {
+  console.log(`[+] 🔒 Tailscale IP: http://${tailscaleIp}:${PORT}`);
+  console.log(`[+] 🔗 Tailscale MCP: http://${tailscaleIp}:${PORT}/mcp`);
+  console.log(`[+] 🔗 Tailscale SSE: http://${tailscaleIp}:${PORT}/sse`);
+}
 console.log(`=======================================================`);
 
 import { startMessengerListener } from "./fb-sales";

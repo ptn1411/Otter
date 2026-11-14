@@ -127,13 +127,106 @@ export function setAuthToken(token: string | null): void {
 }
 
 /**
+ * Kiểm tra xem host hoặc IP có thuộc mạng tin cậy (Localhost, Tailscale VPN, Private LAN) không.
+ */
+export function isTrustedHostOrIp(hostOrIp: string | null | undefined): boolean {
+  if (!hostOrIp) return false;
+  let cleaned = hostOrIp.replace(/^https?:\/\//i, "").split("/")[0].trim();
+
+  // Strip IPv4-mapped IPv6 prefix (e.g. ::ffff:100.111.68.103 hoặc [::ffff:127.0.0.1])
+  if (cleaned.startsWith("::ffff:") || cleaned.startsWith("[::ffff:")) {
+    cleaned = cleaned.replace(/^\[?::ffff:/i, "").replace(/\](:\d+)?$/, "");
+  }
+
+  let hostWithoutPort: string;
+
+  if (cleaned.startsWith("[")) {
+    const endBracket = cleaned.indexOf("]");
+    if (endBracket !== -1) {
+      hostWithoutPort = cleaned.slice(1, endBracket).toLowerCase();
+    } else {
+      hostWithoutPort = cleaned.replace(/^\[/, "").toLowerCase();
+    }
+  } else if (cleaned.includes(":") && cleaned.split(":").length > 2) {
+    // Raw IPv6 address without brackets, e.g. fd7a:115c:a1e0::1 or ::1
+    hostWithoutPort = cleaned.toLowerCase();
+  } else {
+    // Hostname or IPv4 with optional :port
+    hostWithoutPort = cleaned.split(":")[0].toLowerCase();
+  }
+
+  // 1. Localhost
+  if (["localhost", "127.0.0.1", "::1", "0.0.0.0"].includes(hostWithoutPort)) {
+    return true;
+  }
+
+  // 2. Tailscale MagicDNS (*.ts.net)
+  if (hostWithoutPort.endsWith(".ts.net")) {
+    return true;
+  }
+
+  // 3. Tailscale IPv6 (fd7a:115c:a1e0::/48)
+  if (hostWithoutPort.startsWith("fd7a:115c:a1e0:") || hostWithoutPort.startsWith("fd7a:115c:a1e0::")) {
+    return true;
+  }
+
+  // 4. IPv4 checks (Tailscale CGNAT & Private LAN)
+  const parts = hostWithoutPort.split(".").map(Number);
+  if (parts.length === 4 && parts.every(p => !isNaN(p) && p >= 0 && p <= 255)) {
+    // Tailscale IPv4: 100.64.0.0/10 (100.64.0.0 - 100.127.255.255)
+    if (parts[0] === 100 && parts[1] >= 64 && parts[1] <= 127) {
+      return true;
+    }
+    // LAN: 192.168.0.0/16
+    if (parts[0] === 192 && parts[1] === 168) {
+      return true;
+    }
+    // LAN: 10.0.0.0/8
+    if (parts[0] === 10) {
+      return true;
+    }
+    // LAN: 172.16.0.0/12 (172.16.0.0 - 172.31.255.255)
+    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Tự động tìm IP Tailscale của máy tính hiện tại qua network interfaces
+ */
+export function getTailscaleIp(): string | null {
+  try {
+    const nets = os.networkInterfaces();
+    for (const [name, addrs] of Object.entries(nets)) {
+      if (!addrs) continue;
+      const isTsInterface = name.toLowerCase().includes("tailscale");
+      for (const a of addrs) {
+        if (a.internal) continue;
+        if (isTsInterface && (a.family === "IPv4" || (a.family as any) === 4)) {
+          return a.address;
+        }
+        const parts = a.address.split(".").map(Number);
+        if (parts.length === 4 && parts[0] === 100 && parts[1] >= 64 && parts[1] <= 127) {
+          return a.address;
+        }
+      }
+    }
+  } catch {}
+  return null;
+}
+
+/**
  * Kiểm tra xác thực (Authentication).
  * Quy tắc an toàn:
- * 1. Nếu request đến từ Internet (Cloudflare Tunnel hoặc remote host khác localhost), BẮT BUỘC phải có token.
- * 2. Nếu có OTTER_API_KEY được cấu hình (kể cả trên localhost), BẮT BUỘC phải có token.
- * 3. Hỗ trợ Authorization: Bearer <token> hoặc query param ?token=<token>.
+ * 1. Nếu request đến từ Internet (Cloudflare Tunnel hoặc remote host công khai), BẮT BUỘC phải có token.
+ * 2. Nếu request đến từ Localhost, mạng Tailscale VPN hoặc Private LAN, được miễn trừ token khi OTTER_API_KEY chưa đặt.
+ * 3. Nếu có OTTER_API_KEY được cấu hình (kể cả trên localhost/Tailscale), BẮT BUỘC phải có token.
+ * 4. Hỗ trợ Authorization: Bearer <token> hoặc query param ?token=<token>.
  */
-export function isRequestAuthorized(req: Request, url: URL): boolean {
+export function isRequestAuthorized(req: Request, url: URL, clientIp?: string): boolean {
   const token = getAuthToken();
 
   // Kiểm tra Header Authorization
@@ -151,16 +244,24 @@ export function isRequestAuthorized(req: Request, url: URL): boolean {
     return true;
   }
 
-  // Kiểm tra host xuất xứ
+  // Kiểm tra host và client xuất xứ
   const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || url.host;
-  const isExternal = !host.includes("localhost") && !host.includes("127.0.0.1") && !host.includes("[::1]");
+  const forwardedFor = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const realIp = req.headers.get("x-real-ip")?.trim();
+  const effectiveClientIp = clientIp || forwardedFor || realIp || "";
 
-  if (isExternal) {
+  // Nếu cả host VÀ client IP (nếu có) thuộc Tailscale / Localhost / Private LAN:
+  // Được coi là truy cập mạng tin cậy an toàn
+  const isHostTrusted = isTrustedHostOrIp(host);
+  const isClientTrusted = effectiveClientIp ? isTrustedHostOrIp(effectiveClientIp) : isHostTrusted;
+  const isTrustedNetwork = isHostTrusted && isClientTrusted;
+
+  if (!isTrustedNetwork) {
     // Khi đi qua Cloudflare Tunnel hoặc truy cập ngoài mạng, BẮT BUỘC chặn nếu không có token
     return false;
   }
 
-  // Nếu ở localhost và người dùng chưa đặt OTTER_API_KEY, cho phép local development
+  // Nếu ở mạng nội bộ (Local / Tailscale / Private LAN) và người dùng chưa đặt OTTER_API_KEY, cho phép truy cập
   if (!process.env.OTTER_API_KEY) {
     return true;
   }

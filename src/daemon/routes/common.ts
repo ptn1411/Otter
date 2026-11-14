@@ -1,4 +1,4 @@
-import { isRequestAuthorized } from "../security";
+import { isRequestAuthorized, isTrustedHostOrIp } from "../security";
 
 const ALLOWED_ORIGIN_PATTERNS = [
   /^https?:\/\/localhost(:\d+)?$/,
@@ -14,6 +14,7 @@ export function getCorsHeaders(req?: Request): Record<string, string> {
 
   if (origin) {
     const isMatched = ALLOWED_ORIGIN_PATTERNS.some(p => p.test(origin)) ||
+      isTrustedHostOrIp(origin) ||
       (process.env.ALLOWED_ORIGINS && process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim()).includes(origin));
 
     if (isMatched) {
@@ -55,10 +56,10 @@ export function errorResponse(message: string, status = 500, req?: Request): Res
   });
 }
 
-export function checkAuth(req: Request, url: URL): Response | null {
-  if (!isRequestAuthorized(req, url)) {
-    const proto = req.headers.get("x-forwarded-proto") || (url.protocol.startsWith("https") ? "https" : (url.host.includes("localhost") || url.host.includes("127.0.0.1") ? "http" : "https"));
+export function checkAuth(req: Request, url: URL, clientIp?: string): Response | null {
+  if (!isRequestAuthorized(req, url, clientIp)) {
     const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || url.host;
+    const proto = req.headers.get("x-forwarded-proto") || (url.protocol.startsWith("https") ? "https" : (isTrustedHostOrIp(host) ? "http" : "https"));
     const origin = `${proto}://${host}`;
     return new Response("Unauthorized: Yêu cầu Authorization Bearer token hợp lệ.", {
       status: 401,

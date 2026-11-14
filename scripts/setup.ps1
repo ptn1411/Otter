@@ -80,6 +80,8 @@ Write-Host "========================================================`n" -Foregro
 # ------------------------------------------------------------------------------
 Get-Process -Name "otter-tray" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 Get-Process -Name "otter" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-Process -Name "cloudflared" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Start-Sleep -Milliseconds 800
 
 # ------------------------------------------------------------------------------
 # 3. CHUAN BI THU MUC CAI DAT

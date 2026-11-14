@@ -111,8 +111,16 @@ fn spawn_otter_daemon(install_dir: &Path, exe: &Path) {
     }
 }
 
+static LAST_SPAWN: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
 fn ensure_daemon_running() {
     if is_port_open(1993) {
+        return;
+    }
+
+    let now = chrono_lite_timestamp();
+    let last = LAST_SPAWN.load(std::sync::atomic::Ordering::Relaxed);
+    if now.saturating_sub(last) < 10 {
         return;
     }
 
@@ -120,6 +128,7 @@ fn ensure_daemon_running() {
     log_msg(&format!("Install dir: {:?}", install_dir));
     if let Some(exe) = get_otter_binary(&install_dir) {
         log_msg(&format!("Found binary: {:?}", exe));
+        LAST_SPAWN.store(now, std::sync::atomic::Ordering::Relaxed);
         spawn_otter_daemon(&install_dir, &exe);
     } else {
         log_msg("Could not find otter binary!");
@@ -158,7 +167,10 @@ fn copy_to_clipboard(text: &str) {
 }
 
 fn open_url(url: &str) {
-    let _ = open::that(url);
+    let url_owned = url.to_string();
+    std::thread::spawn(move || {
+        let _ = open::that(&url_owned);
+    });
 }
 
 fn restart_daemon() {
@@ -329,14 +341,14 @@ fn main() {
         return;
     }
 
+    // Đảm bảo daemon được khởi động ngay
+    ensure_daemon_running();
+
     // Nếu người dùng nhấp trực tiếp (không phải Windows boot autostart), mở Dashboard ngay
     if !is_autostart {
         log_msg("Opening Otter Dashboard in default browser...");
         open_url("http://127.0.0.1:1993/activity");
     }
-
-    // Khởi chạy daemon ngầm
-    ensure_daemon_running();
 
     // Vòng lặp giám sát liên tục (Daemon Watchdog & Dynamic Tray Creator)
     let mut tray_opt: Option<TrayItem> = None;
