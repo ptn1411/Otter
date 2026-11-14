@@ -543,7 +543,6 @@ export async function findCuaDriverExe(): Promise<string> {
  * Thực thi một công cụ CUA (Computer-Use Agent) từ trycua/cua
  */
 export async function executeCuaTool(toolName: string, args: Record<string, any> = {}): Promise<any> {
-  const isWindows = process.platform === "win32";
   const driverExe = await findCuaDriverExe();
 
   // Đảm bảo daemon CUA đang chạy
@@ -561,19 +560,28 @@ export async function executeCuaTool(toolName: string, args: Record<string, any>
     }
   } catch {}
 
-  const jsonArg = JSON.stringify(args || {});
-  const cmd = isWindows
-    ? `& "${driverExe}" call ${toolName} '${jsonArg.replace(/'/g, "''")}'`
-    : `"${driverExe}" call ${toolName} '${jsonArg.replace(/'/g, "'\\''")}'`;
-  const res = await executeCommand(cmd);
+  // Gọi trực tiếp bằng mảng tham số (Bun.spawn) thay vì ghép chuỗi lệnh
+  // qua PowerShell: PowerShell 5.1 nuốt dấu ngoặc kép quanh tên trường
+  // trong JSON nhiều trường (vd {"x": 915, "y": 1065} thành {x:915,y:1065})
+  // khiến cua-driver báo lỗi parse. Dùng mảng tham số thì JSON đi nguyên vẹn.
+  const { spawn } = await import("bun");
+  const proc = spawn({
+    cmd: [driverExe, "call", toolName, JSON.stringify(args || {})],
+    stdout: "pipe",
+    stderr: "pipe",
+    stdin: "ignore"
+  });
+  const stdout = await new Response(proc.stdout).text();
+  const stderr = await new Response(proc.stderr).text();
+  const exitCode = await proc.exited;
 
-  if (res.exitCode !== 0 && (!res.stdout || res.stderr)) {
-    throw new Error(`Lỗi CUA (${res.exitCode}): ${res.stderr || res.stdout}`);
+  if (exitCode !== 0 && (!stdout || stderr)) {
+    throw new Error(`Lỗi CUA (${exitCode}): ${stderr || stdout}`);
   }
 
   try {
-    return JSON.parse(res.stdout);
+    return JSON.parse(stdout);
   } catch {
-    return res.stdout || "Success";
+    return stdout || "Success";
   }
 }
