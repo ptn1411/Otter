@@ -28,6 +28,8 @@
     "package": "bun run build:extension && powershell -Command \"New-Item -ItemType Directory -Force -Path dist; Compress-Archive -Path extension/dist/* -DestinationPath dist/otter-extension.zip -Force\" && bun run build:exe",
     "deploy": "bun scripts/deploy.ts",
     "deploy:vps": "bun scripts/deploy-to-vps.ts",
+    "redeploy": "bun scripts/redeploy.ts",
+    "deploy:all": "bun scripts/redeploy.ts",
     "license:status": "bun src/daemon/license/keygen-tool.ts --status",
     "license:self": "bun src/daemon/license/keygen-tool.ts --self",
     "license:keygen": "bun src/daemon/license/keygen-tool.ts",
