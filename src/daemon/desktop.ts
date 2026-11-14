@@ -513,9 +513,9 @@ export async function getCuaToolList(): Promise<any[]> {
 }
 
 /**
- * Thực thi một công cụ CUA (Computer-Use Agent) từ trycua/cua
+ * Tìm đường dẫn file thực thi cua-driver trên hệ thống
  */
-export async function executeCuaTool(toolName: string, args: Record<string, any> = {}): Promise<any> {
+export async function findCuaDriverExe(): Promise<string> {
   const isWindows = process.platform === "win32";
   const ext = isWindows ? ".exe" : "";
   const exeDir = path.dirname(process.execPath);
@@ -529,18 +529,22 @@ export async function executeCuaTool(toolName: string, args: Record<string, any>
     path.join(os.homedir(), ".cua-driver", "packages", "current", `cua-driver${ext}`)
   ].filter(Boolean);
 
-  let driverExe = "";
   for (const c of candidates) {
     try {
       await fs.access(c);
-      driverExe = c;
-      break;
+      return c;
     } catch {}
   }
 
-  if (!driverExe) {
-    throw new Error(`Không tìm thấy file thực thi cua-driver tại tools/cua/cua-driver${ext}`);
-  }
+  throw new Error(`Không tìm thấy file thực thi cua-driver tại tools/cua/cua-driver${ext}`);
+}
+
+/**
+ * Thực thi một công cụ CUA (Computer-Use Agent) từ trycua/cua
+ */
+export async function executeCuaTool(toolName: string, args: Record<string, any> = {}): Promise<any> {
+  const isWindows = process.platform === "win32";
+  const driverExe = await findCuaDriverExe();
 
   // Đảm bảo daemon CUA đang chạy
   try {

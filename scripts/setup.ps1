@@ -447,7 +447,8 @@ try {
     $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
     $PathParts = ($UserPath -split ';') | Where-Object { [string]::IsNullOrWhiteSpace($_) -eq $false }
     $SkillToolDir = Join-Path $InstallDir "tools\skill"
-    $DirsToAdd = @($InstallDir, $BinDir, $SkillToolDir)
+    $CuaToolDir = Join-Path $InstallDir "tools\cua"
+    $DirsToAdd = @($InstallDir, $BinDir, $SkillToolDir, $CuaToolDir)
     $Changed = $false
 
     foreach ($d in $DirsToAdd) {
@@ -521,7 +522,7 @@ if ($proc) {
     }
     Write-Host " - Bieu tuong Desktop: $DesktopShortcutPath (Nhan bat & chay ngam)" -ForegroundColor Cyan
     Write-Host " - Tu khoi dong: Da bat moi khi mo may tinh" -ForegroundColor White
-    Write-Host " - Lenh goi CLI: 'otter' (Da dang ky PATH toan cuc)" -ForegroundColor Cyan
+    Write-Host " - Lenh goi CLI: 'otter', 'otter cua', 'cua' (Da dang ky PATH toan cuc)" -ForegroundColor Cyan
     Write-Host " - Thu muc cai dat: $InstallDir" -ForegroundColor White
     if (Test-Path $ExtDir) {
         Write-Host " - Chrome Extension: $ExtDir (Da giai nen san)" -ForegroundColor Gray

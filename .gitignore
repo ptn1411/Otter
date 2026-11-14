@@ -34,7 +34,10 @@ otter-storage.sqlite*
 
 .agents/
 
-/bin/
+/bin/*
+!/bin/cua*
+!/bin/*.cmd
+!/bin/*.ps1
 /bin/skills/
 /bin/cloudflared*
 /bin/codebase-memory-mcp*

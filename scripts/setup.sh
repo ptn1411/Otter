@@ -312,9 +312,11 @@ else
     [ -f "$HOME/.profile" ] && TARGET_RCS+=("$HOME/.profile")
 fi
 
-# Đồng thời tạo symlink vào ~/.local/bin nếu thư mục tồn tại
+# Cấp quyền thực thi và tạo symlink cho cua / otter
+[ -f "$BIN_DIR/cua" ] && chmod +x "$BIN_DIR/cua" 2>/dev/null || true
 if [ -d "$HOME/.local/bin" ]; then
     ln -sf "$TARGET_EXE" "$HOME/.local/bin/otter" 2>/dev/null || true
+    [ -f "$BIN_DIR/cua" ] && ln -sf "$BIN_DIR/cua" "$HOME/.local/bin/cua" 2>/dev/null || true
 fi
 
 for rc in "${TARGET_RCS[@]}"; do

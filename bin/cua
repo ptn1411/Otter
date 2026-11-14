@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+CANDIDATES=(
+  "$SCRIPT_DIR/../tools/cua/cua-driver"
+  "$SCRIPT_DIR/tools/cua/cua-driver"
+  "$HOME/.otter/tools/cua/cua-driver"
+  "$HOME/.cua-driver/packages/current/cua-driver"
+)
+
+for c in "${CANDIDATES[@]}"; do
+  if [ -x "$c" ]; then
+    exec "$c" "$@"
+  fi
+done
+
+exec otter cua "$@"

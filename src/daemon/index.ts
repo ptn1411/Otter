@@ -62,6 +62,11 @@ if (cliArg === "help" || cliArg === "--help" || cliArg === "-h") {
 Cách sử dụng:
   otter                         Khởi động Otter Daemon ngầm (tự động kết nối TryCloudflare)
   otter --no-tunnel             Khởi động Otter Daemon chỉ trên Localhost (không mở Tunnel)
+  otter cua                     Bộ công cụ CLI điều khiển màn hình máy tính CUA (trycua/cua)
+  otter cua serve               Khởi động CUA Daemon (lắng nghe named pipe \\\\.\\pipe\\cua-driver)
+  otter cua call <tool> [args]  Gọi trực tiếp công cụ CUA (get_screen_size, click, type_text...)
+  otter cua list [query]        Liệt kê 61 công cụ CUA khả dụng
+  otter cua status              Xem trạng thái hoạt động của CUA Daemon
   otter license activate <KEY>  Kích hoạt bản quyền bằng License Key
   otter license status          Xem mã thiết bị và trạng thái bản quyền
   otter version                 Xem phiên bản hiện tại
@@ -102,6 +107,106 @@ if (cliArg === "license" || cliArg === "license:activate" || cliArg === "license
     }
     console.log("");
     process.exit(0);
+  }
+}
+
+if (cliArg === "cua" || cliArg === "cua-driver") {
+  const sub = process.argv[3];
+  const { findCuaDriverExe, executeCuaTool, getCuaToolList } = await import("./desktop");
+  const { spawn } = await import("bun");
+
+  try {
+    const driverExe = await findCuaDriverExe();
+
+    if (!sub || sub === "help" || sub === "--help" || sub === "-h") {
+      console.log(`
+🖱️ Otter CUA CLI — Computer-Use Agent Controller (trycua/cua)
+
+Cú pháp:
+  otter cua serve [--no-overlay]            Khởi động CUA Daemon
+  otter cua call <toolName> [json_args]     Gọi trực tiếp công cụ CUA bất kỳ
+  otter cua status                          Kiểm tra trạng thái CUA Daemon & Named Pipe
+  otter cua stop                            Dừng CUA Daemon đang chạy
+  otter cua list [query]                    Liệt kê các công cụ CUA khả dụng
+  otter cua autostart [enable|disable]      Cài đặt tự khởi động CUA cùng hệ thống
+  otter cua doctor                          Kiểm tra chẩn đoán quyền & hệ thống CUA
+
+Ví dụ lệnh thực tế:
+  otter cua call get_screen_size
+  otter cua call get_cursor_position
+  otter cua call check_permissions
+  otter cua call list_windows
+  otter cua call click '{"x": 500, "y": 300}'
+  otter cua call type_text '{"text": "Xin chao Otter"}'
+  otter cua call hotkey '{"keys": ["ctrl", "c"]}'
+`);
+      process.exit(0);
+    }
+
+    if (sub === "serve") {
+      const extraArgs = process.argv.slice(4);
+      console.log(`[*] Đang khởi động CUA Daemon (${driverExe})...`);
+      const proc = spawn({
+        cmd: [driverExe, "serve", ...extraArgs],
+        stdout: "inherit",
+        stderr: "inherit",
+        stdin: "inherit"
+      });
+      await proc.exited;
+      process.exit(proc.exitCode || 0);
+    }
+
+    if (sub === "call") {
+      const toolName = process.argv[4];
+      if (!toolName) {
+        console.error("\x1b[31m[!] Thiếu tên công cụ CUA:\x1b[0m otter cua call <toolName> [jsonArgs]");
+        process.exit(1);
+      }
+      let argsObj: any = {};
+      const rawArg = process.argv[5];
+      if (rawArg) {
+        try {
+          argsObj = JSON.parse(rawArg);
+        } catch (e: any) {
+          console.error(`\x1b[31m[!] Tham số JSON không hợp lệ:\x1b[0m ${e.message}`);
+          process.exit(1);
+        }
+      }
+      const res = await executeCuaTool(toolName, argsObj);
+      console.log(typeof res === "object" ? JSON.stringify(res, null, 2) : res);
+      process.exit(0);
+    }
+
+    if (sub === "list" || sub === "inventory") {
+      const q = process.argv[4] ? process.argv[4].toLowerCase() : "";
+      const tools = await getCuaToolList();
+      const filtered = q
+        ? tools.filter((t: any) => (t.name && t.name.toLowerCase().includes(q)) || (t.description && t.description.toLowerCase().includes(q)))
+        : tools;
+      console.log(`\n📦 Tìm thấy ${filtered.length} công cụ CUA${q ? ` khớp với '${q}'` : ""}:\n`);
+      for (const t of filtered) {
+        console.log(`  • \x1b[36m${t.name || t.id}\x1b[0m`);
+        const firstLine = (t.description || "").split("\n")[0];
+        if (firstLine) console.log(`    ${firstLine.slice(0, 100)}...`);
+      }
+      console.log("");
+      process.exit(0);
+    }
+
+    // Default: forward directly to cua-driver (status, stop, autostart, doctor, permissions, etc.)
+    const restArgs = process.argv.slice(3);
+    const proc = spawn({
+      cmd: [driverExe, ...restArgs],
+      stdout: "inherit",
+      stderr: "inherit",
+      stdin: "inherit"
+    });
+    await proc.exited;
+    process.exit(proc.exitCode || 0);
+
+  } catch (err: any) {
+    console.error(`\x1b[31m[!] Lỗi CUA CLI:\x1b[0m ${err.message}`);
+    process.exit(1);
   }
 }
 
