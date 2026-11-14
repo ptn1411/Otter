@@ -73,10 +73,39 @@ if (process.platform === "win32") {
       await fs.cp(deployTools, targetTools, { recursive: true, force: true });
     }
 
-    // Khởi động lại Otter Daemon bằng PowerShell ẩn
+    // Đảm bảo run_silent.vbs tồn tại để chạy ngầm không hiện cửa sổ
+    const vbsPath = path.join(installDir, "run_silent.vbs");
+    const exePath = path.join(installDir, "otter.exe");
+    const logPath = path.join(installDir, "otter.log");
+    const vbsContent = [
+      'Set WshShell = CreateObject("WScript.Shell")',
+      `WshShell.CurrentDirectory = "${installDir}"`,
+      'q = Chr(34)',
+      `cmd = "cmd.exe /c " & q & q & "${exePath}" & q & " --tunnel > " & q & "${logPath}" & q & " 2>&1" & q`,
+      'WshShell.Run cmd, 0, False'
+    ].join("\r\n");
+    await fs.writeFile(vbsPath, vbsContent, "utf8");
+
+    // Khởi động lại Otter Daemon bằng wscript
     console.log("[*] Khởi động Otter Daemon ngầm...");
-    execSync(`powershell -NoProfile -Command "Start-Process -FilePath '${path.join(installDir, "otter.exe")}' -ArgumentList '--tunnel' -WindowStyle Hidden"`, { stdio: "ignore" });
-    console.log("[+] Đã cài đặt và khởi động lại Otter Daemon cục bộ thành công!");
+    execSync(`wscript.exe "${vbsPath}"`, { stdio: "ignore" });
+
+    // Đợi daemon sẵn sàng
+    let daemonReady = false;
+    for (let i = 0; i < 10; i++) {
+      await new Promise(r => setTimeout(r, 500));
+      try {
+        const ping = await fetch("http://127.0.0.1:1993/api/mcp/servers", { signal: AbortSignal.timeout(1000) });
+        if (ping.ok) {
+          daemonReady = true;
+          console.log("[+] Đã cài đặt và khởi động lại Otter Daemon cục bộ thành công (Port 1993)!");
+          break;
+        }
+      } catch {}
+    }
+    if (!daemonReady) {
+      console.log("[*] Daemon đang khởi động các dịch vụ phụ trợ trong nền...");
+    }
   } catch (err: any) {
     console.error(`[!] Lỗi cập nhật máy cục bộ: ${err.message}`);
   }
