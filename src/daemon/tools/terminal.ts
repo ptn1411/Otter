@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import * as fs from "node:fs/promises";
+import { existsSync } from "node:fs";
 import * as path from "node:path";
 import { executeCommand } from "../terminal";
 import { assertSafePath } from "../security";
@@ -239,7 +240,7 @@ export function registerTerminalAndFileTools(mcp: McpServer, onActivity?: (event
         const resolvedDir = path.resolve(projectDir);
         const resolvedOut = path.resolve(resolvedDir, outputFile);
         const localBin = path.join(resolvedDir, "node_modules", ".bin", process.platform === "win32" ? "remotion.cmd" : "remotion");
-        const cmd = fs.existsSync(localBin)
+        const cmd = existsSync(localBin)
           ? `"${localBin}" render src/index.ts ${compositionId} "${resolvedOut}"`
           : `bunx @remotion/cli render src/index.ts ${compositionId} "${resolvedOut}"`;
 

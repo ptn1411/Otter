@@ -109,8 +109,8 @@ export function isFbBlockReason(reason: string): boolean {
 }
 
 type DbLike = {
-  run: (sql: string, params?: unknown[]) => unknown;
-  query: (sql: string) => { get: (...params: unknown[]) => unknown; all: (...params: unknown[]) => unknown[] };
+  run: (sql: string, ...params: any[]) => unknown;
+  query: (sql: string) => { get: (...params: any[]) => unknown; all: (...params: any[]) => unknown[] };
 };
 
 function now(): number {

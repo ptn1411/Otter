@@ -1,0 +1,1 @@
+#!/usr/bin/env python3"""dbm entry script — run ./bin/dbm from the project directory,or `python3 -m dbm` from the project directory."""import osimport syssys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))from dbm.cli import mainif __name__ == "__main__":    raise SystemExit(main())

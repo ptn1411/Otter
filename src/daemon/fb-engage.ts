@@ -18,7 +18,7 @@ export interface FeedEngagementEntry {
   postKey: string;
   author: string;
   postSnippet: string;
-  reaction: "like" | "love" | "none";
+  reaction: "like" | "love" | "care" | "haha" | "wow" | "sad" | "angry" | "none";
   commentText?: string;
   status: "liked" | "commented" | "both" | "skipped" | "failed";
   createdAt: number;
@@ -27,7 +27,7 @@ export interface FeedEngagementEntry {
 export interface EngagementDecision {
   shouldEngage: boolean;
   skipReason?: string;
-  reaction: "like" | "love" | "none";
+  reaction: "like" | "love" | "care" | "haha" | "wow" | "sad" | "angry" | "none";
   commentText?: string;
   category: "flowers_gifts" | "sports" | "tech_code" | "life_chill" | "general";
 }
@@ -290,13 +290,13 @@ export async function engageFacebookPost(args: EngagePostArgs, onActivity?: (eve
       });
       if (reactRes?.ok && reactRes?.actualReaction !== "none") {
         didLike = true;
-      } else if (typeof args.likeIndex === "number" && args.reaction !== "none") {
+      } else if (typeof args.likeIndex === "number") {
         // Fallback click trực tiếp
         const clickRes: any = await browserBridge.execute("click", { index: args.likeIndex });
         if (clickRes?.ok) didLike = true;
       }
     } catch {
-      if (typeof args.likeIndex === "number" && args.reaction !== "none") {
+      if (typeof args.likeIndex === "number") {
         try {
           const clickRes: any = await browserBridge.execute("click", { index: args.likeIndex });
           if (clickRes?.ok) didLike = true;

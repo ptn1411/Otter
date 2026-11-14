@@ -135,6 +135,7 @@ export function registerSkillTools(mcp: McpServer, onActivity?: (event: any) => 
       const name = rawName.replace(/[^a-zA-Z0-9_\-]/g, "").toLowerCase() || "custom-skill";
 
       const targetDir = path.resolve(".agents/skills", name);
+      const binTargetDir = path.resolve("bin/skills", name);
       const tempDir = path.resolve(`temp-${name}-${Date.now()}`);
 
       try {
@@ -154,9 +155,11 @@ export function registerSkillTools(mcp: McpServer, onActivity?: (event: any) => 
         // 2. Xóa sạch thư mục .git để không làm phình repo
         await fs.rm(path.join(tempDir, ".git"), { recursive: true, force: true });
 
-        // 3. Sao chép vào .agents/skills
+        // 3. Sao chép vào .agents/skills và bin/skills
         await fs.mkdir(path.dirname(targetDir), { recursive: true });
+        await fs.mkdir(path.dirname(binTargetDir), { recursive: true });
         await fs.cp(tempDir, targetDir, { recursive: true, force: true });
+        await fs.cp(tempDir, binTargetDir, { recursive: true, force: true });
         await fs.rm(tempDir, { recursive: true, force: true });
 
         // 4. Trích xuất mô tả từ SKILL.md hoặc README.md
@@ -190,6 +193,7 @@ export function registerSkillTools(mcp: McpServer, onActivity?: (event: any) => 
 
         // 5. Cập nhật catalog.json
         const catalogPath = path.resolve(".agents/skills/catalog.json");
+        const binCatalogPath = path.resolve("bin/skills/catalog.json");
         let list: any[] = [];
         try {
           list = JSON.parse(await fs.readFile(catalogPath, "utf-8"));
@@ -206,6 +210,7 @@ export function registerSkillTools(mcp: McpServer, onActivity?: (event: any) => 
         });
 
         await fs.writeFile(catalogPath, JSON.stringify(list, null, 2), "utf-8");
+        await fs.writeFile(binCatalogPath, JSON.stringify(list, null, 2), "utf-8");
 
         onActivity?.({ type: "skill_action", action: "install_done", skill: name });
 

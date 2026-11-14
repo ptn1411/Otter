@@ -34,6 +34,7 @@ export interface UpdateScheduledTaskInput {
   errorMessage?: string | null;
   startedAt?: number | null;
   completedAt?: number | null;
+  scheduledAt?: number | null;
 }
 
 // Đảm bảo bảng tồn tại (cho cả database trong bộ nhớ hoặc database đã khởi tạo từ trước)
@@ -150,6 +151,10 @@ export function updateScheduledTaskStatus(
   if (update.completedAt !== undefined) {
     fields.push("completed_at = ?");
     params.push(update.completedAt);
+  }
+  if (update.scheduledAt !== undefined) {
+    fields.push("scheduled_at = ?");
+    params.push(update.scheduledAt);
   }
 
   if (fields.length === 0) return false;

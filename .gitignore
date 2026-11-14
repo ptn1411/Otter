@@ -34,13 +34,13 @@ otter-storage.sqlite*
 
 .agents/
 
-bin/
-bin/skills/
-bin/cloudflared*
-bin/codebase-memory-mcp*
-bin/cua/*.exe
-bin/cua/*.dll
-bin/cua/*.node
+/bin/
+/bin/skills/
+/bin/cloudflared*
+/bin/codebase-memory-mcp*
+/bin/cua/*.exe
+/bin/cua/*.dll
+/bin/cua/*.node
 
 # Environment & credentials
 .env

@@ -291,7 +291,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
     return {
       content: [
         {
-          type: "text",
+          type: "text" as const,
           text: JSON.stringify(
             {
               status: "queued",
@@ -403,7 +403,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
       };
 
       return {
-        content: [{ type: "text", text: JSON.stringify(response, null, 2) }]
+        content: [{ type: "text" as const, text: JSON.stringify(response, null, 2) }]
       };
     }
   );
@@ -438,7 +438,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
         message
       });
 
-      return { content: [{ type: "text", text: "OK" }] };
+      return { content: [{ type: "text" as const, text: "OK" }] };
     }
   );
 
@@ -455,7 +455,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
       }
       const db = getDatabase();
       touchHeartbeat(db, task);
-      return { content: [{ type: "text", text: JSON.stringify({ ok: true, taskId, heartbeatAt: task.heartbeatAt }, null, 2) }] };
+      return { content: [{ type: "text" as const, text: JSON.stringify({ ok: true, taskId, heartbeatAt: task.heartbeatAt }, null, 2) }] };
     },
   );
 
@@ -492,7 +492,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
         phase
       });
 
-      return { content: [{ type: "text", text: "OK" }] };
+      return { content: [{ type: "text" as const, text: "OK" }] };
     }
   );
 
@@ -575,7 +575,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
                 retryPrompt,
                 autoNotifyWeb,
               });
-              return { content: [{ type: "text", text: JSON.stringify({ status: "verify_failed", retry: true, taskId }, null, 2) }] };
+              return { content: [{ type: "text" as const, text: JSON.stringify({ status: "verify_failed", retry: true, taskId }, null, 2) }] };
             }
           }
 
@@ -643,7 +643,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
       planDone,
     });
 
-    return { content: [{ type: "text", text: "OK" }] };
+    return { content: [{ type: "text" as const, text: "OK" }] };
   };
 
   mcp.tool(
@@ -718,7 +718,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
         if (inFlight) {
           return {
             content: [{
-              type: "text",
+              type: "text" as const,
               text: JSON.stringify({
                 taskId,
                 status: "running",
@@ -732,7 +732,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
         if (inQueue) {
           return {
             content: [{
-              type: "text",
+              type: "text" as const,
               text: JSON.stringify({
                 taskId,
                 status: "pending",
@@ -746,7 +746,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
 
       return {
         content: [{
-          type: "text",
+          type: "text" as const,
           text: JSON.stringify({
             status: "not_found",
             message: taskId ? `Không tìm thấy thông tin cho taskId: ${taskId}` : "Chưa có task nào được hoàn thành gần đây."
@@ -757,7 +757,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
 
     return {
       content: [{
-        type: "text",
+        type: "text" as const,
         text: JSON.stringify({
           status: result.status,
           taskId: result.taskId,
@@ -827,7 +827,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
         reason
       });
 
-      return { content: [{ type: "text", text: "OK" }] };
+      return { content: [{ type: "text" as const, text: "OK" }] };
     }
   );
 
@@ -839,7 +839,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
       version: "0.2.0-otter-bridge"
     };
     return {
-      content: [{ type: "text", text: JSON.stringify(stats, null, 2) }]
+      content: [{ type: "text" as const, text: JSON.stringify(stats, null, 2) }]
     };
   };
 

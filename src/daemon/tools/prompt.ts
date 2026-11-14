@@ -6,9 +6,9 @@ export function registerExternalAndPromptTools(mcp: McpServer, onActivity?: (eve
   const buildOtterPrompt = () => ({
     description: "Quy trình chuẩn hướng dẫn AI Agent phối hợp các công cụ của Otter",
     messages: [{
-      role: "user",
+      role: "user" as const,
       content: {
-        type: "text",
+        type: "text" as const,
         text: `Bạn là trợ lý AI thông minh kết nối với hệ điều hành máy tính qua Otter.
 
 Dưới đây là cẩm nang phối hợp công cụ theo từng nhóm nhiệm vụ:
@@ -163,7 +163,7 @@ Dưới đây là cẩm nang phối hợp công cụ theo từng nhóm nhiệm v
         error: s.error
       }));
       return {
-        content: [{ type: "text", text: JSON.stringify(summary, null, 2) }]
+        content: [{ type: "text" as const, text: JSON.stringify(summary, null, 2) }]
       };
     }
   );
@@ -177,7 +177,7 @@ Dưới đây là cẩm nang phối hợp công cụ theo từng nhóm nhiệm v
       const updated = await reloadExternalMcpServers();
       const count = updated.reduce((acc, s) => acc + s.tools.length, 0);
       return {
-        content: [{ type: "text", text: `Đã nạp lại ${updated.length} máy chủ MCP ngoài với tổng cộng ${count} công cụ.` }]
+        content: [{ type: "text" as const, text: `Đã nạp lại ${updated.length} máy chủ MCP ngoài với tổng cộng ${count} công cụ.` }]
       };
     }
   );

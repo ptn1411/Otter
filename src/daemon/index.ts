@@ -1,3 +1,4 @@
+import * as path from "node:path";
 import { initDatabase } from "./db";
 import { createMcpServer } from "./mcp";
 import { recoverTaskQueue, sweepStaleBridgeTasks } from "./tools/task-bridge";
@@ -713,7 +714,11 @@ try {
 
 import { startQuickTunnel } from "./tunnel";
 
-const shouldStartTunnel = !process.argv.includes("--no-tunnel") && process.env.NO_TUNNEL !== "true";
+// Tunnel flags: GitHub default-on (--no-tunnel / NO_TUNNEL=true disables it).
+// Local spellings --tunnel / ENABLE_TUNNEL=true still accepted as explicit opt-in.
+const tunnelExplicitlyOn = process.argv.includes("--tunnel") || process.env.ENABLE_TUNNEL === "true";
+const tunnelDisabled = process.argv.includes("--no-tunnel") || process.env.NO_TUNNEL === "true";
+const shouldStartTunnel = tunnelExplicitlyOn || !tunnelDisabled;
 if (shouldStartTunnel) {
   console.log(`[*] Đang tự động kết nối Cloudflare Quick Tunnel (TryCloudflare)...`);
   startQuickTunnel(PORT, (url) => {

@@ -174,9 +174,9 @@ export function registerPlanTools(mcp: McpServer, onActivity?: (event: any) => v
       planId: z.string().optional(),
       taskId: z.string().optional(),
     },
-    async ({ text, planId, taskId }) => {
+    async ({ text: promptText, planId, taskId }) => {
       const db = getDatabase();
-      const entry = enqueueInjection(db, { planId, taskId, text });
+      const entry = enqueueInjection(db, { planId, taskId, text: promptText });
       onActivity?.({ type: "plan_prompt_enqueued", planId, taskId, outboxId: entry.id });
       return text({ outboxId: entry.id, status: entry.status, attemptCount: entry.attemptCount });
     },

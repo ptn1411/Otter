@@ -430,11 +430,11 @@ export async function executeExternalTool(
   toolName: string,
   args: Record<string, any> = {},
   onActivity?: (evt: any) => void
-): Promise<{ content: Array<{ type: string; text: string }>; isError?: boolean }> {
+): Promise<{ content: Array<{ type: "text"; text: string }>; isError?: boolean }> {
   const server = serversCache.get(serverKey);
   if (!server) {
     return {
-      content: [{ type: "text", text: `Error: External MCP server '${serverKey}' not found.` }],
+      content: [{ type: "text" as const, text: `Error: External MCP server '${serverKey}' not found.` }],
       isError: true
     };
   }
@@ -454,7 +454,7 @@ export async function executeExternalTool(
         session = stdioSessions.get(serverKey);
       } catch (err: any) {
         return {
-          content: [{ type: "text", text: `Failed to reconnect stdio server '${serverKey}': ${err.message}` }],
+          content: [{ type: "text" as const, text: `Failed to reconnect stdio server '${serverKey}': ${err.message}` }],
           isError: true
         };
       }
@@ -462,7 +462,7 @@ export async function executeExternalTool(
 
     if (!session) {
       return {
-        content: [{ type: "text", text: `Error: Stdio server '${serverKey}' is not running.` }],
+        content: [{ type: "text" as const, text: `Error: Stdio server '${serverKey}' is not running.` }],
         isError: true
       };
     }
@@ -474,14 +474,14 @@ export async function executeExternalTool(
       });
       const content = Array.isArray(result.content)
         ? result.content
-        : [{ type: "text", text: typeof result === "string" ? result : JSON.stringify(result, null, 2) }];
+        : [{ type: "text" as const, text: typeof result === "string" ? result : JSON.stringify(result, null, 2) }];
       return {
-        content: content as Array<{ type: string; text: string }>,
+        content: content as Array<{ type: "text"; text: string }>,
         isError: Boolean(result.isError)
       };
     } catch (err: any) {
       return {
-        content: [{ type: "text", text: `Failed to execute stdio ${serverKey}/${toolName}: ${err.message}` }],
+        content: [{ type: "text" as const, text: `Failed to execute stdio ${serverKey}/${toolName}: ${err.message}` }],
         isError: true
       };
     }
@@ -489,7 +489,7 @@ export async function executeExternalTool(
 
   if (!server.config.url) {
     return {
-      content: [{ type: "text", text: `Error: External MCP server '${serverKey}' has no URL.` }],
+      content: [{ type: "text" as const, text: `Error: External MCP server '${serverKey}' has no URL.` }],
       isError: true
     };
   }
@@ -513,7 +513,7 @@ export async function executeExternalTool(
   const sec = validateSecureUrl(server.config.url);
   if (!sec.secure) {
     return {
-      content: [{ type: "text", text: sec.reason || `URL server không an toàn: ${server.config.url}` }],
+      content: [{ type: "text" as const, text: sec.reason || `URL server không an toàn: ${server.config.url}` }],
       isError: true,
     };
   }
@@ -534,7 +534,7 @@ export async function executeExternalTool(
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
       return {
-        content: [{ type: "text", text: `HTTP error ${res.status} from ${serverKey}: ${errText}` }],
+        content: [{ type: "text" as const, text: `HTTP error ${res.status} from ${serverKey}: ${errText}` }],
         isError: true
       };
     }
@@ -542,7 +542,7 @@ export async function executeExternalTool(
     const data: any = await res.json();
     if (data.error) {
       return {
-        content: [{ type: "text", text: `Error from ${serverKey} (${data.error.code}): ${data.error.message}` }],
+        content: [{ type: "text" as const, text: `Error from ${serverKey} (${data.error.code}): ${data.error.message}` }],
         isError: true
       };
     }
@@ -556,13 +556,13 @@ export async function executeExternalTool(
     }
 
     return {
-      content: [{ type: "text", text: typeof result === "string" ? result : JSON.stringify(result, null, 2) }],
+      content: [{ type: "text" as const, text: typeof result === "string" ? result : JSON.stringify(result, null, 2) }],
       isError: false
     };
   } catch (err: any) {
     clearTimeout(timeoutId);
     return {
-      content: [{ type: "text", text: `Failed to execute ${serverKey}/${toolName}: ${err.message}` }],
+      content: [{ type: "text" as const, text: `Failed to execute ${serverKey}/${toolName}: ${err.message}` }],
       isError: true
     };
   }

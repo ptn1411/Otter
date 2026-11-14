@@ -32,8 +32,8 @@ export const FLEET_STALE_AFTER_MS = 90_000;
 export const FLEET_DEFAULT_DEADLINE_MS = 60 * 60 * 1000;
 
 type DbLike = {
-  run: (sql: string, params?: unknown[]) => unknown;
-  query: (sql: string) => { get: (...params: unknown[]) => unknown; all: (...params: unknown[]) => unknown[] };
+  run: (sql: string, ...params: any[]) => unknown;
+  query: (sql: string) => { get: (...params: any[]) => unknown; all: (...params: any[]) => unknown[] };
 };
 
 function now(): number { return Date.now(); }

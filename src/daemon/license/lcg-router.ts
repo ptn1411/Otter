@@ -84,7 +84,7 @@ export class LcgCipher {
   /**
    * Giải mã mảng byte (tự động tách 2 byte Salt đầu tiên) trở lại chuỗi văn bản gốc
    */
-  static deobfuscate(bytes: number[] | Uint8Array, baseSeed: number = LCG_DEFAULT_SEED): string {
+  static deobfuscate(bytes: readonly number[] | Uint8Array, baseSeed: number = LCG_DEFAULT_SEED): string {
     const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
     if (arr.length < 2) return '';
 

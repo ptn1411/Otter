@@ -141,7 +141,7 @@ export async function startQuickTunnel(port: number = 1993, onUrlReady?: (url: s
       };
 
       (async () => {
-        if (tunnelProcess?.stdout) {
+        if (tunnelProcess?.stdout && typeof tunnelProcess.stdout !== "number") {
           for await (const chunk of tunnelProcess.stdout) {
             handleStreamData(chunk);
           }
@@ -149,7 +149,7 @@ export async function startQuickTunnel(port: number = 1993, onUrlReady?: (url: s
       })();
 
       (async () => {
-        if (tunnelProcess?.stderr) {
+        if (tunnelProcess?.stderr && typeof tunnelProcess.stderr !== "number") {
           for await (const chunk of tunnelProcess.stderr) {
             handleStreamData(chunk);
           }

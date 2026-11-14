@@ -654,7 +654,7 @@ const lastRepliedTurns = new Map<string, { text: string; at: number }>();
 export async function checkAndReplyMessengerOnce(
   db: Database,
   onActivity?: (ev: any) => void
-): Promise<{ action: string; details?: any }> {
+): Promise<{ action: string; details?: any; recipient?: string; index?: number; error?: string }> {
   try {
     listenerStatus.lastCheckAt = Date.now();
     listenerStatus.lastError = null;

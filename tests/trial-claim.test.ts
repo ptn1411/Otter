@@ -31,7 +31,7 @@ describe("Google Sign-In 30-Day Trial Claims", () => {
     expect(claim.license_key).toBe(res.license_key);
   });
 
-  it("cho phép email yêu cầu tạo lại key 30 ngày dùng thử (không giới hạn 1 email 1 lần)", async () => {
+  it("từ chối nếu email đó yêu cầu dùng thử lần thứ 2 (chỉ được 1 lần duy nhất)", async () => {
     // Thử lại chính xác email đó
     const res2 = await claimTrialLicense(db, {
       email: "tester.trial@example.com",
@@ -39,21 +39,20 @@ describe("Google Sign-In 30-Day Trial Claims", () => {
       ip_address: "127.0.0.1",
     });
 
-    expect(res2.success).toBe(true);
-    expect(res2.duration_days).toBe(30);
-    expect(res2.license_key).toStartWith("OTTER-TRIAL-30D-");
+    expect(res2.success).toBe(false);
+    expect(res2.already_claimed).toBe(true);
+    expect(res2.error).toContain("chỉ được nhận 1 lần duy nhất");
   });
 
-  it("chuẩn hóa chữ hoa chữ thường: TESTER.TRIAL@EXAMPLE.COM cũng thành công", async () => {
+  it("chuẩn hóa chữ hoa chữ thường: TESTER.TRIAL@EXAMPLE.COM cũng bị từ chối", async () => {
     const res3 = await claimTrialLicense(db, {
       email: "TESTER.TRIAL@EXAMPLE.COM",
       name: "Uppercase Test",
       ip_address: "127.0.0.1",
     });
 
-    expect(res3.success).toBe(true);
-    expect(res3.duration_days).toBe(30);
-    expect(res3.license_key).toStartWith("OTTER-TRIAL-30D-");
+    expect(res3.success).toBe(false);
+    expect(res3.already_claimed).toBe(true);
   });
 
   it("từ chối email không hợp lệ", async () => {

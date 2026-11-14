@@ -74,8 +74,8 @@ export interface PageLoopReceipt {
 }
 
 type DbLike = {
-  run: (sql: string, params?: unknown[]) => unknown;
-  query: (sql: string) => { get: (...params: unknown[]) => unknown; all: (...params: unknown[]) => unknown[] };
+  run: (sql: string, ...params: any[]) => unknown;
+  query: (sql: string) => { get: (...params: any[]) => unknown; all: (...params: any[]) => unknown[] };
 };
 
 function now(): number { return Date.now(); }
@@ -241,7 +241,7 @@ export function createPageLoop(db: DbLike, input: {
     const view = getPlanStatus(db, loop.planId);
     const next = getPageLoopNextTask(db, loop.planId);
     firstPrompt = next
-      ? buildIncrementalPrompt({ planGoal: view.plan.goal, planId: loop.planId, nextGoal: next.goal, nextDetails: next.details || undefined, nextVerify: (() => { try { return JSON.parse(next.verifyJson || "[]"); } catch { return []; } })(), lastSummary: `Bắt đầu plan: ${view.plan.goal}`, remainingCount: view.tasks.filter((t) => t.status === "pending" || t.status === "running").length })
+      ? buildIncrementalPrompt({ planGoal: view.plan.goal, planId: loop.planId, nextGoal: next.goal, nextDetails: next.details || undefined, nextVerify: next.verify ?? [], lastSummary: `Bắt đầu plan: ${view.plan.goal}`, remainingCount: view.tasks.filter((t) => t.status === "pending" || t.status === "running").length })
       : buildFinalPrompt({ planGoal: view.plan.goal, planId: loop.planId, view });
   } else {
     firstPrompt = `🎯 [Otter Page Loop — bắt đầu] Mục tiêu: ${goal}\n\nLàm ngay, không dừng, không hỏi lại những gì đã rõ. Khi xong thật, ghi dòng cuối cùng đúng là OTTER-DONE, đứng một mình một dòng.`;
@@ -272,7 +272,7 @@ export function prepareNextPrompt(db: DbLike, loopId: string): { prompt: string;
     const next = getPageLoopNextTask(db, loop.planId);
     if (!next) return { prompt: buildFinalPrompt({ planGoal: view.plan.goal, planId: loop.planId, view }), decision: "done" };
     return {
-      prompt: buildIncrementalPrompt({ planGoal: view.plan.goal, planId: loop.planId, nextGoal: next.goal, nextDetails: next.details || undefined, nextVerify: (() => { try { return JSON.parse(next.verifyJson || "[]"); } catch { return []; } })(), lastSummary: "Tiếp tục plan.", remainingCount: view.tasks.filter((t) => t.status === "pending" || t.status === "running").length }),
+      prompt: buildIncrementalPrompt({ planGoal: view.plan.goal, planId: loop.planId, nextGoal: next.goal, nextDetails: next.details || undefined, nextVerify: next.verify ?? [], lastSummary: "Tiếp tục plan.", remainingCount: view.tasks.filter((t) => t.status === "pending" || t.status === "running").length }),
       decision: "continue",
     };
   }
@@ -398,7 +398,7 @@ export function recordTurn(db: DbLike, input: RecordTurnInput): RecordTurnResult
     prompt = buildIncrementalPrompt({
       planGoal: view.plan.goal, planId: loop.planId, nextGoal: next.goal,
       nextDetails: next.details || undefined,
-      nextVerify: (() => { try { return JSON.parse(next.verifyJson || "[]"); } catch { return []; } })(),
+      nextVerify: next.verify ?? [],
       lastSummary: input.excerpt.slice(0, 500),
       remainingCount: view.tasks.filter((t) => t.status === "pending" || t.status === "running").length,
     });

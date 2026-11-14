@@ -1165,6 +1165,28 @@
       .compare-table {
         min-width: 540px;
       }
+      .pricing-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+      .pricing-card {
+        padding: 26px 20px;
+        border-radius: 20px;
+      }
+      .pricing-card.featured {
+        border-color: rgba(16, 185, 129, 0.45);
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.12);
+      }
+      .pricing-card.vip {
+        border-color: rgba(245, 158, 11, 0.45);
+        box-shadow: 0 10px 30px rgba(245, 158, 11, 0.12);
+      }
+      .price-features li {
+        font-size: 13.5px;
+      }
+      .price-amount {
+        font-size: 28px;
+      }
       .docs-layout {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -1323,22 +1345,92 @@
       color: #f87171;
       background: rgba(239, 68, 68, 0.1);
     }
-    .btn-recreate-key {
-      background: rgba(16, 185, 129, 0.2);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
+
+    /* Pricing Section */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 22px;
+      margin: 36px 0;
     }
-    .btn-recreate-key:hover {
-      background: #10b981;
-      color: #ffffff;
-      transform: translateY(-1px);
+    .pricing-card {
+      background: rgba(18, 24, 38, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 30px 24px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .pricing-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+    }
+    .pricing-card.featured {
+      border: 2px solid #10b981;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(18, 24, 38, 0.95) 100%);
+      box-shadow: 0 0 35px rgba(16, 185, 129, 0.2);
+    }
+    .pricing-card.vip {
+      border: 2px solid #818cf8;
+      background: linear-gradient(180deg, rgba(129, 140, 248, 0.1) 0%, rgba(18, 24, 38, 0.95) 100%);
+      box-shadow: 0 0 35px rgba(129, 140, 248, 0.25);
+    }
+    .pricing-badge {
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #000;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    .pricing-badge.vip-badge {
+      background: linear-gradient(135deg, #818cf8, #6366f1);
+      color: #fff;
+    }
+    .price-amount {
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      margin: 14px 0 8px;
+    }
+    .price-amount span {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .price-features {
+      list-style: none;
+      margin: 18px 0 24px;
+      padding: 0;
+    }
+    .price-features li {
+      padding: 8px 0;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.45;
+    }
+    .price-features li::before {
+      content: "✓";
+      color: #10b981;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .price-features li.vip-feat::before {
+      content: "★";
+      color: #818cf8;
     }
 
     /* Modals */
@@ -1460,32 +1552,30 @@
       <!-- Center Segmented Tabs -->
       <nav class="nav-tabs" aria-label="Điều hướng chính">
         <button class="tab-btn active" id="tab-btn-landing" onclick="switchView('landing')">
-          🌟 Tính Năng
+          🌟 Giới Thiệu
+        </button>
+        <button class="tab-btn" id="tab-btn-pricing" onclick="switchView('pricing')">
+          💎 Bảng Giá
         </button>
         <button class="tab-btn" id="tab-btn-docs" onclick="switchView('docs')">
-          📖 Hướng Dẫn Cài Đặt
+          📖 Hướng Dẫn
         </button>
       </nav>
 
       <!-- Right CTAs & Links -->
       <div class="nav-cta">
-        <!-- Đăng nhập Google / Lấy Key 30 Ngày -->
-        <div id="auth-container">
-          <button class="btn-google" id="btn-google-login" onclick="handleGoogleSignIn()">
-            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-            <span>🎁 30 Ngày Dùng Thử</span>
-          </button>
-        </div>
-
         <a href="https://otter.gpt.io.vn/otter-extension.zip" download class="btn-download-ext btn-sm" title="Tải file zip tiện ích Chrome cài đặt trực tiếp">
           <span>📦</span> <span>Tải Tiện Ích</span>
         </a>
 
-        <button class="btn-secondary btn-sm" onclick="switchView('docs')" style="padding: 6px 12px; font-size: 13px;">
-          <span>⚡</span> <span>Bắt Đầu Ngay</span>
-        </button>
+        <div id="auth-container">
+          <button class="btn-google btn-sm" id="btn-google-login" onclick="handleGoogleSignIn()">
+            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+            <span>Dùng Thử 30 Ngày</span>
+          </button>
+        </div>
 
-        <button class="btn-push btn-icon desktop-only" id="btn-web-push" onclick="requestWebNotificationPermission()" title="Bật thông báo Web khi có cập nhật">
+        <button class="btn-push btn-icon desktop-only" id="btn-web-push" onclick="requestWebNotificationPermission()" title="Bật thông báo Web khi có key hoặc cập nhật">
           <span id="push-icon">🔔</span>
         </button>
 
@@ -1519,21 +1609,17 @@
 
       <!-- Primary Action Buttons (Sleek, refined) -->
       <div class="hero-actions">
-        <button class="btn-google" onclick="handleGoogleSignIn()" style="display:inline-flex; align-items:center; gap:8px; padding:12px 20px; font-size:14px; font-weight:700; border-radius:12px; cursor:pointer;">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-          <span>🔑 Đăng Nhập / Nhận Key 30 Ngày (Miễn Phí)</span>
-        </button>
-
         <a href="https://otter.gpt.io.vn/otter-extension.zip" download class="btn-download-ext">
           <span>📦</span> <span>Tải Tiện Ích Chrome (.zip)</span>
         </a>
 
-        <a href="#features" class="btn-primary" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; padding:12px 22px;">
-          <span>⚡</span> <span>Khám Phá Tính Năng</span>
-        </a>
+        <button onclick="handleGoogleSignIn()" class="btn-google">
+          <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+          <span>🎁 Nhận 30 Ngày Dùng Thử</span>
+        </button>
 
         <button onclick="switchView('docs')" class="btn-secondary">
-          <span>📖</span> <span>Hướng Dẫn Cài Đặt (30s)</span>
+          <span>📖</span> <span>Hướng Dẫn Cài Đặt</span>
         </button>
       </div>
 
@@ -1683,16 +1769,6 @@
           </p>
           <span class="feat-badge-pill">⚡ Bạn luôn nắm quyền kiểm soát</span>
         </div>
-
-        <!-- Feature 7 -->
-        <div class="feature-card">
-          <div class="feat-icon-box">⚡</div>
-          <h3 class="feat-title">Động Cơ Kép (Extension + CDP Siêu Tốc 2ms)</h3>
-          <p class="feat-desc">
-            Tự động hóa trình duyệt qua cả Chrome Extension lẫn Chrome DevTools Protocol (CDP). Độ trễ phản hồi chỉ <strong>2ms</strong>, tương thích 100% với GPM Login, Antidetect Browser và tự động chạy nền không lo bị ngắt.
-          </p>
-          <span class="feat-badge-pill">⚡ Tự động fallback 2 lớp an toàn</span>
-        </div>
       </div>
 
       <!-- Comparison Section -->
@@ -1744,26 +1820,86 @@
     </section>
 
     <!-- ========================================== -->
-    <!-- GET STARTED / INSTALLATION CTA SECTION     -->
+    <!-- PRICING & LICENSE PLANS SECTION            -->
     <!-- ========================================== -->
-    <section class="container" id="get-started" style="padding: 40px 0 70px;">
-      <div class="support-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(56, 189, 248, 0.08) 100%); border: 1px solid rgba(16, 185, 129, 0.25); text-align: center; padding: 40px 24px;">
-        <div class="support-title" style="font-size: 26px; margin-bottom: 8px;">🚀 Bắt Đầu Trải Nghiệm Otter Hoàn Toàn Miễn Phí</div>
-        <p class="support-desc" style="max-width: 650px; margin: 0 auto 20px; font-size: 15px; color: var(--text-muted);">
-          Otter giải phóng bạn khỏi mọi thao tác máy tính nhàm chán lặp đi lặp lại. Cài đặt chỉ với 1 dòng lệnh duy nhất, tự động kết nối ngay với ChatGPT Web hoặc Claude Desktop.
-        </p>
+    <section class="container" id="pricing" style="padding: 40px 0 70px;">
+      <div class="section-title-area">
+        <div class="section-tag">Bảng Giá & Bản Quyền</div>
+        <h2 class="section-heading">Lựa chọn gói bản quyền phù hợp với bạn</h2>
+        <p class="section-sub">Đăng nhập tài khoản Google để nhận ngay 30 ngày dùng thử miễn phí (mỗi email 1 lần duy nhất). Chỉ có 2 gói trả phí linh hoạt: 1 năm hoặc sở hữu vĩnh viễn.</p>
+      </div>
 
-        <div class="prompt-box" style="max-width: 580px; margin: 0 auto 24px;">
-          <span class="prompt-text">irm https://otter.gpt.io.vn/setup.ps1 | iex</span>
-          <button class="copy-btn" onclick="copyText('irm https://otter.gpt.io.vn/setup.ps1 | iex', this)">Sao chép</button>
+      <div class="pricing-grid">
+        <!-- Plan 0: Dùng Thử 30 Ngày -->
+        <div class="pricing-card">
+          <div class="pricing-badge" style="background:#38bdf8; color:#031c30;">1 LẦN / EMAIL</div>
+          <h3 style="font-size:20px; color:#fff; margin-bottom:4px;">🎁 Dùng Thử 30 Ngày</h3>
+          <p style="font-size:13px; color:#94a3b8;">Đăng nhập Google để nhận mã bản quyền tự động gửi về hòm thư.</p>
+          <div class="price-amount">0đ <span>/ 30 ngày</span></div>
+          <ul class="price-features">
+            <li>Trải nghiệm toàn bộ 100% tính năng Otter</li>
+            <li>Đọc & tóm tắt web với <code>/browse</code></li>
+            <li>Dựng video AI Remotion kèm thuyết minh</li>
+            <li>Quản lý máy chủ VPS & lưu bookmark</li>
+            <li>Mỗi tài khoản Google chỉ được nhận 1 lần</li>
+          </ul>
+          <button class="btn-google" style="width:100%; justify-content:center; margin-top:auto;" onclick="handleGoogleSignIn()">
+            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+            Nhận 30 Ngày Dùng Thử
+          </button>
         </div>
 
-        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-          <a href="https://otter.gpt.io.vn/otter-extension.zip" download class="btn-download-ext" style="font-size: 15px; padding: 12px 24px;">
-            <span>📦</span> <span>Tải Tiện Ích Chrome (.zip)</span>
-          </a>
-          <button onclick="switchView('docs')" class="btn-secondary" style="font-size: 15px; padding: 12px 24px;">
-            <span>📖</span> <span>Xem Hướng Dẫn Cài Đặt Chi Tiết</span>
+        <!-- Plan 1: Gói 1 Năm -->
+        <div class="pricing-card">
+          <div class="pricing-badge" style="background:#10b981;">TIẾT KIỆM</div>
+          <h3 style="font-size:20px; color:#fff; margin-bottom:4px;">⚡ Gói 1 Năm</h3>
+          <p style="font-size:13px; color:#94a3b8;">Dành cho cá nhân sử dụng công việc hàng ngày trong 365 ngày.</p>
+          <div class="price-amount">500.000đ <span>/ năm</span></div>
+          <ul class="price-features">
+            <li>Sử dụng toàn bộ tính năng trong 365 ngày</li>
+            <li>Miễn phí mọi bản cập nhật tính năng mới trong năm</li>
+            <li>Kích hoạt trên máy tính của bạn (hỗ trợ đổi máy)</li>
+            <li>Hỗ trợ giải đáp qua nhóm cộng đồng Facebook</li>
+            <li>Chi phí siêu rẻ chỉ ~1.300đ/ngày</li>
+          </ul>
+          <button class="btn-primary" style="width:100%; justify-content:center; margin-top:auto;" onclick="openPaymentModal('1nam', 500000, 'Gói 1 Năm (500.000đ)')">
+            ⚡ Mua Gói 1 Năm (500k)
+          </button>
+        </div>
+
+        <!-- Plan 2: Gói Vĩnh Viễn -->
+        <div class="pricing-card featured">
+          <div class="pricing-badge">PHỔ BIẾN NHẤT</div>
+          <h3 style="font-size:20px; color:#fff; margin-bottom:4px;">👑 Gói Vĩnh Viễn</h3>
+          <p style="font-size:13px; color:#94a3b8;">Trả một lần duy nhất, sở hữu phần mềm trọn đời không phát sinh phí.</p>
+          <div class="price-amount">1.000.000đ <span>/ trọn đời</span></div>
+          <ul class="price-features">
+            <li>Bản quyền vĩnh viễn trọn đời (Lifetime)</li>
+            <li>Không lo gia hạn hay phí duy trì hàng năm</li>
+            <li>Miễn phí trọn đời tất cả các bản nâng cấp tương lai</li>
+            <li>Bảo lưu bản quyền khi cài lại Windows hoặc đổi máy</li>
+            <li>Hỗ trợ kỹ thuật qua nhóm Facebook</li>
+          </ul>
+          <button class="btn-primary" style="width:100%; justify-content:center; margin-top:auto; background: linear-gradient(135deg, #34d399 0%, #10b981 100%);" onclick="openPaymentModal('vinhvien', 1000000, 'Gói Vĩnh Viễn (1.000.000đ)')">
+            👑 Mua Gói Vĩnh Viễn (1Tr)
+          </button>
+        </div>
+
+        <!-- Plan 3: Gói Vĩnh Viễn VIP -->
+        <div class="pricing-card vip">
+          <div class="pricing-badge vip-badge">ƯU TIÊN HỖ TRỢ</div>
+          <h3 style="font-size:20px; color:#fff; margin-bottom:4px;">⭐ Vĩnh Viễn VIP</h3>
+          <p style="font-size:13px; color:#94a3b8;">Sở hữu trọn đời kèm dịch vụ hỗ trợ kỹ thuật chuyên sâu 1-1.</p>
+          <div class="price-amount">1.500.000đ <span>/ trọn đời</span></div>
+          <ul class="price-features">
+            <li>Toàn bộ quyền lợi của <strong>Gói Vĩnh Viễn Trọn Đời</strong></li>
+            <li class="vip-feat"><strong>Ưu tiên hỗ trợ kỹ thuật 1-1</strong> qua Zalo / UltraView / AnyDesk</li>
+            <li class="vip-feat">Hỗ trợ cài đặt, kết nối VPS và cấu hình Extension tận nơi</li>
+            <li class="vip-feat">Tư vấn và hỗ trợ tùy biến kịch bản video AI / tự động hóa riêng</li>
+            <li class="vip-feat">Kênh trao đổi trực tiếp với tác giả phát triển dự án</li>
+          </ul>
+          <button class="btn-primary" style="width:100%; justify-content:center; margin-top:auto; background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%); color:#fff;" onclick="openPaymentModal('vip', 1500000, 'Gói Vĩnh Viễn VIP (1.500.000đ - Ưu Tiên Hỗ Trợ)')">
+            ⭐ Mua Gói VIP (1Tr5)
           </button>
         </div>
       </div>
@@ -1785,8 +1921,9 @@
         <a href="#extension" class="docs-nav-link">2. Cài Chrome Extension</a>
         <a href="#cach-dung" class="docs-nav-link">3. Cách dùng trên ChatGPT</a>
         <a href="#cau-lenh" class="docs-nav-link">4. Mẫu câu lệnh phổ biến</a>
-        <a href="#faq" class="docs-nav-link">5. Câu hỏi thường gặp (FAQ)</a>
-        <a href="#cong-dong" class="docs-nav-link">6. Nhóm Hỗ Trợ & Ủng Hộ</a>
+        <a href="#bang-gia-docs" class="docs-nav-link">5. Bảng Giá & Bản Quyền</a>
+        <a href="#faq" class="docs-nav-link">6. Câu hỏi thường gặp (FAQ)</a>
+        <a href="#cong-dong" class="docs-nav-link">7. Nhóm Hỗ Trợ & Ủng Hộ</a>
       </aside>
 
       <!-- Main Docs Content -->
@@ -1930,17 +2067,42 @@
           </div>
         </div>
 
-        <!-- Step 5: FAQ -->
+        <!-- Step 5: Pricing in Docs -->
+        <div class="doc-block" id="bang-gia-docs">
+          <h3><span>💎</span> Bước 5: Bảng Giá & Kích Hoạt Bản Quyền</h3>
+          <p>Otter áp dụng chính sách cấp phép rõ ràng, minh bạch và thân thiện:</p>
+          <ul style="color:var(--text-muted); padding-left:20px; line-height:1.8; margin-bottom:18px;">
+            <li><strong>Gói Dùng Thử (0đ)</strong>: Tặng 30 ngày dùng thử đầy đủ tính năng khi đăng nhập Google (mỗi tài khoản 1 lần duy nhất).</li>
+            <li><strong>Gói 1 Năm (500.000đ)</strong>: Thích hợp cho cá nhân làm việc liên tục 365 ngày.</li>
+            <li><strong>Gói Vĩnh Viễn (1.000.000đ)</strong>: Sở hữu trọn đời, miễn phí mọi bản nâng cấp tương lai.</li>
+            <li><strong>Gói Vĩnh Viễn VIP (1.500.000đ)</strong>: Sở hữu trọn đời + <strong>Ưu tiên hỗ trợ kỹ thuật 1-1</strong> qua Zalo / UltraView cài đặt và cấu hình riêng.</li>
+          </ul>
+          <button class="btn-primary" onclick="switchView('landing'); setTimeout(() => document.getElementById('pricing').scrollIntoView({behavior:'smooth'}), 100);">
+            👉 Xem Chi Tiết Bảng Giá & Đăng Nhập Nhận Key
+          </button>
+        </div>
+
+        <!-- Step 6: FAQ -->
         <div class="doc-block" id="faq">
           <h3><span>❓</span> Câu Hỏi Thường Gặp (Giải Đáp Dễ Hiểu)</h3>
           
           <div class="faq-item">
             <div class="faq-question" onclick="toggleFaq(this)">
-              <span>Otter có miễn phí không?</span>
+              <span>Otter có gói dùng thử miễn phí không?</span>
               <span class="faq-toggle">▼</span>
             </div>
             <div class="faq-answer">
-              <strong>CÓ!</strong> Otter được phát triển để phục vụ cộng đồng và cá nhân tự động hóa công việc. Bạn có thể tải tiện ích Chrome Extension hoặc chạy dòng lệnh cài đặt 1-Click để trải nghiệm trọn bộ các tính năng duyệt web, quản trị máy tính, điều khiển trình duyệt và tạo video AI hoàn toàn miễn phí.
+              <strong>CÓ!</strong> Bạn chỉ cần bấm nút <strong>Đăng nhập Google</strong> trên website này, hệ thống sẽ tự động cấp ngay <strong>30 ngày dùng thử miễn phí</strong> và gửi mã kích hoạt về hòm thư của bạn. Mỗi email Google chỉ được nhận 1 lần duy nhất.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <span>Sau khi hết hạn dùng thử, giá nâng cấp thế nào?</span>
+              <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+              Otter chỉ có đúng 2 gói trả phí: <strong>Gói 1 Năm (500.000đ)</strong> và <strong>Gói Vĩnh Viễn (1.000.000đ)</strong>. Nếu bạn muốn được kèm cặp và hỗ trợ kỹ thuật 1-1 tận nơi, có thêm <strong>Gói Vĩnh Viễn VIP (1.500.000đ)</strong>.
             </div>
           </div>
 
@@ -2032,9 +2194,9 @@
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('modal-trial-success')">✕</button>
       <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
-      <h3 style="color: #fff; font-size: 22px; margin-bottom: 8px;">Cấp Mã Bản Quyền 30 Ngày Thành Công!</h3>
+      <h3 style="color: #fff; font-size: 22px; margin-bottom: 8px;">Kích Hoạt 30 Ngày Dùng Thử Thành Công!</h3>
       <p style="color: var(--text-muted); font-size: 14px;">
-        Chào mừng <strong id="trial-user-name" style="color:#10b981;">Bạn</strong>! Mã bản quyền dùng thử 30 ngày của bạn đã sẵn sàng (bạn có thể đăng nhập bất cứ lúc nào để tạo lại hoặc lấy lại key, không giới hạn).
+        Chào mừng <strong id="trial-user-name" style="color:#10b981;">Bạn</strong>! Mã bản quyền Otter của bạn đã được tạo và gửi đồng thời vào email <strong id="trial-user-email" style="color:#38bdf8;"></strong>.
       </p>
 
       <div class="key-display-box" id="trial-key-display">
@@ -2053,11 +2215,51 @@
       <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:16px; text-align:left; font-size:13px; line-height:1.6; color:#cbd5e1; border:1px solid var(--border);">
         <strong style="color:#fff;">🚀 3 bước kích hoạt trên máy tính:</strong>
         <ol style="margin-left: 20px; margin-top: 6px;">
-          <li>Khởi động Otter bằng file <code>install.bat</code> hoặc lệnh <code>irm https://otter.gpt.io.vn/setup.ps1 | iex</code>.</li>
+          <li>Khởi động Otter bằng file <code>install.bat</code>.</li>
           <li>Mở trình duyệt truy cập <code>http://127.0.0.1:1993</code> (hoặc bấm biểu tượng Tiện ích Otter trên Chrome).</li>
           <li>Dán mã key ở trên vào ô <strong>Kích Hoạt Bản Quyền</strong> và nhấn Xác nhận.</li>
         </ol>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Thanh Toán & QR Chuyển Khoản Mua Gói -->
+  <div class="modal-overlay" id="modal-payment">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('modal-payment')">✕</button>
+      <div style="font-size: 40px; margin-bottom: 8px;">💳</div>
+      <h3 style="color: #fff; font-size: 20px; margin-bottom: 6px;" id="pay-package-title">Thanh Toán Gói Bản Quyền</h3>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
+        Quét mã VietQR TPBank để kích hoạt tự động hoặc gửi biên lai vào nhóm hỗ trợ.
+      </p>
+
+      <div style="text-align: left; margin-bottom: 14px;">
+        <label style="font-size: 12px; color: #94a3b8; font-weight: 600;">Email nhận mã bản quyền của bạn:</label>
+        <input type="email" id="pay-email-input" class="modal-input" placeholder="nhap-email-cua-ban@gmail.com" oninput="updatePaymentQR()">
+      </div>
+
+      <!-- VietQR Image Box -->
+      <div style="background:#fff; padding:12px; border-radius:14px; display:inline-block; margin-bottom:16px;">
+        <img id="pay-qr-img" src="" alt="VietQR TPBank" style="max-width:220px; width:100%; display:block; border-radius:8px;">
+      </div>
+
+      <div class="bank-info" style="width:100%; box-sizing:border-box; margin-bottom:16px; font-size:13px;">
+        <div>• Ngân hàng: <strong>TPBank (Tiên Phong Bank)</strong></div>
+        <div>• Số tài khoản: <strong>69238686888</strong> <button class="btn-push" style="padding:2px 8px; font-size:11px;" onclick="copyText('69238686888', this)">Sao chép STK</button></div>
+        <div>• Chủ tài khoản: <strong>PHAM THANH NAM</strong></div>
+        <div>• Số tiền: <strong id="pay-amount-label" style="color:#10b981;">500.000 VNĐ</strong></div>
+        <div>• Nội dung CK: <strong id="pay-memo-label" style="color:#38bdf8;">OTTER 1NAM</strong> <button class="btn-push" style="padding:2px 8px; font-size:11px;" onclick="copyText(document.getElementById('pay-memo-label').textContent, this)">Sao chép cú pháp</button></div>
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <button type="button" class="btn-primary" style="width:100%; justify-content:center; padding:13px; font-size:14px; font-weight:700;" id="btn-submit-order" onclick="handleSubmitPaymentOrder()">
+          📤 Xác Nhận Đã Chuyển Khoản & Gửi Đơn
+        </button>
+      </div>
+
+      <p style="font-size:12px; color:#94a3b8;">
+        Sau khi chuyển khoản, nhấn nút gửi đơn ở trên để Quản trị viên duyệt và gửi mã bản quyền vào email của bạn! Hoặc liên hệ <a href="https://www.facebook.com/share/g/1CN8sjFYDH/?mibextid=wwXIfr" target="_blank" rel="noreferrer" style="color:#38bdf8;">Nhóm Hỗ Trợ</a> để được hỗ trợ trực tiếp.
+      </p>
     </div>
   </div>
 
@@ -2068,19 +2270,19 @@
       <div style="font-size: 40px; margin-bottom: 8px;">🔑</div>
       <h3 style="color: #fff; font-size: 20px; margin-bottom: 6px;">Đăng Nhập Nhận 30 Ngày Dùng Thử</h3>
       <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
-        Nhập địa chỉ email của bạn để nhận hoặc tạo lại mã key 30 ngày dùng thử (miễn phí, không giới hạn):
+        Nhập địa chỉ email của bạn để nhận ngay 30 ngày dùng thử (mỗi email 1 lần duy nhất):
       </p>
 
       <form onsubmit="handleDirectEmailTrial(event)">
         <input type="text" id="demo-name-input" class="modal-input" placeholder="Họ và tên của bạn" required>
         <input type="email" id="demo-email-input" class="modal-input" placeholder="dia-chi-email@gmail.com" required>
         <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:12px;" id="btn-submit-trial">
-          🎁 Xác Nhận Nhận / Tạo Lại Key (30 Ngày Miễn Phí)
+          🎁 Xác Nhận Nhận 30 Ngày Dùng Thử
         </button>
       </form>
 
       <div style="margin-top:16px; font-size:12px; color:#64748b; line-height:1.5;">
-        💡 <em>Đăng nhập Google hoặc nhập email để nhận key ngay lập tức. Bạn có thể tạo lại bất cứ lúc nào.</em>
+        💡 <em>Khi bạn cấu hình Firebase Console thực tế vào <code>FIREBASE_CONFIG</code>, nút này sẽ tự động mở popup Google Đăng nhập 1-chạm.</em>
       </div>
     </div>
   </div>
@@ -2340,8 +2542,8 @@
         });
         const data = await res.json();
 
-        if (data.success || data.license_key) {
-          // Hiển thị modal nhận key thành công (kể cả key tạo lại)
+        if (data.success) {
+          // Hiển thị modal nhận key thành công
           document.getElementById('trial-user-name').textContent = name || email;
           document.getElementById('trial-user-email').textContent = email;
           document.getElementById('trial-key-display').textContent = data.license_key;
@@ -2349,22 +2551,19 @@
 
           // Đẩy Web Push Notification tức thì trên trình duyệt
           sendWebNotification(
-            "🦦 Otter AI Assistant: Mã Bản Quyền 30 Ngày!",
-            `Chúc mừng ${name || email}! Mã bản quyền: ${data.license_key}. Hạn dùng 30 ngày.`
+            "🦦 Otter AI Assistant: Nhận 30 Ngày Dùng Thử!",
+            `Chúc mừng ${name || email}! Mã bản quyền: ${data.license_key}. Đã gửi email kích hoạt.`
           );
 
-          showToast('✅ Cấp mã bản quyền 30 ngày thành công!');
+          showToast('✅ Cấp 30 ngày dùng thử thành công!');
+        } else if (data.already_claimed) {
+          showToast(`⚠️ ${data.error}`);
+          alert(`Thông báo: Email ${email} đã nhận gói 30 ngày dùng thử trước đó (Mã: ${data.license_key || 'Đã cấp'}). Mỗi tài khoản chỉ được nhận 1 lần duy nhất!`);
         } else {
           showToast(`❌ Lỗi: ${data.error || 'Không thể cấp gói dùng thử'}`);
         }
       } catch (err) {
-        // Fallback tạo key trực tiếp cho người dùng nếu server không phản hồi
-        const fallbackKey = 'OTTER-TRIAL-30D-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-        document.getElementById('trial-user-name').textContent = name || email;
-        document.getElementById('trial-user-email').textContent = email;
-        document.getElementById('trial-key-display').textContent = fallbackKey;
-        document.getElementById('modal-trial-success').classList.add('active');
-        showToast('✅ Đã tạo mã dùng thử 30 ngày thành công!');
+        showToast(`❌ Lỗi kết nối máy chủ: ${err.message}. Hãy chắc chắn license-server đang chạy.`);
       }
     }
 
@@ -2377,7 +2576,6 @@
 
     function updateUserUI(user) {
       const container = document.getElementById('auth-container');
-      if (!container) return;
       const avatarUrl = user.photoURL ? encodeURI(user.photoURL) : 'https://raw.githubusercontent.com/ptn1411/skill/main/qr-sepay.png';
       const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
 
@@ -2385,7 +2583,6 @@
         <div class="user-profile-badge">
           <img src="${avatarUrl}" class="user-avatar" alt="Avatar">
           <span class="user-name" title="${escapeHtml(user.email)}">${escapeHtml(displayName)}</span>
-          <button class="btn-recreate-key" onclick="recreateTrialKey()" title="Tạo lại mã bản quyền 30 ngày dùng thử">🔑 Tạo Lại Key</button>
           <button class="btn-logout" onclick="handleSignOut()" title="Đăng xuất">Thoát</button>
         </div>
       `;
@@ -2393,27 +2590,12 @@
 
     function resetUserUI() {
       const container = document.getElementById('auth-container');
-      if (!container) return;
       container.innerHTML = `
         <button class="btn-google" id="btn-google-login" onclick="handleGoogleSignIn()">
           <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
           <span>🎁 30 Ngày Dùng Thử</span>
         </button>
       `;
-    }
-
-    async function recreateTrialKey() {
-      if (!currentUser) {
-        handleGoogleSignIn();
-        return;
-      }
-      try {
-        showToast('⏳ Đang tạo/lấy lại key 30 ngày cho ' + currentUser.email + '...');
-        const idToken = await currentUser.getIdToken(true);
-        await claimTrialForEmail(currentUser.email, currentUser.displayName || currentUser.email, idToken);
-      } catch (err) {
-        showToast('❌ Lỗi xác thực: ' + err.message);
-      }
     }
 
     async function handleSignOut() {
@@ -2530,8 +2712,96 @@
     }
 
     // ========================================================
-    // TƯƠNG TÁC GIAO DIỆN
+    // PAYMENT MODAL & DYNAMIC VIETQR (TPBANK 69238686888)
     // ========================================================
+    let currentPayment = {
+      code: '1nam',
+      amount: 500000,
+      title: 'Gói 1 Năm (500.000đ)'
+    };
+
+    function openPaymentModal(code, amount, title) {
+      currentPayment = { code, amount, title };
+      document.getElementById('pay-package-title').textContent = title;
+      document.getElementById('pay-amount-label').textContent = Number(amount).toLocaleString('vi-VN') + ' VNĐ';
+
+      if (currentUser && currentUser.email) {
+        document.getElementById('pay-email-input').value = currentUser.email;
+      }
+
+      updatePaymentQR();
+      document.getElementById('modal-payment').classList.add('active');
+    }
+
+    function updatePaymentQR() {
+      const email = (document.getElementById('pay-email-input').value || '').trim();
+      const safeEmailSuffix = email ? email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') : '';
+      
+      let memoPrefix = 'OTTER 1NAM';
+      if (currentPayment.code === 'vinhvien') memoPrefix = 'OTTER VINHVIEN';
+      else if (currentPayment.code === 'vip') memoPrefix = 'OTTER VIP';
+
+      const memo = safeEmailSuffix ? `${memoPrefix} ${safeEmailSuffix}` : memoPrefix;
+      document.getElementById('pay-memo-label').textContent = memo;
+
+      // Sinh URL mã QR VietQR tự động cập nhật số tiền và nội dung
+      const qrUrl = `https://img.vietqr.io/image/TPB-69238686888-compact2.png?amount=${currentPayment.amount}&addInfo=${encodeURIComponent(memo)}&accountName=PHAM%20THANH%20NAM`;
+      document.getElementById('pay-qr-img').src = qrUrl;
+    }
+
+    // Gửi thông tin đơn hàng thanh toán kèm tín hiệu thiết bị
+    async function handleSubmitPaymentOrder() {
+      const email = (document.getElementById('pay-email-input').value || '').trim();
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!email || !emailRegex.test(email)) {
+        showToast('⚠️ Vui lòng nhập địa chỉ email hợp lệ để nhận mã bản quyền!');
+        document.getElementById('pay-email-input').focus();
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-order');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Đang ghi nhận vân tay máy & gửi đơn...</span>';
+
+      try {
+        let clientSignals = null;
+        try {
+          if (window.OtterSignals) {
+            clientSignals = await window.OtterSignals.signals(false);
+          }
+        } catch (e) {
+          console.warn('Signals warning:', e);
+        }
+
+        const memo = document.getElementById('pay-memo-label').textContent;
+
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            package_type: currentPayment.code,
+            package_title: currentPayment.title,
+            amount: currentPayment.amount,
+            memo,
+            signals: clientSignals
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          showToast(`✅ Đã gửi đơn thành công! Mã đơn: #${data.order_id.slice(0, 8)}. Quản trị viên sẽ kiểm tra thanh toán và duyệt mã gửi vào email của bạn.`);
+          closeModal('modal-payment');
+        } else {
+          showToast(`❌ Không thể gửi đơn: ${data.error || 'Vui lòng thử lại sau'}`);
+        }
+      } catch (err) {
+        showToast(`❌ Lỗi kết nối máy chủ: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>📤 Xác Nhận Đã Chuyển Khoản & Gửi Đơn</span>';
+      }
+    }
 
     function closeModal(id) {
       document.getElementById(id).classList.remove('active');
@@ -2565,21 +2835,44 @@
       }
     });
 
-    // Tab switching between Landing and Docs
+    // Tab switching between Landing, Pricing, and Docs
     function switchView(viewName) {
       document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
       if (viewName === 'landing') {
         document.getElementById('view-landing').classList.add('active');
-        document.getElementById('tab-btn-landing')?.classList.add('active');
+        document.getElementById('tab-btn-landing').classList.add('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (viewName === 'pricing') {
+        document.getElementById('view-landing').classList.add('active');
+        document.getElementById('tab-btn-pricing').classList.add('active');
+        const p = document.getElementById('pricing');
+        if (p) p.scrollIntoView({ behavior: 'smooth' });
       } else {
         document.getElementById('view-docs').classList.add('active');
-        document.getElementById('tab-btn-docs')?.classList.add('active');
+        document.getElementById('tab-btn-docs').classList.add('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
+
+    // Auto update active tab between Intro and Pricing on scroll
+    window.addEventListener('scroll', () => {
+      const landingView = document.getElementById('view-landing');
+      if (!landingView || !landingView.classList.contains('active')) return;
+      const pricingEl = document.getElementById('pricing');
+      if (!pricingEl) return;
+      const rect = pricingEl.getBoundingClientRect();
+      const tabLanding = document.getElementById('tab-btn-landing');
+      const tabPricing = document.getElementById('tab-btn-pricing');
+      if (rect.top <= 260 && rect.bottom >= 150) {
+        tabPricing?.classList.add('active');
+        tabLanding?.classList.remove('active');
+      } else {
+        tabLanding?.classList.add('active');
+        tabPricing?.classList.remove('active');
+      }
+    }, { passive: true });
 
     // Copy prompt text helper
     function copyText(text, btn) {
@@ -2645,7 +2938,7 @@
 
   <!--
     Làm đẹp bằng GSAP + Motion (cùng bộ đôi như trang admin).
-    - GSAP: timeline mở hero, ScrollTrigger reveal features khi cuộn.
+    - GSAP: timeline mở hero, ScrollTrigger reveal features/pricing khi cuộn.
       Dùng gsap.from / fromTo nên CDN lỗi thì trang vẫn hiển thị bình thường.
     - Motion: spring vật lý cho hover thẻ và nhấn nút CTA.
       Import động trong try/catch; CDN lỗi thì fallback CSS :active vẫn có.
@@ -2674,7 +2967,7 @@
       from { transform: translate3d(-2%, -1%, 0) scale(1); }
       to { transform: translate3d(2%, 2%, 0) scale(1.05); }
     }
-    .feature-card { will-change: transform; }
+    .feature-card, .pricing-card { will-change: transform; }
     .btn-primary:active, .btn-download-ext:active, .btn-google:active,
     .btn-secondary:active, .sim-chip:active { transform: scale(0.98); }
     .btn-primary:focus-visible, .btn-download-ext:focus-visible,
@@ -2702,8 +2995,8 @@
         .from('.author-ribbon', { opacity: 0, duration: 0.4, clearProps: 'all' }, '-=0.2')
         .from('.stats-strip .stat-card', { y: 16, opacity: 0, duration: 0.4, stagger: 0.06, clearProps: 'all' }, '-=0.25')
         .from('.demo-wrapper', { y: 20, opacity: 0, duration: 0.5, clearProps: 'all' }, '-=0.2');
-      // Reveal khi cuộn tới: tiêu đề section, thẻ tính năng.
-      ScrollTrigger.batch('.section-title-area, .feature-card, .support-card', {
+      // Reveal khi cuộn tới: tiêu đề section, thẻ tính năng, thẻ giá.
+      ScrollTrigger.batch('.section-title-area, .feature-card, .pricing-card', {
         start: 'top 88%',
         once: true,
         onEnter: function (batch) {
@@ -2719,6 +3012,10 @@
       const springSoft = { type: 'spring', bounce: 0.25, duration: 0.4 };
       document.querySelectorAll('.feature-card').forEach((card) => {
         card.addEventListener('mouseenter', () => animate(card, { scale: 1.02, y: -4 }, springSoft));
+        card.addEventListener('mouseleave', () => animate(card, { scale: 1, y: 0 }, { type: 'spring', bounce: 0.2, duration: 0.35 }));
+      });
+      document.querySelectorAll('.pricing-card').forEach((card) => {
+        card.addEventListener('mouseenter', () => animate(card, { scale: 1.02, y: -5 }, springSoft));
         card.addEventListener('mouseleave', () => animate(card, { scale: 1, y: 0 }, { type: 'spring', bounce: 0.2, duration: 0.35 }));
       });
       document.querySelectorAll('.btn-primary, .btn-download-ext, .btn-google, .btn-secondary').forEach((btn) => {

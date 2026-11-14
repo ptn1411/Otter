@@ -100,8 +100,8 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
     let body: any = {};
     try { body = await req.json(); } catch {}
     const res = await openFilePicker(body.initialPath, body.multiple ?? true);
-    if (res.files && res.files.length > 0) {
-      for (const f of res.files) {
+    if (res.paths && res.paths.length > 0) {
+      for (const f of res.paths) {
         registerAllowedWorkspace(path.dirname(f));
       }
     }

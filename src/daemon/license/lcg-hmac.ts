@@ -66,10 +66,10 @@ export class LcgHmacGuard {
     nonce: string,
     timestamp: number,
     payloadJson: string
-  ): Uint8Array {
+  ): Uint8Array<ArrayBuffer> {
     // Ghép nối chặt chẽ: Path động + Nonce + Timestamp + Nội dung JSON
     const raw = `${routePath}|${nonce}|${timestamp}|${payloadJson}`;
-    return new TextEncoder().encode(raw);
+    return new Uint8Array(new TextEncoder().encode(raw));
   }
 
   /**
