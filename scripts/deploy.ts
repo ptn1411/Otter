@@ -91,10 +91,13 @@ for (const t of buildTargets) {
       { stdio: "inherit", cwd: rootDir }
     );
 
-    // Tạo alias otter.exe cho Windows
+    // Tạo alias otter.exe cho Windows (cả ở deploy/ và deploy/bin/)
     if (t.alias && await fs.stat(destPath).then(() => true).catch(() => false)) {
       const aliasPath = path.join(deployDir, t.alias);
       await fs.copyFile(destPath, aliasPath);
+      const deployBinDir = path.join(deployDir, "bin");
+      await fs.mkdir(deployBinDir, { recursive: true });
+      await fs.copyFile(destPath, path.join(deployBinDir, t.alias));
     }
   } catch (err: any) {
     console.warn(`[!] Không thể biên dịch target ${t.name}: ${err.message}`);

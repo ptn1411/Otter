@@ -52,25 +52,58 @@ if (process.platform === "win32") {
 
     // Sao chép otter.exe & openapi.json
     console.log("[*] Sao chép file thực thi và cấu hình mới vào %LOCALAPPDATA%\\Otter...");
-    await fs.copyFile(path.join(deployDir, "otter.exe"), path.join(installDir, "otter.exe"));
+    const srcExe = path.join(deployDir, "otter.exe");
+    await fs.copyFile(srcExe, path.join(installDir, "otter.exe"));
     
     if (await fs.stat(path.join(deployDir, "openapi.json")).then(() => true).catch(() => false)) {
       await fs.copyFile(path.join(deployDir, "openapi.json"), path.join(installDir, "openapi.json"));
     }
 
-    // Sao chép thư mục bin/
+    // Sao chép thư mục bin/ và đồng bộ otter.exe vào bin/ để CLI chạy chuẩn xác từ PATH
     const targetBin = path.join(installDir, "bin");
     await fs.mkdir(targetBin, { recursive: true });
     const binFiles = await fs.readdir(path.join(deployDir, "bin")).catch(() => [] as string[]);
     for (const f of binFiles) {
       await fs.copyFile(path.join(deployDir, "bin", f), path.join(targetBin, f));
     }
+    await fs.copyFile(srcExe, path.join(targetBin, "otter.exe"));
 
     // Sao chép thư mục tools/ nếu có
     const deployTools = path.join(deployDir, "tools");
     if (await fs.stat(deployTools).then(() => true).catch(() => false)) {
       const targetTools = path.join(installDir, "tools");
       await fs.cp(deployTools, targetTools, { recursive: true, force: true });
+    }
+
+    // Kiểm tra & Khởi động CUA Daemon trên desktop tương tác (WinSta0\Default)
+    const cuaExe = path.join(installDir, "tools", "cua", "cua-driver.exe");
+    const startScript = path.join(installDir, "tools", "cua", "start-daemon.ps1");
+    if (await fs.stat(cuaExe).then(() => true).catch(() => false)) {
+      try {
+        console.log("[*] Kiểm tra CUA Daemon...");
+        let isRunning = false;
+        try {
+          const res = execSync(`"${cuaExe}" status`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+          if (res.toLowerCase().includes("running")) isRunning = true;
+        } catch {}
+
+        if (!isRunning) {
+          console.log("[*] Đang khởi động CUA Daemon trên desktop tương tác (WinSta0\\Default)...");
+          if (await fs.stat(startScript).then(() => true).catch(() => false)) {
+            spawn("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", startScript], {
+              detached: true,
+              stdio: "ignore"
+            }).unref();
+          } else {
+            spawn(cuaExe, ["serve", "--no-overlay"], { detached: true, stdio: "ignore" }).unref();
+          }
+          await new Promise(r => setTimeout(r, 1200));
+        } else {
+          console.log("[+] CUA Daemon đang hoạt động bình thường.");
+        }
+      } catch (err: any) {
+        console.warn(`[!] Không thể khởi động CUA Daemon: ${err.message}`);
+      }
     }
 
     // Đảm bảo run_silent.vbs tồn tại để chạy ngầm không hiện cửa sổ

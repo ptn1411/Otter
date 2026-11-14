@@ -545,18 +545,35 @@ export async function findCuaDriverExe(): Promise<string> {
 export async function executeCuaTool(toolName: string, args: Record<string, any> = {}): Promise<any> {
   const driverExe = await findCuaDriverExe();
 
-  // Đảm bảo daemon CUA đang chạy
+  // Đảm bảo daemon CUA đang chạy trên interactive desktop
   try {
     const statusRes = await executeCommand(`"${driverExe}" status`);
     if (!statusRes.stdout?.toLowerCase().includes("running")) {
       const { spawn } = await import("bun");
-      spawn({
-        cmd: [driverExe, "serve", "--no-overlay"],
-        stdout: "ignore",
-        stderr: "ignore",
-        stdin: "ignore"
-      });
-      await new Promise(r => setTimeout(r, 600));
+      const scriptDir = path.dirname(driverExe);
+      const startScript = path.join(scriptDir, "start-daemon.ps1");
+      let started = false;
+      if (process.platform === "win32") {
+        try {
+          await fs.access(startScript);
+          spawn({
+            cmd: ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", startScript],
+            stdout: "ignore",
+            stderr: "ignore",
+            stdin: "ignore"
+          });
+          started = true;
+        } catch {}
+      }
+      if (!started) {
+        spawn({
+          cmd: [driverExe, "serve", "--no-overlay"],
+          stdout: "ignore",
+          stderr: "ignore",
+          stdin: "ignore"
+        });
+      }
+      await new Promise(r => setTimeout(r, 1200));
     }
   } catch {}
 

@@ -163,13 +163,22 @@ Ví dụ lệnh thực tế:
         process.exit(1);
       }
       let argsObj: any = {};
-      const rawArg = process.argv[5];
+      const rawArg = process.argv.slice(5).join(" ").trim();
       if (rawArg) {
         try {
           argsObj = JSON.parse(rawArg);
-        } catch (e: any) {
-          console.error(`\x1b[31m[!] Tham số JSON không hợp lệ:\x1b[0m ${e.message}`);
-          process.exit(1);
+        } catch {
+          try {
+            // Thử unescape nếu shell truyền vào \" hoặc bọc trong dấu nháy kép ngoài
+            let cleaned = rawArg.replace(/\\"/g, '"');
+            if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+              cleaned = cleaned.slice(1, -1);
+            }
+            argsObj = JSON.parse(cleaned);
+          } catch (e: any) {
+            console.error(`\x1b[31m[!] Tham số JSON không hợp lệ:\x1b[0m ${e.message}`);
+            process.exit(1);
+          }
         }
       }
       const res = await executeCuaTool(toolName, argsObj);
