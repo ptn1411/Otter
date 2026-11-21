@@ -1,6 +1,7 @@
 import * as path from "node:path";
 import { getTailscaleIp, ensureAuthToken } from "./security";
 import { initDatabase } from "./db";
+import { initSettings } from "./settings";
 import { createMcpServer } from "./mcp";
 import { cleanupAfterUpdate, startUpdateScheduler, registerBeforeRestartHook } from "./updater";
 import { OTTER_VERSION } from "./version";
@@ -204,6 +205,7 @@ Ví dụ lệnh thực tế:
   }
 }
 
+const appSettings = initSettings();
 const PORT = Number(process.env.PORT || 1993);
 const db = initDatabase();
 

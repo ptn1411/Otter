@@ -10,6 +10,7 @@ import { getLicenseStatus } from "../license";
 import { setTelemetryUser, sendTelemetryHeartbeat, getTelemetryUser } from "../telemetry";
 import { getQuickTunnelStatus, startQuickTunnel, stopQuickTunnel, openTunnelInBrowser } from "../tunnel";
 import { matchDaemonRoute } from "./lcg-routes";
+import { getSettings, updateSettings } from "../settings";
 import { EMBEDDED_DASHBOARD_ASSETS } from "../dashboard-assets.generated";
 import { OTTER_VERSION } from "../version";
 
@@ -134,6 +135,22 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
       message: enabled
         ? "Đã bật chế độ Full Access (Cho phép truy cập toàn bộ tệp tin và tạo dự án tự do trên máy tính)"
         : "Đã tắt chế độ Full Access (Chỉ cho phép truy cập các workspace an toàn)"
+    });
+  }
+
+  // 0.3 Quản lý cấu hình toàn diện & Biến môi trường
+  if (url.pathname === "/api/system/settings" && req.method === "GET") {
+    return jsonResponse(getSettings());
+  }
+
+  if (url.pathname === "/api/system/settings" && req.method === "POST") {
+    let body: any = {};
+    try { body = await req.json(); } catch {}
+    const updated = updateSettings(body || {});
+    return jsonResponse({
+      success: true,
+      settings: updated,
+      message: "Đã cập nhật cấu hình hệ thống thành công"
     });
   }
 

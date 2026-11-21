@@ -188,10 +188,31 @@ export interface CustomCommandItem {
   isPinned?: boolean;
 }
 
+export interface OtterSettings {
+  browserEngine: "cdp" | "auto" | "extension";
+  cdpHeadless: boolean;
+  cdpHud: boolean;
+  cdpPort: number;
+  browserPath: string;
+  userDataDir: string;
+  fullAccess: boolean;
+  strictWorkspace: boolean;
+  autoTunnel: boolean;
+  apiKey: string;
+  gpmApiPort: number;
+  antigravityBin: string;
+}
+
 export interface BrowserEngineInfo {
   mode: "cdp" | "auto" | "extension";
+  activeEngine?: "extension" | "cdp" | "none";
   extension?: { connected: boolean; socketsCount: number };
   cdp?: { available: boolean; port: number };
+  headless?: boolean;
+  hud?: boolean;
+  port?: number;
+  browserPath?: string;
+  userDataDir?: string;
   benchmark?: {
     extension?: { latencyMs: number };
     cdp?: { latencyMs: number };

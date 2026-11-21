@@ -2,6 +2,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { executeCommand } from "../terminal";
 import { browserBridge } from "../browser-bridge";
+import { getSettings, updateSettings } from "../settings";
 import { getDatabase } from "../db";
 import {
   startMessengerListener,
@@ -268,16 +269,32 @@ export async function handleActivityRoutes(
         if (req.method === "POST") {
           try { body = await req.json(); } catch {}
         }
+        const toUpdate: any = {};
         if (body.mode) {
           browserBridge.setEngineMode(body.mode);
+          toUpdate.browserEngine = body.mode;
+        }
+        if (typeof body.headless === "boolean") toUpdate.cdpHeadless = body.headless;
+        if (typeof body.hud === "boolean") toUpdate.cdpHud = body.hud;
+        if (typeof body.port === "number") toUpdate.cdpPort = body.port;
+        if (typeof body.browserPath === "string") toUpdate.browserPath = body.browserPath;
+        if (typeof body.userDataDir === "string") toUpdate.userDataDir = body.userDataDir;
+        if (Object.keys(toUpdate).length > 0) {
+          updateSettings(toUpdate);
         }
         const status = await browserBridge.getStatus();
+        const currentSettings = getSettings();
         let benchmarkResult = null;
         if (body.benchmark) {
           benchmarkResult = await browserBridge.benchmark();
         }
         return jsonResponse({
           ...status,
+          headless: currentSettings.cdpHeadless,
+          hud: currentSettings.cdpHud,
+          port: currentSettings.cdpPort,
+          browserPath: currentSettings.browserPath,
+          userDataDir: currentSettings.userDataDir,
           ...(benchmarkResult ? { benchmark: benchmarkResult } : {})
         });
       } catch (err: any) {

@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { browserBridge } from "../browser-bridge";
+import { getSettings, updateSettings } from "../settings";
 import { getDatabase } from "../db";
 import { getOrCreateConversation, recordMessage, getMessengerListenerStatus } from "../fb-sales";
 
@@ -369,19 +370,31 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
     "browser_engine_status",
     {
       mode: z.enum(["auto", "extension", "cdp"]).optional().describe("Chuyển đổi chế độ động cơ: 'cdp' (mặc định — chỉ CDP, tự mở Chrome CDP khi cần), 'auto' (ưu tiên CDP, fallback Extension), 'extension' (chỉ dùng Extension)"),
+      headless: z.boolean().optional().describe("Bật/tắt chế độ chạy ngầm Chrome (headless) không hiện cửa sổ"),
+      hud: z.boolean().optional().describe("Bật/tắt thanh HUD điều khiển và viền xanh trên trang web"),
       benchmark: z.boolean().optional().describe("Có chạy đo đạc so sánh tốc độ phản hồi (latency) giữa 2 động cơ không (mặc định: false)")
     },
-    async ({ mode, benchmark }) => {
+    async ({ mode, headless, hud, benchmark }) => {
       try {
+        const toUpdate: any = {};
         if (mode) {
           browserBridge.setEngineMode(mode);
+          toUpdate.browserEngine = mode;
+        }
+        if (typeof headless === "boolean") toUpdate.cdpHeadless = headless;
+        if (typeof hud === "boolean") toUpdate.cdpHud = hud;
+        if (Object.keys(toUpdate).length > 0) {
+          updateSettings(toUpdate);
         }
 
         const status = await browserBridge.getStatus();
+        const settings = getSettings();
         let report = [
           `⚙️ TRẠNG THÁI ĐỘNG CƠ ĐIỀU KHIỂN TRÌNH DUYỆT (DUAL-ENGINE):`,
           `- Chế độ cấu hình (Mode): ${status.mode.toUpperCase()}`,
           `- Động cơ đang hoạt động (Active): ${status.activeEngine.toUpperCase()}`,
+          `- Chạy ngầm (Headless): ${settings.cdpHeadless ? "✅ Bật (Ẩn cửa sổ)" : "❌ Tắt (Hiện cửa sổ)"}`,
+          `- Thanh HUD & Viền xanh: ${settings.cdpHud ? "✅ Bật" : "❌ Tắt"}`,
           `\n1. Động cơ Chrome Extension:`,
           `   + Kết nối: ${status.extension.connected ? "✅ Đang kết nối" : "❌ Chưa kết nối"}`,
           `   + Số socket mở: ${status.extension.socketsCount}`,

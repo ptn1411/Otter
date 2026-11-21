@@ -12,6 +12,8 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Banner } from "@astryxdesign/core/Banner";
+import { Switch } from "@astryxdesign/core/Switch";
+import { Divider } from "@astryxdesign/core/Divider";
 import { PageHeader } from "../components/PageHeader";
 import { apiGet, apiPost, type BrowserEngineInfo, type ChromeProfileItem } from "../api";
 
@@ -23,6 +25,9 @@ interface Props {
 export default function BrowserTab({ busy, act }: Props) {
   const [engine, setEngine] = useState<BrowserEngineInfo | null>(null);
   const [engineMode, setEngineMode] = useState<string>("cdp");
+  const [headless, setHeadless] = useState<boolean>(false);
+  const [hud, setHud] = useState<boolean>(true);
+  const [cdpPort, setCdpPort] = useState<string>("9222");
   const [benchmarkText, setBenchmarkText] = useState<string | null>(null);
   const [chromeProfiles, setChromeProfiles] = useState<ChromeProfileItem[]>([]);
   const [customBrowserPath, setCustomBrowserPath] = useState("");
@@ -37,6 +42,9 @@ export default function BrowserTab({ busy, act }: Props) {
     if (eng) {
       setEngine(eng);
       if (eng.mode) setEngineMode(eng.mode);
+      if (typeof eng.headless === "boolean") setHeadless(eng.headless);
+      if (typeof eng.hud === "boolean") setHud(eng.hud);
+      if (eng.port) setCdpPort(String(eng.port));
     }
     if (prof) setChromeProfiles(prof.profiles || []);
   }, []);
@@ -179,9 +187,52 @@ export default function BrowserTab({ busy, act }: Props) {
               <SegmentedControlItem value="auto" label="Auto" />
               <SegmentedControlItem value="extension" label="Extension" />
             </SegmentedControl>
+
+            <Divider />
+
+            <VStack gap={3}>
+              <Text weight="semibold">Tùy chọn Chrome CDP (Environment)</Text>
+              <HStack justify="between" align="center" gap={3}>
+                <VStack gap={0.5}>
+                  <Text weight="medium">Chạy ngầm (Headless Mode)</Text>
+                  <Text type="supporting">OTTER_CDP_HEADLESS=1 — Không tự bung cửa sổ Chrome lên màn hình khi AI điều khiển.</Text>
+                </VStack>
+                <Switch
+                  label="Headless Mode"
+                  isLabelHidden
+                  value={headless}
+                  onChange={setHeadless}
+                />
+              </HStack>
+
+              <HStack justify="between" align="center" gap={3}>
+                <VStack gap={0.5}>
+                  <Text weight="medium">Thanh HUD & Viền xanh</Text>
+                  <Text type="supporting">OTTER_CDP_HUD=1 — Hiển thị thanh trạng thái Otter CDP Core và khung viền xanh.</Text>
+                </VStack>
+                <Switch
+                  label="Thanh HUD"
+                  isLabelHidden
+                  value={hud}
+                  onChange={setHud}
+                />
+              </HStack>
+
+              <HStack gap={2} align="center">
+                <Text style={{ minWidth: 120 }}>Cổng CDP Port:</Text>
+                <TextInput
+                  label="CDP Port"
+                  isLabelHidden
+                  value={cdpPort}
+                  onChange={setCdpPort}
+                  placeholder="9222"
+                />
+              </HStack>
+            </VStack>
+
             <HStack>
               <Button
-                label="Lưu chế độ Engine"
+                label="Lưu cấu hình CDP & Engine"
                 variant="primary"
                 size="sm"
                 isLoading={busy === "save-engine"}
@@ -189,10 +240,15 @@ export default function BrowserTab({ busy, act }: Props) {
                   act(
                     "save-engine",
                     async () => {
-                      await apiPost("/api/activity/v1/browser/engine", { mode: engineMode });
+                      await apiPost("/api/activity/v1/browser/engine", {
+                        mode: engineMode,
+                        headless,
+                        hud,
+                        port: Number(cdpPort) || 9222,
+                      });
                       await loadAll();
                     },
-                    `Đã lưu chế độ engine: ${engineMode.toUpperCase()}.`
+                    `Đã lưu cấu hình trình duyệt: Engine ${engineMode.toUpperCase()}, Headless: ${headless ? "Bật" : "Tắt"}, HUD: ${hud ? "Bật" : "Tắt"}, Port: ${cdpPort}.`
                   )
                 }
               />

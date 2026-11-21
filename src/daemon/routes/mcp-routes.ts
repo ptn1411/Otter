@@ -11,6 +11,7 @@ import { jsonResponse, errorResponse } from "./common";
 import { isTrustedHostOrIp } from "../security";
 import { matchDaemonRoute, matchDaemonRoutePrefix, getDaemonRoute } from "./lcg-routes";
 import { browserBridge } from "../browser-bridge";
+import { updateSettings } from "../settings";
 import { getDatabase } from "../db";
 import {
   startMessengerListener,
@@ -67,8 +68,15 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
 
     if (serverKey === "otter_core") {
       if (toolName === "browser_engine_status") {
+        const toUpdate: any = {};
         if (body.mode) {
           browserBridge.setEngineMode(body.mode);
+          toUpdate.browserEngine = body.mode;
+        }
+        if (typeof body.headless === "boolean") toUpdate.cdpHeadless = body.headless;
+        if (typeof body.hud === "boolean") toUpdate.cdpHud = body.hud;
+        if (Object.keys(toUpdate).length > 0) {
+          updateSettings(toUpdate);
         }
         const status = await browserBridge.getStatus();
         let benchmarkResult = null;

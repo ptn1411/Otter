@@ -30,12 +30,14 @@ import {
   MessageIcon,
   OtterMark,
   RefreshIcon,
+  SettingsIcon,
   ShieldIcon,
   TerminalIcon,
   WrenchIcon,
 } from "./components/Icons";
 import OverviewTab from "./tabs/OverviewTab";
 import SecurityAccountTab from "./tabs/SecurityAccountTab";
+import SettingsTab from "./tabs/SettingsTab";
 import UpdatesTab from "./tabs/UpdatesTab";
 import ToolsTab from "./tabs/ToolsTab";
 import CommandsTab from "./tabs/CommandsTab";
@@ -50,6 +52,7 @@ initTokenFromUrl();
 type SectionKey =
   | "overview"
   | "security"
+  | "settings"
   | "updates"
   | "tools"
   | "commands"
@@ -224,6 +227,12 @@ export default function App({
           }
           onClick={() => setView("updates")}
         />
+        <SideNavItem
+          label="Cấu hình & Env"
+          icon={SettingsIcon}
+          isSelected={view === "settings"}
+          onClick={() => setView("settings")}
+        />
       </SideNavSection>
 
       <SideNavSection title="Công cụ AI">
@@ -350,6 +359,12 @@ export default function App({
               busy={busy}
               act={act}
               onUpdateLoaded={setUpdate}
+            />
+          )}
+          {view === "settings" && (
+            <SettingsTab
+              busy={busy}
+              act={act}
             />
           )}
           {view === "tools" && (
