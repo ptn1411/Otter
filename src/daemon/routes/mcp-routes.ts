@@ -67,6 +67,11 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
     try { body = await req.json(); } catch { }
 
     if (serverKey === "otter_core") {
+      if (toolName === "browser_close") {
+        const res = await browserBridge.execute("close");
+        return jsonResponse(res);
+      }
+
       if (toolName === "browser_engine_status") {
         const toUpdate: any = {};
         if (body.mode) {
@@ -75,6 +80,7 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
         }
         if (typeof body.headless === "boolean") toUpdate.cdpHeadless = body.headless;
         if (typeof body.hud === "boolean") toUpdate.cdpHud = body.hud;
+        if (typeof body.autoClose === "boolean") toUpdate.cdpAutoClose = body.autoClose;
         if (Object.keys(toUpdate).length > 0) {
           updateSettings(toUpdate);
         }
@@ -354,6 +360,12 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
           qualifiedName: "otter_core_tool_groups_set",
           title: "Bật/tắt nhóm MCP tools theo nhu cầu",
           description: "AI tự bật/tắt nhóm MCP tools bằng preset (all/minimal/code/fb) hoặc từng nhóm; thay đổi áp dụng ngay cho mọi phiên MCP đang kết nối."
+        },
+        {
+          name: "browser_close",
+          qualifiedName: "otter_core_browser_close",
+          title: "Đóng toàn bộ trình duyệt Chrome CDP",
+          description: "Đóng toàn bộ phiên Chrome CDP đang mở để giải phóng RAM và CPU."
         },
         {
           name: "browser_engine_status",

@@ -767,12 +767,15 @@ import { startMessengerListener } from "./fb-sales";
 import { startGroupPostSchedulerLoop } from "./fb-group-post";
 import { startMediaPostSchedulerLoop } from "./fb-media-post";
 
-// Tự động khởi động tiến trình lắng nghe Messenger nền theo kịch bản bán hàng
-try {
-  startMessengerListener(db, handleMcpActivity, 5000);
-  console.log(`[+] 💬 Messenger Auto-Listener: ĐÃ KÍCH HOẠT (tự động trả lời tin nhắn 24/7)`);
-} catch (err: any) {
-  console.warn(`[!] Không thể tự khởi động Messenger Listener: ${err.message}`);
+// Tiến trình lắng nghe Messenger nền theo kịch bản bán hàng (chỉ kích hoạt nếu có cấu hình OTTER_MESSENGER_AUTO_LISTEN)
+const autoListenMessenger = process.env.OTTER_MESSENGER_AUTO_LISTEN === "1" || process.env.OTTER_MESSENGER_AUTO_LISTEN === "true";
+if (autoListenMessenger) {
+  try {
+    startMessengerListener(db, handleMcpActivity, 5000);
+    console.log(`[+] 💬 Messenger Auto-Listener: ĐÃ KÍCH HOẠT (tự động trả lời tin nhắn 24/7)`);
+  } catch (err: any) {
+    console.warn(`[!] Không thể tự khởi động Messenger Listener: ${err.message}`);
+  }
 }
 
 // Tự động khởi động tiến trình kiểm tra hẹn giờ đăng bài nhóm Facebook (giãn cách 3 phút/nhóm)

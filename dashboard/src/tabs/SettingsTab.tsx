@@ -27,6 +27,7 @@ export default function SettingsTab({ busy, act }: Props) {
   const [browserEngine, setBrowserEngine] = useState<"cdp" | "auto" | "extension">("cdp");
   const [cdpHeadless, setCdpHeadless] = useState<boolean>(false);
   const [cdpHud, setCdpHud] = useState<boolean>(true);
+  const [cdpAutoClose, setCdpAutoClose] = useState<boolean>(true);
   const [cdpPort, setCdpPort] = useState<string>("9222");
   const [browserPath, setBrowserPath] = useState<string>("");
   const [userDataDir, setUserDataDir] = useState<string>("");
@@ -47,6 +48,7 @@ export default function SettingsTab({ busy, act }: Props) {
         setBrowserEngine(data.browserEngine || "cdp");
         setCdpHeadless(Boolean(data.cdpHeadless));
         setCdpHud(data.cdpHud !== false);
+        setCdpAutoClose(data.cdpAutoClose !== false);
         setCdpPort(String(data.cdpPort || 9222));
         setBrowserPath(data.browserPath || "");
         setUserDataDir(data.userDataDir || "");
@@ -76,6 +78,7 @@ export default function SettingsTab({ busy, act }: Props) {
           browserEngine,
           cdpHeadless,
           cdpHud,
+          cdpAutoClose,
           cdpPort: Number(cdpPort) || 9222,
           browserPath: browserPath.trim(),
           userDataDir: userDataDir.trim(),
@@ -168,6 +171,19 @@ export default function SettingsTab({ busy, act }: Props) {
                 isLabelHidden
                 value={cdpHud}
                 onChange={setCdpHud}
+              />
+            </HStack>
+
+            <HStack justify="between" align="center" gap={3}>
+              <VStack gap={0.5}>
+                <Text weight="medium">Tự động tắt khi rảnh rỗi (OTTER_CDP_AUTO_CLOSE)</Text>
+                <Text type="supporting">Tự động đóng Chrome sau 60s không có tác vụ duyệt web nào để giải phóng RAM & CPU.</Text>
+              </VStack>
+              <Switch
+                label="Auto Close"
+                isLabelHidden
+                value={cdpAutoClose}
+                onChange={setCdpAutoClose}
               />
             </HStack>
 

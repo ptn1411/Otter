@@ -8,24 +8,28 @@ describe("Settings Module", () => {
     expect(typeof s.browserEngine).toBe("string");
     expect(typeof s.cdpHeadless).toBe("boolean");
     expect(typeof s.cdpHud).toBe("boolean");
+    expect(typeof s.cdpAutoClose).toBe("boolean");
     expect(typeof s.cdpPort).toBe("number");
   });
 
   it("updates and persists settings into process.env", () => {
-    updateSettings({ cdpHeadless: true, cdpHud: false, cdpPort: 9333 });
+    updateSettings({ cdpHeadless: true, cdpHud: false, cdpAutoClose: false, cdpPort: 9333 });
     expect(process.env.OTTER_CDP_HEADLESS).toBe("1");
     expect(process.env.OTTER_CDP_HUD).toBe("0");
+    expect(process.env.OTTER_CDP_AUTO_CLOSE).toBe("0");
     expect(process.env.OTTER_CDP_PORT).toBe("9333");
 
     const s = getSettings();
     expect(s.cdpHeadless).toBe(true);
     expect(s.cdpHud).toBe(false);
+    expect(s.cdpAutoClose).toBe(false);
     expect(s.cdpPort).toBe(9333);
 
     // Rollback for clean test state
-    updateSettings({ cdpHeadless: false, cdpHud: true, cdpPort: 9222 });
+    updateSettings({ cdpHeadless: false, cdpHud: true, cdpAutoClose: true, cdpPort: 9222 });
     expect(process.env.OTTER_CDP_HEADLESS).toBe("0");
     expect(process.env.OTTER_CDP_HUD).toBe("1");
+    expect(process.env.OTTER_CDP_AUTO_CLOSE).toBe("1");
     expect(process.env.OTTER_CDP_PORT).toBe("9222");
   });
 
@@ -58,7 +62,7 @@ describe("Settings Module", () => {
     const postReq = new Request("http://127.0.0.1:1993/api/activity/v1/browser/engine", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mode: "auto", headless: true, hud: false }),
+      body: JSON.stringify({ mode: "auto", headless: true, hud: false, autoClose: false }),
     });
     const postRes = await handleActivityRoutes(postReq, new URL(postReq.url), "activity/v1");
     expect(postRes).not.toBeNull();
@@ -66,8 +70,9 @@ describe("Settings Module", () => {
     expect(data.mode).toBe("auto");
     expect(data.headless).toBe(true);
     expect(data.hud).toBe(false);
+    expect(data.autoClose).toBe(false);
 
     // Rollback
-    updateSettings({ browserEngine: "cdp", cdpHeadless: false, cdpHud: true });
+    updateSettings({ browserEngine: "cdp", cdpHeadless: false, cdpHud: true, cdpAutoClose: true });
   });
 });

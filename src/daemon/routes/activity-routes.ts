@@ -276,6 +276,7 @@ export async function handleActivityRoutes(
         }
         if (typeof body.headless === "boolean") toUpdate.cdpHeadless = body.headless;
         if (typeof body.hud === "boolean") toUpdate.cdpHud = body.hud;
+        if (typeof body.autoClose === "boolean") toUpdate.cdpAutoClose = body.autoClose;
         if (typeof body.port === "number") toUpdate.cdpPort = body.port;
         if (typeof body.browserPath === "string") toUpdate.browserPath = body.browserPath;
         if (typeof body.userDataDir === "string") toUpdate.userDataDir = body.userDataDir;
@@ -292,11 +293,22 @@ export async function handleActivityRoutes(
           ...status,
           headless: currentSettings.cdpHeadless,
           hud: currentSettings.cdpHud,
+          autoClose: currentSettings.cdpAutoClose,
           port: currentSettings.cdpPort,
           browserPath: currentSettings.browserPath,
           userDataDir: currentSettings.userDataDir,
           ...(benchmarkResult ? { benchmark: benchmarkResult } : {})
         });
+      } catch (err: any) {
+        return errorResponse(err.message, 500);
+      }
+    }
+
+    if ((browserAction === "close" || browserAction === "browser/close") && (req.method === "POST" || req.method === "GET")) {
+      try {
+        const res = await browserBridge.execute("close");
+        handleMcpActivity({ type: "browser_action", action: "close" });
+        return jsonResponse(res);
       } catch (err: any) {
         return errorResponse(err.message, 500);
       }

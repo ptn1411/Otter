@@ -8,6 +8,7 @@
  */
 import type { Database } from "bun:sqlite";
 import { browserBridge } from "./browser-bridge";
+import { cdpBridge } from "./cdp-bridge";
 
 export type SalesStage = "greeting" | "discovery" | "pitch" | "objection" | "closing" | "support" | "done";
 
@@ -658,6 +659,20 @@ export async function checkAndReplyMessengerOnce(
   try {
     listenerStatus.lastCheckAt = Date.now();
     listenerStatus.lastError = null;
+
+    // Kiểm tra nhanh: Nếu trình duyệt chưa chạy hoặc không có tab Facebook, bỏ qua ngay
+    const status = await browserBridge.getStatus();
+    if (status.activeEngine === "none") {
+      return { action: "no_browser_running" };
+    }
+    if (status.activeEngine === "cdp") {
+      const tabs = await cdpBridge.getTabs().catch(() => []);
+      const hasFb = tabs.some((t) => t.url.toLowerCase().includes("facebook.com") || t.url.toLowerCase().includes("messenger.com"));
+      if (!hasFb) {
+        return { action: "no_facebook_tab" };
+      }
+    }
+
     const page = await browserBridge.execute("read_page", { urlPattern: "facebook.com" });
     if (!page || !page.summaryText) return { action: "no_page_data" };
 

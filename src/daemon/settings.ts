@@ -15,6 +15,7 @@ export interface OtterSettings {
   browserEngine: "cdp" | "auto" | "extension";
   cdpHeadless: boolean;
   cdpHud: boolean;
+  cdpAutoClose: boolean;
   cdpPort: number;
   browserPath: string;
   userDataDir: string;
@@ -49,6 +50,9 @@ function getDefaultSettings(): OtterSettings {
   const hudEnv = (process.env.OTTER_CDP_HUD || "").trim().toLowerCase();
   const cdpHud = hudEnv !== "0" && hudEnv !== "false" && hudEnv !== "off";
 
+  const autoCloseEnv = (process.env.OTTER_CDP_AUTO_CLOSE || "").trim().toLowerCase();
+  const cdpAutoClose = autoCloseEnv !== "0" && autoCloseEnv !== "false" && autoCloseEnv !== "off";
+
   const cdpPort = parseInt(process.env.OTTER_CDP_PORT || process.env.CDP_PORT || "9222", 10) || 9222;
   const browserPath = (process.env.OTTER_BROWSER_PATH || process.env.OTTER_CHROME_PATH || "").trim();
   const userDataDir = (process.env.OTTER_CHROME_USER_DATA_DIR || "").trim();
@@ -65,6 +69,7 @@ function getDefaultSettings(): OtterSettings {
     browserEngine,
     cdpHeadless,
     cdpHud,
+    cdpAutoClose,
     cdpPort,
     browserPath,
     userDataDir,
@@ -81,6 +86,7 @@ function applySettingsToEnvironment(settings: OtterSettings): void {
   process.env.OTTER_BROWSER_ENGINE = settings.browserEngine;
   process.env.OTTER_CDP_HEADLESS = settings.cdpHeadless ? "1" : "0";
   process.env.OTTER_CDP_HUD = settings.cdpHud ? "1" : "0";
+  process.env.OTTER_CDP_AUTO_CLOSE = settings.cdpAutoClose ? "1" : "0";
   process.env.OTTER_CDP_PORT = String(settings.cdpPort);
   process.env.CDP_PORT = String(settings.cdpPort);
 

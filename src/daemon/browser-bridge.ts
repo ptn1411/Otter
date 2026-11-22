@@ -188,18 +188,40 @@ export class BrowserBridge {
    * Gửi một hành động tới trình duyệt (Tự động định tuyến sang Extension hoặc CDP)
    */
   async execute(action: string, params: any = {}, timeoutMs = 30000): Promise<any> {
+    if (action === "close" || action === "close_browser") {
+      return cdpBridge.closeBrowser();
+    }
+
     const status = await this.getStatus();
 
     if (status.activeEngine === "cdp") {
-      return cdpBridge.execute(action, params);
+      try {
+        return await cdpBridge.execute(action, params);
+      } catch (err: any) {
+        // Trạng thái vừa báo CDP sẵn sàng nhưng kết nối đã chết/bị từ chối giữa chừng
+        // (ví dụ người dùng bấm Huỷ ở hộp thoại gỡ lỗi, hoặc Chrome vừa đóng):
+        // tự phục hồi bằng ensureCdpChrome rồi thử lại đúng một lần khi người dùng mở trang mới.
+        const msg = String(err?.message || err || "");
+        const isConnErr =
+          /ECONNREFUSED|fetch failed|Browser WebSocket|chưa sẵn sàng|Không thể lấy danh sách tab|quá hạn|đã đóng|Không tìm thấy Browser WebSocket/i.test(msg);
+        if (isConnErr && (action === "open" || action === "open_url")) {
+          console.warn(`[BrowserBridge] CDP lỗi kết nối (${msg}), thử tự phục hồi...`);
+          const launched = await cdpBridge.ensureCdpChrome();
+          if (launched) {
+            return await cdpBridge.execute(action, params);
+          }
+        }
+        throw err;
+      }
     }
 
     if (status.activeEngine === "extension") {
       return this.executeViaExtension(action, params, timeoutMs);
     }
 
-    // Chưa có engine nào: thử tự mở Chrome CDP (trừ khi bị khóa ở chế độ extension).
-    if (this.engineMode !== "extension") {
+    // Chưa có engine nào: CHỈ tự mở Chrome CDP khi người dùng chủ động mở trang web mới (action === "open" | "open_url").
+    // TUYỆT ĐỐI KHÔNG tự mở Chrome cho các thao tác thụ động (read_page, click, type...) để tránh vòng lặp spawn vô tận.
+    if (this.engineMode !== "extension" && (action === "open" || action === "open_url")) {
       const launched = await cdpBridge.ensureCdpChrome();
       if (launched) {
         return cdpBridge.execute(action, params);
@@ -273,14 +295,19 @@ export class BrowserBridge {
       } catch {}
     }
 
+    // CHỈ inject qua CDP nếu CDP ĐÃ ĐANG MỞ SẴN và có tab ChatGPT!
+    // TUYỆT ĐỐI KHÔNG tự tiện spawn Chrome mới nếu người dùng không mở ChatGPT Web!
     try {
-      if (!(await cdpBridge.isAvailable())) {
-        await cdpBridge.ensureCdpChrome();
+      if (await cdpBridge.isAvailable()) {
+        const tabs = await cdpBridge.getTabs();
+        const hasChat = tabs.some((t) => t.url.toLowerCase().includes("chatgpt.com"));
+        if (hasChat) {
+          const res = await cdpBridge.injectChatMessage(text, autoSubmit);
+          return Boolean(res.ok);
+        }
       }
-      const res = await cdpBridge.injectChatMessage(text, autoSubmit);
-      return Boolean(res.ok);
-    } catch (err: any) {
-      console.warn("[BrowserBridge] CDP inject prompt failed:", err?.message || err);
+      return false;
+    } catch {
       return false;
     }
   }

@@ -644,6 +644,44 @@
         }
       }
     },
+    "/api/activity/v1/browser/close": {
+      "post": {
+        "operationId": "browserClose",
+        "summary": "Đóng trình duyệt Chrome CDP",
+        "description": "Đóng toàn bộ phiên Chrome CDP đang mở để giải phóng RAM và CPU",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả đóng trình duyệt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/activity/v1/browser/engine": {
       "post": {
         "operationId": "browserEngineStatus",

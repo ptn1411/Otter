@@ -44,8 +44,23 @@ if (process.platform === "win32") {
     // Dừng tiến trình otter cũ nếu đang chạy
     console.log("[*] Đang dừng tiến trình Otter cũ...");
     execSync('taskkill /F /IM otter.exe /T 2>nul || exit 0', { shell: "cmd.exe", stdio: "ignore" });
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 1500));
   } catch {}
+
+  const copyFileWithRetry = async (src: string, dest: string, maxRetries = 5) => {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        await fs.copyFile(src, dest);
+        return;
+      } catch (err: any) {
+        if (i === maxRetries - 1) throw err;
+        try {
+          execSync('taskkill /F /IM otter.exe /T 2>nul || exit 0', { shell: "cmd.exe", stdio: "ignore" });
+        } catch {}
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+  };
 
   try {
     await fs.mkdir(installDir, { recursive: true });
@@ -53,10 +68,10 @@ if (process.platform === "win32") {
     // Sao chép otter.exe & openapi.json
     console.log("[*] Sao chép file thực thi và cấu hình mới vào %LOCALAPPDATA%\\Otter...");
     const srcExe = path.join(deployDir, "otter.exe");
-    await fs.copyFile(srcExe, path.join(installDir, "otter.exe"));
+    await copyFileWithRetry(srcExe, path.join(installDir, "otter.exe"));
     
     if (await fs.stat(path.join(deployDir, "openapi.json")).then(() => true).catch(() => false)) {
-      await fs.copyFile(path.join(deployDir, "openapi.json"), path.join(installDir, "openapi.json"));
+      await copyFileWithRetry(path.join(deployDir, "openapi.json"), path.join(installDir, "openapi.json"));
     }
 
     // Sao chép thư mục bin/ và đồng bộ otter.exe vào bin/ để CLI chạy chuẩn xác từ PATH
@@ -64,9 +79,9 @@ if (process.platform === "win32") {
     await fs.mkdir(targetBin, { recursive: true });
     const binFiles = await fs.readdir(path.join(deployDir, "bin")).catch(() => [] as string[]);
     for (const f of binFiles) {
-      await fs.copyFile(path.join(deployDir, "bin", f), path.join(targetBin, f));
+      await copyFileWithRetry(path.join(deployDir, "bin", f), path.join(targetBin, f));
     }
-    await fs.copyFile(srcExe, path.join(targetBin, "otter.exe"));
+    await copyFileWithRetry(srcExe, path.join(targetBin, "otter.exe"));
 
     // Sao chép thư mục tools/ nếu có
     const deployTools = path.join(deployDir, "tools");

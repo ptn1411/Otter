@@ -192,6 +192,7 @@ export interface OtterSettings {
   browserEngine: "cdp" | "auto" | "extension";
   cdpHeadless: boolean;
   cdpHud: boolean;
+  cdpAutoClose: boolean;
   cdpPort: number;
   browserPath: string;
   userDataDir: string;
@@ -210,6 +211,7 @@ export interface BrowserEngineInfo {
   cdp?: { available: boolean; port: number };
   headless?: boolean;
   hud?: boolean;
+  autoClose?: boolean;
   port?: number;
   browserPath?: string;
   userDataDir?: string;

@@ -27,6 +27,7 @@ export default function BrowserTab({ busy, act }: Props) {
   const [engineMode, setEngineMode] = useState<string>("cdp");
   const [headless, setHeadless] = useState<boolean>(false);
   const [hud, setHud] = useState<boolean>(true);
+  const [autoClose, setAutoClose] = useState<boolean>(true);
   const [cdpPort, setCdpPort] = useState<string>("9222");
   const [benchmarkText, setBenchmarkText] = useState<string | null>(null);
   const [chromeProfiles, setChromeProfiles] = useState<ChromeProfileItem[]>([]);
@@ -44,6 +45,7 @@ export default function BrowserTab({ busy, act }: Props) {
       if (eng.mode) setEngineMode(eng.mode);
       if (typeof eng.headless === "boolean") setHeadless(eng.headless);
       if (typeof eng.hud === "boolean") setHud(eng.hud);
+      if (typeof eng.autoClose === "boolean") setAutoClose(eng.autoClose);
       if (eng.port) setCdpPort(String(eng.port));
     }
     if (prof) setChromeProfiles(prof.profiles || []);
@@ -59,7 +61,25 @@ export default function BrowserTab({ busy, act }: Props) {
         title="Trình duyệt & CDP"
         description="Quản lý động cơ điều khiển trình duyệt (CDP mặc định / Extension phụ) và mở nhanh Chrome Profiles."
         actions={
-          <Button label="Làm mới" size="sm" variant="secondary" onClick={() => void loadAll()} />
+          <HStack gap={2}>
+            <Button
+              label="Đóng Chrome CDP"
+              size="sm"
+              variant="destructive"
+              isLoading={busy === "close-browser"}
+              onClick={() =>
+                act(
+                  "close-browser",
+                  async () => {
+                    await apiPost("/api/activity/v1/browser/close");
+                    await loadAll();
+                  },
+                  "Đã đóng trình duyệt Chrome CDP."
+                )
+              }
+            />
+            <Button label="Làm mới" size="sm" variant="secondary" onClick={() => void loadAll()} />
+          </HStack>
         }
       />
 
@@ -218,6 +238,19 @@ export default function BrowserTab({ busy, act }: Props) {
                 />
               </HStack>
 
+              <HStack justify="between" align="center" gap={3}>
+                <VStack gap={0.5}>
+                  <Text weight="medium">Tự động tắt khi rảnh rỗi (Auto Close)</Text>
+                  <Text type="supporting">OTTER_CDP_AUTO_CLOSE=1 — Tự động đóng Chrome sau 60s không có tác vụ duyệt web nào.</Text>
+                </VStack>
+                <Switch
+                  label="Tự động tắt Chrome"
+                  isLabelHidden
+                  value={autoClose}
+                  onChange={setAutoClose}
+                />
+              </HStack>
+
               <HStack gap={2} align="center">
                 <Text style={{ minWidth: 120 }}>Cổng CDP Port:</Text>
                 <TextInput
@@ -244,11 +277,12 @@ export default function BrowserTab({ busy, act }: Props) {
                         mode: engineMode,
                         headless,
                         hud,
+                        autoClose,
                         port: Number(cdpPort) || 9222,
                       });
                       await loadAll();
                     },
-                    `Đã lưu cấu hình trình duyệt: Engine ${engineMode.toUpperCase()}, Headless: ${headless ? "Bật" : "Tắt"}, HUD: ${hud ? "Bật" : "Tắt"}, Port: ${cdpPort}.`
+                    `Đã lưu cấu hình trình duyệt: Engine ${engineMode.toUpperCase()}, Headless: ${headless ? "Bật" : "Tắt"}, HUD: ${hud ? "Bật" : "Tắt"}, AutoClose: ${autoClose ? "Bật" : "Tắt"}, Port: ${cdpPort}.`
                   )
                 }
               />

@@ -1,6 +1,6 @@
 {
   "name": "otter",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "description": "Otter — Agentic AI Desktop & Browser Controller built with Bun + TypeScript (Port 1993)",
   "license": "MIT",
   "author": "PHAM THANH NAM (@ptn1411)",

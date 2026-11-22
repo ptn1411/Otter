@@ -76,6 +76,31 @@ export class CdpBridge {
   private controlledTabId: string | null = null;
   private preloadedTabIds = new Set<string>();
   private spawnedChrome: ChildProcess | null = null;
+  private idleTimer: any = null;
+  private idleTimeoutMs = 60000;
+
+  resetIdleTimer() {
+    this.clearIdleTimer();
+    const autoCloseEnv = (process.env.OTTER_CDP_AUTO_CLOSE || "").trim().toLowerCase();
+    if (autoCloseEnv === "0" || autoCloseEnv === "false" || autoCloseEnv === "off") return;
+
+    if (this.spawnedChrome && !this.spawnedChrome.killed) {
+      this.idleTimer = setTimeout(() => {
+        console.log("[CDP Bridge] ⏳ Không có thao tác duyệt web trong 60s, tự động đóng Chrome CDP để trả tài nguyên...");
+        void this.closeBrowser();
+      }, this.idleTimeoutMs);
+      if (this.idleTimer?.unref) {
+        this.idleTimer.unref();
+      }
+    }
+  }
+
+  clearIdleTimer() {
+    if (this.idleTimer) {
+      clearTimeout(this.idleTimer);
+      this.idleTimer = null;
+    }
+  }
 
   // Kết nối Browser-level WebSocket bền vững cho Chrome 144+ mặc định (DevToolsActivePort)
   // Giữ 1 kết nối duy nhất để người dùng chỉ phải bấm "Allow" 1 lần trong Chrome.
@@ -85,6 +110,13 @@ export class CdpBridge {
   private browserWsPending = new Map<number, { resolve: (v: any) => void; reject: (e: any) => void; timer: any }>();
   private browserWsConnectPromise: Promise<void> | null = null;
   private attachedSessions = new Map<string, string>(); // targetId -> sessionId
+  // Khi người dùng bấm "Huỷ" ở hộp thoại gỡ lỗi từ xa của Chrome, kết nối WS bị từ chối.
+  // Ghi lại thời điểm bị từ chối để tạm ngưng thử lại đường browser-WS trong vài phút,
+  // tránh hộp thoại hiện lại liên tục và để đường dự phòng (Chrome CDP riêng) được dùng.
+  private browserWsDeniedUntil = 0;
+  private static readonly BROWSER_WS_DENIED_COOLDOWN_MS = 5 * 60 * 1000;
+  // Chống chạy trùng ensureCdpChrome (getTabs -> ensureCdpChrome -> preload -> getTabs)
+  private ensureCdpInFlight: Promise<boolean> | null = null;
 
   constructor(defaultPort = 9222, defaultChromeUserDataDir?: string) {
     this.defaultPort = process.env.OTTER_CDP_PORT ? Number(process.env.OTTER_CDP_PORT) : defaultPort;
@@ -93,7 +125,13 @@ export class CdpBridge {
 
   private getPreferredDefaultChromeInfo(port?: number): DevToolsActivePortInfo | null {
     if (port) return null;
-    if (!this.defaultChromeUserDataDir && process.env.OTTER_CDP_USE_DEFAULT_CHROME === "0") return null;
+    if (
+      !this.defaultChromeUserDataDir &&
+      !process.env.OTTER_CHROME_USER_DATA_DIR &&
+      process.env.OTTER_CDP_USE_DEFAULT_CHROME !== "1"
+    ) {
+      return null;
+    }
     return readDefaultChromeActivePort(this.defaultChromeUserDataDir || process.env.OTTER_CHROME_USER_DATA_DIR);
   }
 
@@ -120,6 +158,8 @@ export class CdpBridge {
     if (this.browserWs && this.browserWs.readyState === WebSocket.OPEN && this.browserWsUrl === info.browserWsUrl) {
       return true;
     }
+    // Vừa bị từ chối quyền gỡ lỗi (người dùng bấm Huỷ): không thử lại ngay để tránh popup lặp.
+    if (Date.now() < this.browserWsDeniedUntil) return false;
     return this.isTcpPortListening(info.port);
   }
 
@@ -151,7 +191,7 @@ export class CdpBridge {
     }
   }
 
-  private async ensureBrowserWs(wsUrl: string, timeoutMs = 15000): Promise<void> {
+  private async ensureBrowserWs(wsUrl: string, timeoutMs = 3000): Promise<void> {
     if (this.browserWs && this.browserWs.readyState === WebSocket.OPEN && this.browserWsUrl === wsUrl) {
       return;
     }
@@ -166,6 +206,7 @@ export class CdpBridge {
       const timer = setTimeout(() => {
         if (!settled) {
           settled = true;
+          this.browserWsDeniedUntil = Date.now() + CdpBridge.BROWSER_WS_DENIED_COOLDOWN_MS;
           this.resetBrowserWs();
           reject(new Error("Kết nối Browser WebSocket Chrome mặc định quá hạn (hãy kiểm tra hộp thoại Allow trong Chrome)"));
         }
@@ -185,6 +226,7 @@ export class CdpBridge {
         if (!settled) {
           settled = true;
           clearTimeout(timer);
+          this.browserWsDeniedUntil = 0;
           this.browserWs = ws;
           this.browserWsConnectPromise = null;
           resolve();
@@ -214,6 +256,7 @@ export class CdpBridge {
         if (!settled) {
           settled = true;
           clearTimeout(timer);
+          this.browserWsDeniedUntil = Date.now() + CdpBridge.BROWSER_WS_DENIED_COOLDOWN_MS;
           this.resetBrowserWs();
           reject(new Error("Không thể kết nối Browser WebSocket của Chrome mặc định"));
         }
@@ -224,6 +267,7 @@ export class CdpBridge {
         if (!settled) {
           settled = true;
           clearTimeout(timer);
+          this.browserWsDeniedUntil = Date.now() + CdpBridge.BROWSER_WS_DENIED_COOLDOWN_MS;
           reject(closeErr);
         }
         this.resetBrowserWs(closeErr);
@@ -309,15 +353,15 @@ export class CdpBridge {
    * (Ưu tiên Chrome 144+ mặc định qua DevToolsActivePort nếu đang bật, dùng TCP probe để không gây popup).
    */
   async isAvailable(port?: number, _profileId?: string): Promise<boolean> {
-    if (await this.shouldUseBrowserWs(port)) return true;
-
     const targetPort = port || this.defaultPort;
     try {
       const res = await fetch(`http://127.0.0.1:${targetPort}/json/version`, {
-        signal: AbortSignal.timeout(1000),
+        signal: AbortSignal.timeout(800),
       });
       if (res.ok) return true;
     } catch {}
+
+    if (await this.shouldUseBrowserWs(port)) return true;
 
     if (!port) {
       const candidatePorts = [
@@ -399,9 +443,22 @@ export class CdpBridge {
    * Lấy danh sách tất cả các tab đang mở
    */
   async getTabs(port?: number): Promise<CdpTab[]> {
+    const targetPort = port || this.defaultPort;
+
+    // 1. Nếu cổng targetPort (mặc định 9222) đang mở và có danh sách tab qua HTTP /json, dùng ngay lập tức (< 5ms)
+    try {
+      const res = await fetch(`http://127.0.0.1:${targetPort}/json`, {
+        signal: AbortSignal.timeout(1000),
+      });
+      if (res.ok) {
+        return (await res.json()) as CdpTab[];
+      }
+    } catch {}
+
+    // 2. Thử qua persistent Browser WebSocket (DevToolsActivePort Chrome 144+)
     if (await this.shouldUseBrowserWs(port)) {
       try {
-        const res = await this.sendOnBrowserWs("Target.getTargets", {}, undefined, 15000);
+        const res = await this.sendOnBrowserWs("Target.getTargets", {}, undefined, 3000);
         const infos = Array.isArray(res?.targetInfos) ? res.targetInfos : [];
         return infos.map((t: any) => ({
           id: String(t.targetId || ""),
@@ -415,7 +472,6 @@ export class CdpBridge {
       }
     }
 
-    const targetPort = port || this.defaultPort;
     if (!(await this.isAvailable(targetPort))) {
       await this.ensureProfileRunning(undefined, targetPort);
     }
@@ -443,6 +499,7 @@ export class CdpBridge {
         (t) => t.url.toLowerCase().includes(q) || t.title.toLowerCase().includes(q)
       );
       if (matched) return matched;
+      throw new Error(`Không tìm thấy tab nào phù hợp với pattern '${urlPattern}'`);
     }
 
     if (this.controlledTabId) {
@@ -1317,15 +1374,25 @@ export class CdpBridge {
 
   /**
    * Đảm bảo có Chrome mở cổng CDP và tự động nạp sẵn Otter Core vào tất cả tab ngay khi load!
+   * Có khóa chống chạy trùng: nhiều lời gọi đồng thời dùng chung một lần khởi động.
    */
   async ensureCdpChrome(port?: number): Promise<boolean> {
+    if (this.ensureCdpInFlight) return this.ensureCdpInFlight;
+    const run = this.doEnsureCdpChrome(port);
+    this.ensureCdpInFlight = run;
+    try {
+      return await run;
+    } finally {
+      if (this.ensureCdpInFlight === run) this.ensureCdpInFlight = null;
+    }
+  }
+
+  private async doEnsureCdpChrome(port?: number): Promise<boolean> {
     if (await this.isAvailable(port)) {
-      void this.preloadCoreOnAllTabs(port);
       return true;
     }
     const targetPort = port || this.defaultPort;
     if (await this.ensureProfileRunning(undefined, targetPort)) {
-      void this.preloadCoreOnAllTabs(targetPort);
       return true;
     }
 
@@ -1361,6 +1428,12 @@ export class CdpBridge {
       );
       const child = spawn(chromePath, args, { detached: true, stdio: "ignore" });
       child.on("error", () => {});
+      child.on("exit", () => {
+        if (this.spawnedChrome === child) {
+          this.spawnedChrome = null;
+          this.clearIdleTimer();
+        }
+      });
       child.unref();
       this.spawnedChrome = child;
     } catch (err: any) {
@@ -1373,6 +1446,7 @@ export class CdpBridge {
       if (await this.isAvailable(targetPort)) {
         const preloaded = await this.preloadCoreOnAllTabs(targetPort);
         console.log(`[CDP Bridge] Đã nạp sẵn Otter Page-Agent Core (${OTTER_CORE_VERSION}) vào ${preloaded} tab.`);
+        this.resetIdleTimer();
         return true;
       }
     }
@@ -1381,10 +1455,83 @@ export class CdpBridge {
   }
 
   /**
+   * Đóng trình duyệt Chrome CDP và giải phóng toàn bộ tài nguyên
+   */
+  async closeBrowser(port?: number): Promise<{ ok: boolean; message: string }> {
+    this.clearIdleTimer();
+    let closed = false;
+    const targetPort = port || this.defaultPort;
+
+    // 1. Gửi lệnh Browser.close qua Browser WebSocket nếu cổng đang mở
+    try {
+      const versionRes = await fetch(`http://127.0.0.1:${targetPort}/json/version`, {
+        signal: AbortSignal.timeout(1500),
+      });
+      if (versionRes.ok) {
+        const vData = await versionRes.json();
+        if (vData?.webSocketDebuggerUrl) {
+          await new Promise<void>((resolve) => {
+            const ws = new WebSocket(vData.webSocketDebuggerUrl);
+            const timer = setTimeout(() => {
+              try { ws.close(); } catch {}
+              resolve();
+            }, 2500);
+
+            ws.onopen = () => {
+              try {
+                ws.send(JSON.stringify({ id: 1, method: "Browser.close" }));
+              } catch {}
+            };
+            ws.onmessage = () => {
+              clearTimeout(timer);
+              try { ws.close(); } catch {}
+              resolve();
+            };
+            ws.onclose = () => {
+              clearTimeout(timer);
+              resolve();
+            };
+            ws.onerror = () => {
+              clearTimeout(timer);
+              resolve();
+            };
+          });
+          closed = true;
+        }
+      }
+    } catch {}
+
+    // 2. Kill spawned child process nếu có
+    if (this.spawnedChrome) {
+      try {
+        if (!this.spawnedChrome.killed) {
+          this.spawnedChrome.kill();
+        }
+        closed = true;
+      } catch {}
+      this.spawnedChrome = null;
+    }
+
+    this.resetBrowserWs();
+    this.attachedSessions.clear();
+    this.preloadedTabIds.clear();
+    this.controlledTabId = null;
+
+    return {
+      ok: closed,
+      message: closed ? "Đã đóng trình duyệt Chrome CDP thành công" : "Không tìm thấy phiên Chrome CDP nào đang mở",
+    };
+  }
+
+  /**
    * Unified dispatcher — đầy đủ 100% hành động của Extension BrowserController chạy trực tiếp trên CDP!
    */
   async execute(action: string, params: any = {}): Promise<any> {
+    this.resetIdleTimer();
     switch (action) {
+      case "close":
+      case "close_browser":
+        return this.closeBrowser();
       case "open":
         return this.openUrl(params.url);
       case "read_page":

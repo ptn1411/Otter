@@ -365,6 +365,28 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
     }
   );
 
+  // Tool: Đóng toàn bộ trình duyệt Chrome CDP để giải phóng RAM và CPU
+  mcp.tool(
+    "browser_close",
+    {},
+    async () => {
+      try {
+        const res = await browserBridge.execute("close");
+        return {
+          content: [{
+            type: "text",
+            text: `✅ ${res.message}`
+          }]
+        };
+      } catch (err: any) {
+        return {
+          content: [{ type: "text", text: `Lỗi đóng trình duyệt: ${err.message}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
   // Tool: Quản lý & đo lường trạng thái 2 động cơ trình duyệt (CDP chính vs Extension dự phòng)
   mcp.tool(
     "browser_engine_status",
@@ -372,9 +394,10 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
       mode: z.enum(["auto", "extension", "cdp"]).optional().describe("Chuyển đổi chế độ động cơ: 'cdp' (mặc định — chỉ CDP, tự mở Chrome CDP khi cần), 'auto' (ưu tiên CDP, fallback Extension), 'extension' (chỉ dùng Extension)"),
       headless: z.boolean().optional().describe("Bật/tắt chế độ chạy ngầm Chrome (headless) không hiện cửa sổ"),
       hud: z.boolean().optional().describe("Bật/tắt thanh HUD điều khiển và viền xanh trên trang web"),
+      autoClose: z.boolean().optional().describe("Bật/tắt tự động đóng Chrome sau 60s không có tác vụ duyệt web (mặc định: true)"),
       benchmark: z.boolean().optional().describe("Có chạy đo đạc so sánh tốc độ phản hồi (latency) giữa 2 động cơ không (mặc định: false)")
     },
-    async ({ mode, headless, hud, benchmark }) => {
+    async ({ mode, headless, hud, autoClose, benchmark }) => {
       try {
         const toUpdate: any = {};
         if (mode) {
@@ -383,6 +406,7 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
         }
         if (typeof headless === "boolean") toUpdate.cdpHeadless = headless;
         if (typeof hud === "boolean") toUpdate.cdpHud = hud;
+        if (typeof autoClose === "boolean") toUpdate.cdpAutoClose = autoClose;
         if (Object.keys(toUpdate).length > 0) {
           updateSettings(toUpdate);
         }
@@ -395,6 +419,7 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
           `- Động cơ đang hoạt động (Active): ${status.activeEngine.toUpperCase()}`,
           `- Chạy ngầm (Headless): ${settings.cdpHeadless ? "✅ Bật (Ẩn cửa sổ)" : "❌ Tắt (Hiện cửa sổ)"}`,
           `- Thanh HUD & Viền xanh: ${settings.cdpHud ? "✅ Bật" : "❌ Tắt"}`,
+          `- Tự động đóng khi rảnh (Auto Close): ${settings.cdpAutoClose ? "✅ Bật (sau 60s idle)" : "❌ Tắt"}`,
           `\n1. Động cơ Chrome Extension:`,
           `   + Kết nối: ${status.extension.connected ? "✅ Đang kết nối" : "❌ Chưa kết nối"}`,
           `   + Số socket mở: ${status.extension.socketsCount}`,
