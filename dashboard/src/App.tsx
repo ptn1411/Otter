@@ -46,6 +46,7 @@ import GpmStudioTab from "./tabs/GpmStudioTab";
 import PlansFleetTab from "./tabs/PlansFleetTab";
 import ScheduledTasksTab from "./tabs/ScheduledTasksTab";
 import FbSalesTab from "./tabs/FbSalesTab";
+import A2aCoordinationTab from "./tabs/A2aCoordinationTab";
 
 initTokenFromUrl();
 
@@ -60,7 +61,8 @@ type SectionKey =
   | "gpm"
   | "plans"
   | "tasks"
-  | "fb-sales";
+  | "fb-sales"
+  | "a2a";
 
 export default function App({
   mode,
@@ -289,6 +291,12 @@ export default function App({
           isSelected={view === "fb-sales"}
           onClick={() => setView("fb-sales")}
         />
+        <SideNavItem
+          label="Điều phối Bot (A2A)"
+          icon={LayersIcon}
+          isSelected={view === "a2a"}
+          onClick={() => setView("a2a")}
+        />
       </SideNavSection>
     </SideNav>
   );
@@ -381,6 +389,7 @@ export default function App({
           {view === "plans" && <PlansFleetTab busy={busy} act={act} />}
           {view === "tasks" && <ScheduledTasksTab busy={busy} act={act} />}
           {view === "fb-sales" && <FbSalesTab busy={busy} act={act} />}
+          {view === "a2a" && <A2aCoordinationTab busy={busy} act={act} />}
         </VStack>
       </div>
     </AppShell>

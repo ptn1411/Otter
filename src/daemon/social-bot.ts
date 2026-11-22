@@ -15,6 +15,16 @@ import * as os from "node:os";
 import { io, Socket } from "socket.io-client";
 import { dispatchBridgeTask, taskBridgeEvents } from "./tools/task-bridge";
 import { acknowledgeTask } from "./a2a-client";
+import {
+  a2aInboxEvents,
+  sendInboxMessage,
+  pullInbox,
+  ackInboxMessage,
+  getInboxStats,
+  listInboxMessages,
+  listBots,
+  type A2aInboxMessage,
+} from "./a2a-inbox";
 
 export interface SocialBotConfig {
   /** MXH Backend Base URL (e.g. http://192.168.1.3:4001 or http://100.111.68.103:4001) */
@@ -71,6 +81,51 @@ let lastError: string | null = null;
 let lastHeartbeat: number | null = null;
 let messagesReceivedCount = 0;
 let tasksDispatchedCount = 0;
+let lastActiveConvId = Number(process.env.MXH_GROUP_ID || 503);
+
+// Wire A2A Store-and-Forward Event Mirroring to Group 503 / MXH Chat
+let a2aMirroringInitialized = false;
+function initA2aMirroring(): void {
+  if (a2aMirroringInitialized) return;
+  a2aMirroringInitialized = true;
+
+  a2aInboxEvents.on("message_sent", (msg: A2aInboxMessage) => {
+    if (!isConnected) return;
+    const priorityBadge = msg.priority > 0 ? ` ⚡ [P${msg.priority}]` : "";
+    const card = [
+      `🤖 [A2A Dispatch] @${msg.senderId} ➔ @${msg.recipientId}${priorityBadge}`,
+      `🎯 Mục tiêu: ${msg.goal}`,
+      msg.details ? `📝 Chi tiết: ${msg.details.slice(0, 150)}` : "",
+      `🆔 Task ID: #${msg.id.slice(-8)} (Hàng đợi Otter SQLite)`,
+    ].filter(Boolean).join("\n");
+    void sendSocialMessage(lastActiveConvId, card);
+  });
+
+  a2aInboxEvents.on("message_pulled", ({ message, workerId }: { message: A2aInboxMessage; workerId?: string }) => {
+    if (!isConnected) return;
+    const workerText = workerId ? ` qua ${workerId}` : "";
+    const card = `⚡ [A2A In-Progress] @${message.recipientId} đã nhận xử lý task #${message.id.slice(-8)}${workerText}: "${message.goal}"`;
+    void sendSocialMessage(lastActiveConvId, card);
+  });
+
+  a2aInboxEvents.on("message_acked", ({ message }: { message: A2aInboxMessage }) => {
+    if (!isConnected) return;
+    const statusBadge = message.status === "acked" ? "✅ [A2A Hoàn thành]" : "⚠️ [A2A Thất bại]";
+    const card = [
+      `${statusBadge} Task #${message.id.slice(-8)} do @${message.recipientId} thực hiện`,
+      `🎯 Mục tiêu: ${message.goal}`,
+      message.resultSummary ? `📋 Báo cáo: ${message.resultSummary}` : "",
+    ].filter(Boolean).join("\n");
+    void sendSocialMessage(lastActiveConvId, card);
+  });
+
+  a2aInboxEvents.on("message_requeued", ({ id, reason }: { id: string; reason: string }) => {
+    if (!isConnected) return;
+    const card = `🔄 [A2A Re-Queued] Task #${id.slice(-8)} hết hạn lease lock (${reason}), đã trả về hàng đợi để worker khác nhận.`;
+    void sendSocialMessage(lastActiveConvId, card);
+  });
+}
+initA2aMirroring();
 
 /** Mapping giữa Otter Task ID và Trello Card ID trên MXH */
 const otterToMxhTask = new Map<string, { convId: number; cardId: number }>();
@@ -490,6 +545,7 @@ async function handleIncomingMessage(payload: any) {
   const convId = payload.conversation?.id || payload.chat?.id;
 
   if (!convId) return;
+  lastActiveConvId = Number(convId);
 
   // 1. Lưu tin nhắn vào bộ nhớ đệm gần đây (để kiểm chứng bot thấy cả tin nhắn thường)
   recentChatMessages.unshift({
@@ -653,6 +709,87 @@ async function handleIncomingMessage(payload: any) {
       `• Thống kê: ${botStatus.messagesReceivedCount} tin nhắn đã nhận, ${botStatus.tasksDispatchedCount} task đã dispatch`,
     ].filter(Boolean);
     await sendSocialMessage(convId, infoLines.join("\n"), payload.id);
+    return;
+  }
+
+  // E. LỆNH /a2a HOẶC /inbox ĐIỀU PHỐI BOT-TO-BOT (OTTER COORDINATION)
+  const a2aMatch = commandText.match(/^\/(?:a2a|inbox)(?:\s+(send|pull|status|list|bots))?(?:\s+@?([a-zA-Z0-9_\-]+))?(?:\s+(.*))?$/i);
+  if (a2aMatch) {
+    const subAction = (a2aMatch[1] || "status").toLowerCase();
+    const target = a2aMatch[2];
+    const rest = a2aMatch[3]?.trim();
+
+    if (subAction === "send") {
+      if (!target || !rest) {
+        await sendSocialMessage(
+          convId,
+          "Cú pháp: `/a2a send @<bot_nhận> <nội dung task>`\nVí dụ: `/a2a send @ai_antigravity Kiểm tra code mới`",
+          payload.id
+        );
+        return;
+      }
+      const recipient = target.startsWith("ai_") || target.startsWith("user_") ? target : `ai_${target}`;
+      const msg = await sendInboxMessage({
+        senderId: senderUsername,
+        recipientId: recipient,
+        goal: rest,
+      });
+      await sendSocialMessage(
+        convId,
+        `✅ Đã tiếp nhận và đưa vào hàng đợi A2A của @${recipient} (ID: #${msg.id.slice(-8)})`,
+        payload.id
+      );
+      return;
+    }
+
+    if (subAction === "bots") {
+      const bots = listBots();
+      const lines = [
+        `🤖 [Danh sách Bot A2A Mesh] (${bots.length} bots)`,
+        ...bots.map(
+          (b) =>
+            `• @${b.botId} (${b.name}) [${b.status.toUpperCase()}]\n  Skills: ${b.capabilities.join(", ")}`
+        ),
+      ];
+      await sendSocialMessage(convId, lines.join("\n"), payload.id);
+      return;
+    }
+
+    if (subAction === "pull") {
+      const botId = target
+        ? target.startsWith("ai_") || target.startsWith("user_")
+          ? target
+          : `ai_${target}`
+        : currentConfig.botUsername;
+      const pulled = pullInbox({ recipientId: botId, limit: 3 });
+      if (pulled.length === 0) {
+        await sendSocialMessage(convId, `Hộp thư A2A của @${botId} hiện đang trống.`, payload.id);
+      } else {
+        const lines = [
+          `📥 [Đã rút ${pulled.length} task cho @${botId}]`,
+          ...pulled.map((t) => `• #${t.id.slice(-8)} từ @${t.senderId}: ${t.goal}`),
+        ];
+        await sendSocialMessage(convId, lines.join("\n"), payload.id);
+      }
+      return;
+    }
+
+    // Mặc định: status / list
+    const stats = getInboxStats();
+    const recent = listInboxMessages({ limit: 5 });
+    const lines = [
+      `📊 [Trạng thái Hàng đợi A2A Mesh]`,
+      `• Đang chờ (Queued): ${stats.queued}`,
+      `• Đang chạy (In-Flight): ${stats.inFlight}`,
+      `• Hoàn thành (Acked): ${stats.acked}`,
+      `• Thất bại (Failed): ${stats.failed}`,
+      recent.length > 0 ? `\n📌 5 nhiệm vụ gần đây:` : "",
+      ...recent.map(
+        (m) =>
+          `• #${m.id.slice(-8)} [@${m.senderId} ➔ @${m.recipientId}] [${m.status.toUpperCase()}]: ${m.goal}`
+      ),
+    ].filter(Boolean);
+    await sendSocialMessage(convId, lines.join("\n"), payload.id);
     return;
   }
 

@@ -313,6 +313,45 @@ export interface FbSalesStage {
   templates: string[];
 }
 
+export interface A2aBotItem {
+  botId: string;
+  name: string;
+  description: string;
+  capabilities: string[];
+  preferredNode?: string | null;
+  status: "online" | "busy" | "idle" | "offline";
+  lastSeenAt?: string | null;
+}
+
+export interface A2aMessageItem {
+  id: string;
+  senderId: string;
+  recipientId: string;
+  messageType: string;
+  goal: string;
+  details?: string | null;
+  payload?: any;
+  artifacts?: any[];
+  priority: number;
+  status: "queued" | "in_flight" | "acked" | "failed" | "cancelled";
+  leaseOwner?: string | null;
+  leaseUntil?: number | null;
+  attemptCount: number;
+  maxAttempts: number;
+  resultSummary?: string | null;
+  result?: any;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface A2aStats {
+  queued: number;
+  inFlight: number;
+  acked: number;
+  failed: number;
+  total: number;
+}
+
 export interface FbSalesIntent {
   intentKey: string;
   name: string;

@@ -7,7 +7,7 @@
 
 ---
 
-## Current Status: In Progress (Phase 1 Completed, moving to Phase 2)
+## Current Status: In Progress (Phase 2 Completed, moving to Phase 3)
 
 ### Phase 1: Hub Store-and-Forward Engine & Bot Identity Registry
 - [x] Architecture design & review approved by pham & Sunny
@@ -20,11 +20,12 @@
 - [x] Git commit for Phase 1
 
 ### Phase 2: Bot Adapters & Unified Oversight Feed
-- [ ] Legacy shared folder migration / watcher helper
-- [ ] MXH Group 503 live mirroring in `src/daemon/social-bot.ts`
-- [ ] Dashboard A2A Coordination & Inbox monitor tab in `dashboard/`
-- [ ] Dashboard build & asset re-embedding
-- [ ] Git commit for Phase 2
+- [x] Legacy shared folder migration / watcher helper (`src/daemon/a2a-folder-adapter.ts`)
+- [x] MXH Group 503 live mirroring in `src/daemon/social-bot.ts` with `/a2a` command suite
+- [x] Dashboard A2A Coordination & Inbox monitor tab (`dashboard/src/tabs/A2aCoordinationTab.tsx`)
+- [x] Dashboard build (`pnpm build`) & asset re-embedding (`src/daemon/dashboard-assets.generated.ts`)
+- [x] Unit tests for folder adapter (`tests/test-a2a-folder-adapter.test.ts` - 2/2 passing)
+- [x] Git commit for Phase 2
 
 ### Phase 3: Sunset, Verification & Deployment
 - [ ] Shared folder deprecation & archive guidance

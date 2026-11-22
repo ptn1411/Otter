@@ -795,6 +795,7 @@ try {
 }
 
 import { startSocialBot } from "./social-bot";
+import { startLegacyFolderWatcher } from "./a2a-folder-adapter";
 
 // Tự động khởi động kết nối Social Task Mesh Bot Client tới MXH
 try {
@@ -803,6 +804,11 @@ try {
 } catch (err: any) {
   console.warn(`[!] Không thể tự khởi động Social Task Mesh Bot: ${err.message}`);
 }
+
+// Tự động khởi động bộ chuyển đổi hàng đợi thư mục dùng chung (Legacy Shared Folder Adapter)
+try {
+  startLegacyFolderWatcher(20000);
+} catch {}
 
 import { startTaskWorker } from "./mxh-task-worker";
 
