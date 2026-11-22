@@ -47,8 +47,13 @@
   - Published v2.3.6 release hashes (SHA-256) to `https://license.gpt.io.vn`
   - Verified `https://otter.gpt.io.vn/version.json` returns `v2.3.6`
 
+- [x] Full Backlog Resolution on `nam` Hub:
+  - Processed and acknowledged 22/22 queued tasks from scratch (6 under `ai_antigravity` + 16 under `ai_anti`)
+  - Cleaned up obsolete notifications, updated verified results for security, dashboard, landing, and native CDP
+  - Current queue status for Anti on hub: 0 queued, 100% completed
+
 ---
 
 ## Blockers & Notes
-- None. Full 3-phase implementation, multi-node deployment (Windows Worker & Linux Hub `nam`), and VPS public distribution mirror completed and verified live.
+- None. Full 3-phase implementation, multi-node deployment (Windows Worker & Linux Hub `nam`), VPS public distribution mirror, and 100% A2A inbox backlog resolution completed and verified live.
 
