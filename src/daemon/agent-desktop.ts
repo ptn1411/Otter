@@ -115,7 +115,18 @@ export class AgentDesktopBridge {
         await new Promise((r) => setTimeout(r, remaining));
       }
 
-      const cmd = findAgentDesktopCommand();
+      let cmd = findAgentDesktopCommand();
+      if (!cmd) {
+        console.log("[AgentDesktop] Chưa tìm thấy agent-desktop, đang tự động cài đặt qua npm install -g agent-desktop...");
+        try {
+          const { setupAgentDesktop } = await import("../../tools/agent-desktop/setup-agent-desktop");
+          await setupAgentDesktop();
+          cmd = findAgentDesktopCommand();
+        } catch (err: any) {
+          console.warn(`[AgentDesktop] Tự động cài đặt agent-desktop thất bại: ${err.message}`);
+        }
+      }
+
       if (!cmd) {
         throw new Error(
           "agent-desktop is not installed or not found on PATH. Please install it globally by running: npm install -g agent-desktop"

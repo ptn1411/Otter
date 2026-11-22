@@ -180,5 +180,9 @@ try {
 import { setupCua } from "../tools/cua/setup-cua.ts";
 await setupCua();
 
+// 5. Check & Setup agent-desktop (github.com/vercel-labs/agent-desktop)
+import { setupAgentDesktop } from "../tools/agent-desktop/setup-agent-desktop.ts";
+await setupAgentDesktop();
+
 console.log("\n[✔] Setup check completed! All utilities and tools are ready.");
 

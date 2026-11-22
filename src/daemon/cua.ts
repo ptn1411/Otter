@@ -172,7 +172,18 @@ export async function getCuaHealth(): Promise<CuaHealthStatus> {
  * Start the CUA driver daemon in the background with appropriate platform and permission rules
  */
 export async function startCuaDriverDaemon(options?: { permissionMode?: "standard" | "bounded" | "unrestricted" }): Promise<{ ok: boolean; message?: string }> {
-  const driverExe = await findCuaDriverExe();
+  let driverExe = await findCuaDriverExe();
+  if (!driverExe) {
+    console.log("[CUA] Chưa tìm thấy cua-driver, đang tự động tải và cài đặt qua setupCua()...");
+    try {
+      const { setupCua } = await import("../../tools/cua/setup-cua");
+      await setupCua();
+      driverExe = await findCuaDriverExe();
+    } catch (err: any) {
+      console.warn(`[CUA] Tự động tải cua-driver thất bại: ${err.message}`);
+    }
+  }
+
   if (!driverExe) {
     return {
       ok: false,
