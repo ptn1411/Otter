@@ -27,6 +27,7 @@ export { registerMetaTools, callMetaRpc } from "./meta-tools";
 export { registerToolGroupsTools } from "./tool-groups-tools";
 export { registerGpmTools } from "./gpm-tools";
 export { registerSocialBotTools } from "./social-bot-tools";
+export { registerA2aTools } from "./a2a-tools";
 export {
   registerAntigravityCdpTools,
   getAntigravityStatus,

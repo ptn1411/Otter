@@ -41,6 +41,16 @@ import {
   mxhFilesEdit
 } from "../social-bot";
 import {
+  sendInboxMessage,
+  pullInbox,
+  ackInboxMessage,
+  getInboxMessage,
+  listInboxMessages,
+  getInboxStats,
+  listBots,
+  updateBotPresence,
+} from "../a2a-inbox";
+import {
   getAntigravityStatus,
   runAntigravityTask,
   readAntigravityChat,
@@ -320,6 +330,76 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
         } catch (err: any) {
           return errorResponse(err.message, 400);
         }
+      }
+
+      if (toolName === "a2a_send_message") {
+        try {
+          const msg = await sendInboxMessage({
+            senderId: body.senderId,
+            recipientId: body.recipientId,
+            goal: body.goal,
+            details: body.details,
+            messageType: body.messageType,
+            priority: body.priority,
+            payload: body.payload,
+            artifacts: body.artifacts,
+          });
+          return jsonResponse({ ok: true, message: msg });
+        } catch (err: any) {
+          return errorResponse(err.message, 400);
+        }
+      }
+
+      if (toolName === "a2a_pull_inbox") {
+        try {
+          const tasks = pullInbox({
+            recipientId: body.botId,
+            workerId: body.workerId,
+            limit: body.limit,
+            leaseMs: body.leaseSeconds ? body.leaseSeconds * 1000 : undefined,
+          });
+          return jsonResponse({ ok: true, count: tasks.length, tasks });
+        } catch (err: any) {
+          return errorResponse(err.message, 400);
+        }
+      }
+
+      if (toolName === "a2a_ack_message") {
+        try {
+          const res = ackInboxMessage({
+            messageId: body.messageId,
+            workerId: body.workerId,
+            status: body.status,
+            resultSummary: body.resultSummary,
+            result: body.result,
+            artifacts: body.artifacts,
+          });
+          return jsonResponse(res);
+        } catch (err: any) {
+          return errorResponse(err.message, 400);
+        }
+      }
+
+      if (toolName === "a2a_inbox_status") {
+        if (body.messageId) {
+          const msg = getInboxMessage(body.messageId);
+          return jsonResponse({ ok: !!msg, message: msg });
+        }
+        const stats = getInboxStats();
+        const messages = listInboxMessages({
+          recipientId: body.botId,
+          status: body.status,
+          limit: body.limit,
+        });
+        return jsonResponse({ ok: true, stats, messages });
+      }
+
+      if (toolName === "a2a_list_bots") {
+        if (body.updatePresenceBotId && body.presenceStatus) {
+          updateBotPresence(body.updatePresenceBotId, body.presenceStatus);
+        }
+        const bots = listBots();
+        return jsonResponse({ ok: true, total: bots.length, bots });
       }
     }
 
@@ -666,6 +746,36 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
           qualifiedName: "otter_core_meta_msg_send",
           title: "Gửi tin nhắn Messenger",
           description: "Gửi 1 tin nhắn Messenger vào đoạn chat hoặc cho 1 người."
+        },
+        {
+          name: "a2a_send_message",
+          qualifiedName: "otter_core_a2a_send_message",
+          title: "Gửi tin nhắn / task A2A",
+          description: "Gửi nhiệm vụ (task) hoặc tin nhắn A2A bền vững trong SQLite (Store-and-Forward) cho bot."
+        },
+        {
+          name: "a2a_pull_inbox",
+          qualifiedName: "otter_core_a2a_pull_inbox",
+          title: "Rút task từ hàng đợi A2A",
+          description: "Rút các task đang chờ xử lý cho bot kèm khóa thuê (lease lock)."
+        },
+        {
+          name: "a2a_ack_message",
+          qualifiedName: "otter_core_a2a_ack_message",
+          title: "Xác nhận kết quả task A2A",
+          description: "Báo cáo kết quả hoàn thành hoặc thất bại kèm dữ liệu kết quả và artifacts."
+        },
+        {
+          name: "a2a_inbox_status",
+          qualifiedName: "otter_core_a2a_inbox_status",
+          title: "Thống kê hàng đợi A2A",
+          description: "Tra cứu thống kê hàng đợi và danh sách nhiệm vụ gần đây."
+        },
+        {
+          name: "a2a_list_bots",
+          qualifiedName: "otter_core_a2a_list_bots",
+          title: "Danh sách Bot Persona",
+          description: "Liệt kê danh sách các Bot Persona trong mạng lưới A2A, khả năng kỹ thuật và hiện diện."
         }
       ];
 

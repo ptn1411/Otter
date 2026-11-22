@@ -66,6 +66,22 @@ import {
   type A2aTaskState,
 } from "../a2a-client";
 
+import {
+  sendInboxMessage,
+  pullInbox,
+  ackInboxMessage,
+  cancelInboxMessage,
+  getInboxMessage,
+  listInboxMessages,
+  getInboxStats,
+  listBots,
+  getBot,
+  registerBot,
+  updateBotPresence,
+  type A2aMessageType,
+  type BotPresenceStatus,
+} from "../a2a-inbox";
+
 type DbLike = ReturnType<typeof getDatabase>;
 
 const OTTER_TASK_PREFIX = "otter-";
@@ -808,6 +824,153 @@ export async function handleA2aRoutes(req: Request, url: URL, db?: DbLike): Prom
     } catch (err: any) {
       console.error("[A2A] Internal error:", err?.message ?? err);
       return rpcError(body?.id ?? null, A2A_ERROR_CODES.InternalError, "Internal error", 200);
+    }
+  }
+
+  // --- A2A REST API Endpoints (Store-and-Forward Coordination) ---
+  const database = db ?? getDatabase();
+
+  // POST /api/a2a/send
+  if (url.pathname === "/api/a2a/send" && req.method === "POST") {
+    try {
+      const body = (await req.json()) as any;
+      if (!body.senderId || !body.recipientId || !body.goal) {
+        return jsonResponse({ ok: false, error: "Missing required fields: senderId, recipientId, goal" }, 400, {}, req);
+      }
+      const msg = await sendInboxMessage(
+        {
+          senderId: body.senderId,
+          recipientId: body.recipientId,
+          goal: body.goal,
+          details: body.details,
+          messageType: body.messageType as A2aMessageType,
+          priority: body.priority,
+          payload: body.payload,
+          artifacts: body.artifacts,
+        },
+        database
+      );
+      return jsonResponse({ ok: true, message: msg }, 201, {}, req);
+    } catch (err: any) {
+      return jsonResponse({ ok: false, error: err.message }, 500, {}, req);
+    }
+  }
+
+  // POST /api/a2a/pull
+  if (url.pathname === "/api/a2a/pull" && req.method === "POST") {
+    try {
+      const body = (await req.json()) as any;
+      if (!body.botId) {
+        return jsonResponse({ ok: false, error: "Missing required field: botId" }, 400, {}, req);
+      }
+      const pulled = pullInbox(
+        {
+          recipientId: body.botId,
+          workerId: body.workerId,
+          limit: body.limit,
+          leaseMs: body.leaseSeconds ? body.leaseSeconds * 1000 : undefined,
+        },
+        database
+      );
+      return jsonResponse({ ok: true, count: pulled.length, tasks: pulled }, 200, {}, req);
+    } catch (err: any) {
+      return jsonResponse({ ok: false, error: err.message }, 500, {}, req);
+    }
+  }
+
+  // POST /api/a2a/ack
+  if (url.pathname === "/api/a2a/ack" && req.method === "POST") {
+    try {
+      const body = (await req.json()) as any;
+      if (!body.messageId || !body.status) {
+        return jsonResponse({ ok: false, error: "Missing required fields: messageId, status" }, 400, {}, req);
+      }
+      const res = ackInboxMessage(
+        {
+          messageId: body.messageId,
+          workerId: body.workerId,
+          status: body.status,
+          resultSummary: body.resultSummary,
+          result: body.result,
+          artifacts: body.artifacts,
+        },
+        database
+      );
+      return jsonResponse(res, res.ok ? 200 : 400, {}, req);
+    } catch (err: any) {
+      return jsonResponse({ ok: false, error: err.message }, 500, {}, req);
+    }
+  }
+
+  // POST /api/a2a/cancel
+  if (url.pathname === "/api/a2a/cancel" && req.method === "POST") {
+    try {
+      const body = (await req.json()) as any;
+      if (!body.messageId) {
+        return jsonResponse({ ok: false, error: "Missing required field: messageId" }, 400, {}, req);
+      }
+      const res = cancelInboxMessage(body.messageId, body.reason, database);
+      return jsonResponse(res, res.ok ? 200 : 400, {}, req);
+    } catch (err: any) {
+      return jsonResponse({ ok: false, error: err.message }, 500, {}, req);
+    }
+  }
+
+  // GET /api/a2a/messages
+  if (url.pathname === "/api/a2a/messages" && req.method === "GET") {
+    const recipientId = url.searchParams.get("recipientId") || undefined;
+    const senderId = url.searchParams.get("senderId") || undefined;
+    const status = (url.searchParams.get("status") as any) || undefined;
+    const limit = url.searchParams.get("limit") ? Number(url.searchParams.get("limit")) : undefined;
+    const offset = url.searchParams.get("offset") ? Number(url.searchParams.get("offset")) : undefined;
+
+    const messages = listInboxMessages({ recipientId, senderId, status, limit, offset }, database);
+    return jsonResponse({ ok: true, count: messages.length, messages }, 200, {}, req);
+  }
+
+  // GET /api/a2a/messages/:id
+  if (url.pathname.startsWith("/api/a2a/messages/") && req.method === "GET") {
+    const id = url.pathname.slice("/api/a2a/messages/".length);
+    const msg = getInboxMessage(id, database);
+    if (!msg) {
+      return jsonResponse({ ok: false, error: "Message not found" }, 404, {}, req);
+    }
+    return jsonResponse({ ok: true, message: msg }, 200, {}, req);
+  }
+
+  // GET /api/a2a/stats
+  if (url.pathname === "/api/a2a/stats" && req.method === "GET") {
+    const stats = getInboxStats(database);
+    return jsonResponse({ ok: true, stats }, 200, {}, req);
+  }
+
+  // GET /api/a2a/bots
+  if (url.pathname === "/api/a2a/bots" && req.method === "GET") {
+    const bots = listBots(database);
+    return jsonResponse({ ok: true, bots }, 200, {}, req);
+  }
+
+  // POST /api/a2a/bots
+  if (url.pathname === "/api/a2a/bots" && req.method === "POST") {
+    try {
+      const body = (await req.json()) as any;
+      if (!body.botId || !body.name) {
+        return jsonResponse({ ok: false, error: "Missing required fields: botId, name" }, 400, {}, req);
+      }
+      const bot = registerBot(
+        {
+          botId: body.botId,
+          name: body.name,
+          description: body.description || "",
+          capabilities: body.capabilities || [],
+          preferredNode: body.preferredNode,
+          status: body.status,
+        },
+        database
+      );
+      return jsonResponse({ ok: true, bot }, 200, {}, req);
+    } catch (err: any) {
+      return jsonResponse({ ok: false, error: err.message }, 500, {}, req);
     }
   }
 

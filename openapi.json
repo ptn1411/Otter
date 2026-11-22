@@ -2292,6 +2292,130 @@
           }
         }
       }
+    },
+    "/api/a2a/send": {
+      "post": {
+        "operationId": "a2aSendMessage",
+        "summary": "Gửi tin nhắn hoặc nhiệm vụ A2A vào hàng đợi",
+        "description": "Lưu trữ bền vững tin nhắn hoặc task vào SQLite (Store-and-Forward) để bot nhận an toàn.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "senderId": { "type": "string", "description": "ID của bot người gửi" },
+                  "recipientId": { "type": "string", "description": "ID của bot người nhận" },
+                  "goal": { "type": "string", "description": "Mục tiêu công việc" },
+                  "details": { "type": "string", "description": "Chi tiết công việc" },
+                  "messageType": { "type": "string", "enum": ["task", "message", "query", "ack"], "default": "task" },
+                  "priority": { "type": "number", "default": 0 }
+                },
+                "required": ["senderId", "recipientId", "goal"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tin nhắn đã được lưu vào hàng đợi",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/api/a2a/pull": {
+      "post": {
+        "operationId": "a2aPullInbox",
+        "summary": "Rút nhiệm vụ A2A từ hàng đợi của bot",
+        "description": "Lấy các task đang chờ xử lý và cấp khóa thuê (lease lock) cho worker.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "botId": { "type": "string", "description": "ID của bot muốn rút hộp thư" },
+                  "workerId": { "type": "string", "description": "ID của máy thực thi" },
+                  "limit": { "type": "number", "default": 1 },
+                  "leaseSeconds": { "type": "number", "default": 300 }
+                },
+                "required": ["botId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Danh sách nhiệm vụ đã rút",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/api/a2a/ack": {
+      "post": {
+        "operationId": "a2aAckMessage",
+        "summary": "Xác nhận kết quả nhiệm vụ A2A",
+        "description": "Báo cáo trạng thái hoàn thành hoặc thất bại kèm tóm tắt kết quả.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messageId": { "type": "string", "description": "Mã messageId" },
+                  "status": { "type": "string", "enum": ["acked", "failed"] },
+                  "resultSummary": { "type": "string", "description": "Tóm tắt kết quả" },
+                  "result": { "type": "object", "description": "Dữ liệu kết quả JSON" }
+                },
+                "required": ["messageId", "status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả xác nhận",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/api/a2a/messages": {
+      "get": {
+        "operationId": "a2aListMessages",
+        "summary": "Danh sách tin nhắn trong hàng đợi A2A",
+        "description": "Lấy danh sách tin nhắn A2A có hỗ trợ bộ lọc và phân trang.",
+        "parameters": [
+          { "name": "recipientId", "in": "query", "schema": { "type": "string" } },
+          { "name": "senderId", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách tin nhắn",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/api/a2a/bots": {
+      "get": {
+        "operationId": "a2aListBots",
+        "summary": "Danh sách Bot Persona trong mạng lưới A2A",
+        "description": "Liệt kê danh sách các bot persona, capabilities và trạng thái hiện diện.",
+        "responses": {
+          "200": {
+            "description": "Danh sách các bot",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
     }
   }
 }

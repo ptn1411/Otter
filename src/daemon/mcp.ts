@@ -34,6 +34,7 @@ import {
   registerFbMediaPostTools,
   registerGpmTools,
   registerSocialBotTools,
+  registerA2aTools,
   registerAntigravityCdpTools,
   registerMetaTools,
   registerToolGroupsTools
@@ -140,6 +141,10 @@ export function createMcpServer(onActivity?: (event: any) => void): McpServer {
   // 13. Fleet / multi-node — hub điều phối + worker inbox (B2)
   setGroup("agents");
   registerFleetTools(mcp, onActivity);
+
+  // 13b. A2A store-and-forward coordination (Phase 1)
+  setGroup("agents");
+  registerA2aTools(mcp, onActivity);
 
   // 14. Chrome theo profile — mở đúng profile Chrome trên máy này
   setGroup("browser");
