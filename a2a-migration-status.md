@@ -42,7 +42,8 @@
 - [x] Core MCP Server discovery: 58 tools connected (53 previous + 5 new A2A tools) on both nodes
 - [x] Deployment to Distribution VPS (`160.250.181.51` / `vpsre-1769348682` / `otter.gpt.io.vn`):
   - Stopped old daemon process & released port 1993 (no daemon running on VPS as requested)
-  - Full v2.3.6 release bundle synced to `/var/www/otter` (`otter-windows-x64.exe`, `otter.exe`, `otter-linux-x64`, `otter-darwin-arm64`, `otter-darwin-x64`, `otter-extension.zip`, `tools.tar.gz`, `openapi.json`, `version.json`)
+  - Full v2.3.6 release bundle synced to `/var/www/otter` (`otter-windows-x64.exe`, `otter.exe`, `otter-linux-x64`, `otter-darwin-arm64`, `otter-darwin-x64`, `tools.tar.gz`, `openapi.json`, `version.json`)
+  - Dropped `otter-extension.zip` from build, deploy, and setup scripts (fully switched to native Chrome CDP on port 9222)
   - Published v2.3.6 release hashes (SHA-256) to `https://license.gpt.io.vn`
   - Verified `https://otter.gpt.io.vn/version.json` returns `v2.3.6`
 
