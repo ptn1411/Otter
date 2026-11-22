@@ -203,7 +203,7 @@ export class BrowserBridge {
         // tự phục hồi bằng ensureCdpChrome rồi thử lại đúng một lần khi người dùng mở trang mới.
         const msg = String(err?.message || err || "");
         const isConnErr =
-          /ECONNREFUSED|fetch failed|Browser WebSocket|chưa sẵn sàng|Không thể lấy danh sách tab|quá hạn|đã đóng|Không tìm thấy Browser WebSocket/i.test(msg);
+          /ECONNREFUSED|fetch failed|Browser WebSocket|chưa sẵn sàng|chưa chạy|Không thể lấy danh sách tab|quá hạn|đã đóng|Không tìm thấy Browser WebSocket/i.test(msg);
         if (isConnErr && (action === "open" || action === "open_url")) {
           console.warn(`[BrowserBridge] CDP lỗi kết nối (${msg}), thử tự phục hồi...`);
           const launched = await cdpBridge.ensureCdpChrome();
@@ -221,18 +221,24 @@ export class BrowserBridge {
 
     // Chưa có engine nào: CHỈ tự mở Chrome CDP khi người dùng chủ động mở trang web mới (action === "open" | "open_url").
     // TUYỆT ĐỐI KHÔNG tự mở Chrome cho các thao tác thụ động (read_page, click, type...) để tránh vòng lặp spawn vô tận.
+    let autoLaunchAttempted = false;
     if (this.engineMode !== "extension" && (action === "open" || action === "open_url")) {
+      autoLaunchAttempted = true;
       const launched = await cdpBridge.ensureCdpChrome();
       if (launched) {
         return cdpBridge.execute(action, params);
       }
     }
 
+    const cdpDetail = autoLaunchAttempted
+      ? `- Động cơ chính (CDP Port ${cdpBridge.getPort()}): Cổng CDP chưa mở và tự khởi động Chrome không thành công.`
+      : `- Động cơ chính (CDP Port ${cdpBridge.getPort()}): Trình duyệt Chrome CDP hiện chưa chạy. Vui lòng gọi browser_open trước để khởi động Chrome CDP.`;
+
     throw new Error(
       `Không có động cơ trình duyệt nào khả dụng!\n` +
-      `- Động cơ chính (CDP Port ${cdpBridge.getPort()}): Cổng CDP chưa mở và tự khởi động Chrome không thành công.\n` +
+      `${cdpDetail}\n` +
       `- Động cơ dự phòng (Extension): Chưa phát hiện WebSocket kết nối từ Chrome Extension Otter.\n` +
-      `👉 Khắc phục: Cài Google Chrome/Chromium trên máy này, HOẶC mở GPM Login, HOẶC bật tiện ích Otter trên Chrome.`
+      `👉 Khắc phục: Gọi tool browser_open để khởi động Chrome CDP, HOẶC mở GPM Login, HOẶC bật tiện ích Otter trên Chrome.`
     );
   }
 

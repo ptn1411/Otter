@@ -127,6 +127,28 @@ describe("Otter CDP & Dual-Engine Browser Automation Tests", () => {
     expect(bench).toHaveProperty("recommendation");
   });
 
+  test("cdpBridge: getTabs trên cổng không chạy ném lỗi hướng dẫn rõ ràng", async () => {
+    // Port 59999 chắc chắn không có Chrome CDP nào chạy
+    await expect(cdpBridge.getTabs(59999)).rejects.toThrow(
+      "Trình duyệt Chrome CDP (port 59999) hiện chưa chạy. Vui lòng gọi browser_open trước để khởi động Chrome CDP."
+    );
+  });
+
+  test("browserBridge: execute('list_tabs') khi chưa có engine ném lỗi hướng dẫn gọi browser_open", async () => {
+    const { BrowserBridge } = await import("../src/daemon/browser-bridge");
+    const testBridge = new BrowserBridge();
+    testBridge.getStatus = async () => ({
+      mode: "auto",
+      activeEngine: "none",
+      extension: { connected: false, socketsCount: 0 },
+      cdp: { available: false, port: 9222 },
+    });
+
+    await expect(testBridge.execute("list_tabs")).rejects.toThrow(
+      "Trình duyệt Chrome CDP hiện chưa chạy. Vui lòng gọi browser_open trước để khởi động Chrome CDP."
+    );
+  });
+
   test("mcp: createMcpServer registers browser_engine_status without errors", () => {
     const mcp = createMcpServer();
     expect(mcp).toBeDefined();

@@ -475,11 +475,20 @@ export class CdpBridge {
     if (!(await this.isAvailable(targetPort))) {
       await this.ensureProfileRunning(undefined, targetPort);
     }
-    const res = await fetch(`http://127.0.0.1:${targetPort}/json`, {
-      signal: AbortSignal.timeout(3000),
-    });
-    if (!res.ok) throw new Error(`Không thể lấy danh sách tab từ CDP port ${targetPort}`);
-    return (await res.json()) as CdpTab[];
+    try {
+      const res = await fetch(`http://127.0.0.1:${targetPort}/json`, {
+        signal: AbortSignal.timeout(3000),
+      });
+      if (!res.ok) throw new Error(`Không thể lấy danh sách tab từ CDP port ${targetPort}`);
+      return (await res.json()) as CdpTab[];
+    } catch (err: any) {
+      if (!(await this.isAvailable(targetPort))) {
+        throw new Error(
+          `Trình duyệt Chrome CDP (port ${targetPort}) hiện chưa chạy. Vui lòng gọi browser_open trước để khởi động Chrome CDP.`
+        );
+      }
+      throw err;
+    }
   }
 
   /**
@@ -730,10 +739,22 @@ export class CdpBridge {
       } catch {}
     }
     const targetPort = port || this.defaultPort;
-    const newTabRes = await fetch(`http://127.0.0.1:${targetPort}/json/new?${encodeURIComponent(url)}`, {
-      method: "PUT",
-    });
-    return (await newTabRes.json()) as CdpTab;
+    try {
+      const newTabRes = await fetch(`http://127.0.0.1:${targetPort}/json/new?${encodeURIComponent(url)}`, {
+        method: "PUT",
+      });
+      if (!newTabRes.ok) {
+        throw new Error(`Không thể tạo tab mới trên CDP port ${targetPort}`);
+      }
+      return (await newTabRes.json()) as CdpTab;
+    } catch (err: any) {
+      if (!(await this.isAvailable(targetPort))) {
+        throw new Error(
+          `Trình duyệt Chrome CDP (port ${targetPort}) hiện chưa chạy. Vui lòng gọi browser_open trước để khởi động Chrome CDP.`
+        );
+      }
+      throw err;
+    }
   }
 
   private shouldAutoHud(): boolean {
