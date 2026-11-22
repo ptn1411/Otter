@@ -1326,6 +1326,66 @@
         }
       }
     },
+    "/api/activity/v1/desktop/cua/status": {
+      "get": {
+        "operationId": "cua_status",
+        "summary": "Kiểm tra sức khỏe daemon CUA (Computer-Use Agent)",
+        "description": "Kiểm tra xem cua-driver đã cài đặt, đang chạy hay có thể tự khởi động.",
+        "responses": {
+          "200": {
+            "description": "Trạng thái CUA driver"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/desktop/adesktop/status": {
+      "get": {
+        "operationId": "adesktop_status",
+        "summary": "Kiểm tra trạng thái Agent Desktop",
+        "description": "Kiểm tra xem agent-desktop MCP child process đã kết nối hay sẵn sàng.",
+        "responses": {
+          "200": {
+            "description": "Trạng thái agent-desktop"
+          }
+        }
+      }
+    },
+    "/api/activity/v1/desktop/adesktop/execute": {
+      "post": {
+        "operationId": "adesktop_execute",
+        "summary": "Thực thi công cụ Agent Desktop ngữ nghĩa",
+        "description": "Thực thi công cụ agent-desktop như snapshot, click, type, find bằng @ref ID.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "toolName": {
+                    "type": "string",
+                    "description": "Tên công cụ adesktop_* (ví dụ: adesktop_snapshot, adesktop_click, adesktop_type)"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "description": "Tham số cho công cụ",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "toolName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả thực thi agent-desktop"
+          }
+        }
+      }
+    },
     "/api/activity/v1/skills/tts": {
       "post": {
         "operationId": "tts_generate_speech",

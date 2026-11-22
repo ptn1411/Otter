@@ -32,6 +32,7 @@ export const TOOL_GROUPS: ToolGroupDef[] = [
   // core gồm 7 tool terminal/file/media + 2 tool hệ thống tool_groups_list/set
   // (luôn bật, đăng ký ngoài cơ chế capture — xem mcp.ts).
   { id: "core", nameVi: "Máy tính & File", nameEn: "Computer & Files", descVi: "Chạy lệnh terminal, đọc/ghi/sửa file, tạo giọng nói, dựng video Remotion, nhạc nền", descEn: "Terminal commands, file read/write/edit, TTS, Remotion video, background music", toolCount: 9, estTokens: 700 },
+  { id: "agent-desktop", nameVi: "Agent Desktop", nameEn: "Agent Desktop", descVi: "Quan sát và điều khiển giao diện desktop theo cấu trúc ngữ nghĩa (snapshot, click, type, refs)", descEn: "Semantic desktop observation and control (snapshot, click, type, refs)", toolCount: 75, estTokens: 4200 },
   { id: "browser", nameVi: "Trình duyệt", nameEn: "Browser", descVi: "Mở trang, đọc nội dung, bấm, gõ, cuộn, quản lý tab và profile Chrome", descEn: "Open pages, read content, click, type, scroll, manage tabs and Chrome profiles", toolCount: 15, estTokens: 804 },
   { id: "desktop", nameVi: "Màn hình Desktop", nameEn: "Desktop Control", descVi: "Chụp màn hình, điều khiển chuột và bàn phím, Computer Use Agent", descEn: "Screenshots, mouse and keyboard control, Computer Use Agent", toolCount: 6, estTokens: 305 },
   { id: "code", nameVi: "Code & Dự án", nameEn: "Code & Projects", descVi: "Tìm kiếm code, symbol, outline, git status, đồ thị codebase và kiến trúc", descEn: "Code search, symbols, outline, git status, codebase graph and architecture", toolCount: 13, estTokens: 1031 },
@@ -68,6 +69,10 @@ function configPath(): string {
 }
 
 let disabledGroups: Set<string> | null = null;
+
+export function resetToolGroupConfig(): void {
+  disabledGroups = null;
+}
 
 export function loadToolGroupConfig(): Set<string> {
   if (disabledGroups) return disabledGroups;

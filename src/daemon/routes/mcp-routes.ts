@@ -224,6 +224,17 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
         }
       }
 
+      if (toolName.startsWith("adesktop_")) {
+        const { agentDesktopBridge } = await import("../agent-desktop");
+        try {
+          const res = await agentDesktopBridge.callTool(toolName, body.arguments || body.args || body);
+          handleMcpActivity({ type: "adesktop_action", action: "execute_tool", toolName });
+          return jsonResponse({ ok: true, result: res });
+        } catch (err: any) {
+          return errorResponse(err.message, 500);
+        }
+      }
+
       if (toolName === "social_bot_status") {
         const status = getSocialBotStatus();
         return jsonResponse(status);
@@ -578,6 +589,24 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
           qualifiedName: "otter_core_cua_execute_tool",
           title: "Thực thi công cụ CUA (Computer-Use Agent)",
           description: "Gọi trực tiếp bất kỳ công cụ nào của CUA trycua/cua: click, type_text, hotkey, get_screen_size, get_window_state, list_windows..."
+        },
+        {
+          name: "adesktop_status",
+          qualifiedName: "otter_core_adesktop_status",
+          title: "Trạng thái Agent Desktop",
+          description: "Kiểm tra sức khỏe, quyền hạn và trạng thái adapter của agent-desktop."
+        },
+        {
+          name: "adesktop_snapshot",
+          qualifiedName: "otter_core_adesktop_snapshot",
+          title: "Chụp cây Accessibility giao diện Desktop (Refs)",
+          description: "Chụp cây accessibility có cấu trúc ngữ nghĩa kèm các ID @ref để AI quan sát và tương tác chính xác."
+        },
+        {
+          name: "adesktop_click",
+          qualifiedName: "otter_core_adesktop_click",
+          title: "Bấm chuột ngữ nghĩa trên ref (@ref)",
+          description: "Thực hiện hành động bấm chuột ngữ nghĩa theo accessibility @ref của phần tử giao diện."
         },
         {
           name: "social_bot_status",

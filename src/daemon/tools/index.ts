@@ -2,6 +2,7 @@ export { registerTerminalAndFileTools } from "./terminal";
 export { registerCodebaseTools } from "./codebase";
 export { registerSkillTools } from "./skills";
 export { registerDesktopTools } from "./desktop";
+export { registerAgentDesktopTools } from "./agent-desktop-tools";
 export { registerVpsTools } from "./vps";
 export { registerBrowserTools } from "./browser";
 export { registerBookmarkTools } from "./bookmarks";

@@ -29,6 +29,9 @@ export interface OtterSettings {
   // Công cụ ngoài
   gpmApiPort: number;
   antigravityBin: string;
+
+  // CUA Driver (Computer-Use Agent)
+  cuaPermissionMode: "standard" | "bounded" | "unrestricted";
 }
 
 let cachedSettings: OtterSettings | null = null;
@@ -65,6 +68,10 @@ function getDefaultSettings(): OtterSettings {
   const gpmApiPort = parseInt(process.env.OTTER_GPM_PORT || "9495", 10) || 9495;
   const antigravityBin = (process.env.ANTIGRAVITY_BIN || "").trim();
 
+  const envCuaMode = (process.env.OTTER_CUA_PERMISSION_MODE || "").trim().toLowerCase();
+  const cuaPermissionMode: "standard" | "bounded" | "unrestricted" =
+    envCuaMode === "bounded" || envCuaMode === "unrestricted" ? envCuaMode : "standard";
+
   return {
     browserEngine,
     cdpHeadless,
@@ -79,6 +86,7 @@ function getDefaultSettings(): OtterSettings {
     apiKey,
     gpmApiPort,
     antigravityBin,
+    cuaPermissionMode,
   };
 }
 
@@ -128,6 +136,10 @@ function applySettingsToEnvironment(settings: OtterSettings): void {
     process.env.ANTIGRAVITY_BIN = settings.antigravityBin;
   } else {
     delete process.env.ANTIGRAVITY_BIN;
+  }
+
+  if (settings.cuaPermissionMode) {
+    process.env.OTTER_CUA_PERMISSION_MODE = settings.cuaPermissionMode;
   }
 }
 
@@ -183,7 +195,26 @@ export function updateSettings(partial: Partial<OtterSettings>): OtterSettings {
     console.warn("[Settings] Không thể ghi settings.json:", err);
   }
 
+  for (const listener of settingsChangeListeners) {
+    try {
+      listener(updated, current);
+    } catch (e) {
+      console.warn("[Settings] Listener error:", e);
+    }
+  }
+
   return updated;
+}
+
+type SettingsChangeListener = (updated: OtterSettings, previous: OtterSettings) => void;
+const settingsChangeListeners: SettingsChangeListener[] = [];
+
+export function onSettingsChange(listener: SettingsChangeListener): () => void {
+  settingsChangeListeners.push(listener);
+  return () => {
+    const idx = settingsChangeListeners.indexOf(listener);
+    if (idx !== -1) settingsChangeListeners.splice(idx, 1);
+  };
 }
 
 export function initSettings(): OtterSettings {

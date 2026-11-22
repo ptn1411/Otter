@@ -113,6 +113,8 @@ export async function setupCua(): Promise<boolean> {
     console.log(`[*] To manually install CUA driver, visit: https://github.com/trycua/cua`);
     if (isWin) {
       console.log(`    Or run in PowerShell: irm https://cua.ai/driver/install.ps1 | iex`);
+    } else {
+      console.log(`    Or run in Terminal: curl -fsSL https://cua.ai/driver/install.sh | sh`);
     }
     return false;
   }

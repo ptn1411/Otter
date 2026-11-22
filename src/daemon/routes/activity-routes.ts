@@ -27,7 +27,8 @@ import {
   cancelAllPendingMediaPosts,
   tickMediaPostScheduler
 } from "../fb-media-post";
-import { listWindows, takeScreenshot, mouseAction, keyboardAction, executeCuaTool, getCuaToolList } from "../desktop";
+import { listWindows, takeScreenshot, mouseAction, keyboardAction, executeCuaTool, getCuaToolList, getCuaHealth } from "../desktop";
+import { agentDesktopBridge } from "../agent-desktop";
 import { invokeVpsSsh } from "../vps";
 import { dispatchBridgeTask, clearTaskQueue } from "../tools/task-bridge";
 import {
@@ -617,6 +618,37 @@ export async function handleActivityRoutes(
         if (!toolName) return errorResponse("Thiếu tham số 'toolName'", 400);
         const result = await executeCuaTool(toolName, body.arguments || body.args || {});
         handleMcpActivity({ type: "cua_action", action: "execute_tool", toolName });
+        return jsonResponse({ ok: true, result });
+      } catch (err: any) {
+        return errorResponse(err.message, 500);
+      }
+    }
+
+    if (desktopAction === "cua/status" && (req.method === "GET" || req.method === "POST")) {
+      try {
+        const health = await getCuaHealth();
+        return jsonResponse(health);
+      } catch (err: any) {
+        return errorResponse(err.message, 500);
+      }
+    }
+
+    if (desktopAction === "adesktop/status" && (req.method === "GET" || req.method === "POST")) {
+      try {
+        const health = await agentDesktopBridge.getHealth();
+        return jsonResponse(health);
+      } catch (err: any) {
+        return errorResponse(err.message, 500);
+      }
+    }
+
+    if (desktopAction === "adesktop/execute" && req.method === "POST") {
+      try {
+        const body: any = await req.json();
+        const toolName = body.toolName || body.tool;
+        if (!toolName) return errorResponse("Thiếu tham số 'toolName'", 400);
+        const result = await agentDesktopBridge.callTool(toolName, body.arguments || body.args || {});
+        handleMcpActivity({ type: "adesktop_action", action: "execute_tool", toolName });
         return jsonResponse({ ok: true, result });
       } catch (err: any) {
         return errorResponse(err.message, 500);

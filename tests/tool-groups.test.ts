@@ -15,6 +15,7 @@ import {
   getToolGroupsState,
   setToolGroupsEnabled,
   isGroupEnabled,
+  resetToolGroupConfig,
 } from "../src/daemon/tool-groups";
 
 async function connectClient() {
@@ -27,8 +28,14 @@ async function connectClient() {
 }
 
 describe("tool-groups", () => {
+  beforeAll(() => {
+    resetToolGroupConfig();
+    setToolGroupsEnabled(Object.fromEntries(TOOL_GROUPS.map((g) => [g.id, true])));
+  });
+
   afterAll(() => {
     setToolGroupsEnabled(Object.fromEntries(TOOL_GROUPS.map((g) => [g.id, true])));
+    resetToolGroupConfig();
     fs.rmSync(tmpHome, { recursive: true, force: true });
   });
 

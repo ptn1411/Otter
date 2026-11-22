@@ -3,9 +3,10 @@ import { z } from "zod";
 import { listWindows, takeScreenshot, mouseAction, keyboardAction, getCuaToolList, executeCuaTool } from "../desktop";
 
 export function registerDesktopTools(mcp: McpServer, onActivity?: (event: any) => void): void {
-  // Tool 17: Liệt kê các cửa sổ ứng dụng đang mở trên màn hình Desktop Windows
+  // Tool 17: Liệt kê các cửa sổ ứng dụng đang mở trên màn hình Desktop (Fallback cho adesktop_list_windows)
   mcp.tool(
     "desktop_list_windows",
+    "Liệt kê các cửa sổ ứng dụng đang mở trên màn hình Desktop. Hoạt động như fallback trực tiếp nếu adesktop_list_windows gặp lỗi.",
     {},
     async () => {
       try {
@@ -26,9 +27,10 @@ export function registerDesktopTools(mcp: McpServer, onActivity?: (event: any) =
     }
   );
 
-  // Tool 18: Chụp ảnh màn hình Desktop (toàn màn hình)
+  // Tool 18: Chụp ảnh màn hình Desktop (toàn màn hình) (Fallback cho adesktop_screenshot)
   mcp.tool(
     "desktop_take_screenshot",
+    "Chụp ảnh toàn màn hình Desktop. Hoạt động như fallback trực tiếp nếu adesktop_screenshot gặp lỗi.",
     {
       outputPath: z.string().optional().describe("Đường dẫn lưu tệp ảnh PNG (mặc định: tự động sinh trong thư mục dự án)")
     },
@@ -51,9 +53,10 @@ export function registerDesktopTools(mcp: McpServer, onActivity?: (event: any) =
     }
   );
 
-  // Tool 19: Thao tác chuột máy tính (Click, Double Click, Right Click, Move)
+  // Tool 19: Thao tác chuột máy tính theo tọa độ (Fallback)
   mcp.tool(
     "desktop_mouse_action",
+    "Thao tác chuột máy tính theo tọa độ pixel (Click, Double Click, Right Click, Move). Dùng làm fallback khi agent-desktop gặp POLICY_DENIED hoặc cửa sổ không nhận thao tác ngữ nghĩa theo @ref.",
     {
       action: z.enum(["left_click", "right_click", "double_click", "move"]).default("left_click").describe("Hành động chuột: left_click, right_click, double_click, move"),
       x: z.number().describe("Tọa độ X trên màn hình"),
@@ -75,16 +78,17 @@ export function registerDesktopTools(mcp: McpServer, onActivity?: (event: any) =
     }
   );
 
-  // Tool 20: Thao tác bàn phím (Gõ văn bản hoặc bấm phím tắt)
+  // Tool 20: Thao tác bàn phím (Fallback khi cần foreground)
   mcp.tool(
     "desktop_keyboard_action",
+    "Thao tác bàn phím (Gõ văn bản hoặc bấm phím tắt). Dùng làm fallback khi agent-desktop gặp POLICY_DENIED hoặc cần gửi phím trực tiếp vào cửa sổ foreground.",
     {
       keys: z.string().describe("Chuỗi văn bản cần gõ hoặc phím tắt (ví dụ: 'Hello world', '{ENTER}', '^c' cho Ctrl+C, '^v' cho Ctrl+V, '%{F4}' cho Alt+F4, '{TAB}')")
     },
     async ({ keys }) => {
       try {
         const msg = await keyboardAction(keys);
-        onActivity?.({ type: "desktop_action", action: "keyboard", keys });
+        onActivity?.({ type: "desktop_action", action, keys });
         return {
           content: [{ type: "text", text: msg }]
         };
@@ -100,6 +104,7 @@ export function registerDesktopTools(mcp: McpServer, onActivity?: (event: any) =
   // Tool 21: Tra cứu công cụ OpenAI Computer Use Agent (CUA) nếu có
   mcp.tool(
     "cua_get_inventory",
+    "Tra cứu danh mục công cụ CUA từ trycua/cua để điều khiển máy tính chuyên sâu.",
     {
       query: z.string().optional().describe("Từ khóa lọc công cụ CUA (ví dụ: 'window', 'click', 'browser', 'cursor')")
     },
@@ -136,9 +141,9 @@ export function registerDesktopTools(mcp: McpServer, onActivity?: (event: any) =
   // Tool 22: Thực thi trực tiếp công cụ CUA (Computer-Use Agent)
   mcp.tool(
     "cua_execute_tool",
-    "Thực thi trực tiếp bất kỳ công cụ nào của Computer-Use Agent (CUA) từ trycua/cua (ví dụ: 'click', 'double_click', 'right_click', 'drag', 'scroll', 'type_text', 'press_key', 'hotkey', 'get_screen_size', 'get_cursor_position', 'get_window_state', 'list_windows', 'bring_to_front', 'launch_app',...). Tự động chạy daemon CUA nếu chưa khởi động.",
+    "Thực thi trực tiếp công cụ CUA từ trycua/cua. Đây là fallback chính cho các trường hợp khó mà agent-desktop không thực hiện được (cửa sổ foreground lock, POLICY_DENIED, quyền elevated, điều khiển tọa độ/phím nâng cao). Tự động khởi động và giám sát daemon cua-driver.",
     {
-      toolName: z.string().describe("Tên công cụ CUA cần gọi (ví dụ: 'get_screen_size', 'get_cursor_position', 'get_window_state', 'click', 'type_text', 'hotkey')"),
+      toolName: z.string().describe("Tên công cụ CUA cần gọi (ví dụ: 'get_screen_size', 'get_cursor_position', 'get_window_state', 'click', 'type_text', 'hotkey', 'launch_app')"),
       arguments: z.record(z.any()).default({}).describe("Tham số JSON truyền vào công cụ (mặc định: {})")
     },
     async ({ toolName, arguments: toolArgs }) => {

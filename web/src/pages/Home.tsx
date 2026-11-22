@@ -130,6 +130,14 @@ const TOOL_GROUPS: ToolGroup[] = [
     samples: ["desktop_take_screenshot", "desktop_mouse_action", "cua_execute_tool"],
   },
   {
+    id: "agent-desktop",
+    label: "Agent Desktop",
+    count: 75,
+    estTokens: 4200,
+    desc: "Quan sát và điều khiển giao diện desktop theo cấu trúc ngữ nghĩa (snapshot, click, type, refs).",
+    samples: ["adesktop_snapshot", "adesktop_click", "adesktop_status"],
+  },
+  {
     id: "fb",
     label: "Facebook Automation",
     count: 58,

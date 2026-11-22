@@ -11,6 +11,7 @@ import {
   registerCodebaseTools,
   registerSkillTools,
   registerDesktopTools,
+  registerAgentDesktopTools,
   registerVpsTools,
   registerBrowserTools,
   registerBookmarkTools,
@@ -74,6 +75,10 @@ export function createMcpServer(onActivity?: (event: any) => void): McpServer {
   // 4. Điều khiển Desktop & CUA (Computer Use Agent)
   setGroup("desktop");
   registerDesktopTools(mcp, onActivity);
+
+  // 4b. Agent Desktop (Semantic ref-based desktop control via child stdio MCP)
+  setGroup("agent-desktop");
+  registerAgentDesktopTools(mcp, onActivity);
 
   // 5. Quản trị VPS từ xa (SSH & SFTP Paramiko Bridge)
   setGroup("vps");
