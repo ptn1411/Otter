@@ -40,9 +40,14 @@
 - [x] Automatic legacy inbox ingestion on `nam`: 75 backlog files from `/home/nam/muse-shared/inbox/` auto-migrated into SQLite queue (`/api/a2a/stats` -> 75 queued, 0 failed)
 - [x] Live A2A Send -> Pull -> Ack tested on running instance
 - [x] Core MCP Server discovery: 58 tools connected (53 previous + 5 new A2A tools) on both nodes
+- [x] Deployment to Distribution VPS (`160.250.181.51` / `vpsre-1769348682` / `otter.gpt.io.vn`):
+  - Stopped old daemon process & released port 1993 (no daemon running on VPS as requested)
+  - Full v2.3.6 release bundle synced to `/var/www/otter` (`otter-windows-x64.exe`, `otter.exe`, `otter-linux-x64`, `otter-darwin-arm64`, `otter-darwin-x64`, `otter-extension.zip`, `tools.tar.gz`, `openapi.json`, `version.json`)
+  - Published v2.3.6 release hashes (SHA-256) to `https://license.gpt.io.vn`
+  - Verified `https://otter.gpt.io.vn/version.json` returns `v2.3.6`
 
 ---
 
 ## Blockers & Notes
-- None. Full 3-phase implementation and multi-node deployment (Windows Worker & Linux Hub `nam`) completed and verified live.
+- None. Full 3-phase implementation, multi-node deployment (Windows Worker & Linux Hub `nam`), and VPS public distribution mirror completed and verified live.
 
