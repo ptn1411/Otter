@@ -60,8 +60,7 @@ const staticFiles = [
   "version.json",
   "README.md",
   "otter.ico",
-  "otter-tray.exe",
-  "otter-extension.zip"
+  "otter-tray.exe"
 ];
 
 for (const file of staticFiles) {
@@ -128,7 +127,7 @@ sshCmd(`cd ${REMOTE_DIR} && tar -xzf tools.tar.gz && rm tools.tar.gz`);
 
 // 5. Cấu hình quyền và Symlink trên VPS
 console.log("\n[5/6] Cấu hình phân quyền & tạo Symlink...");
-sshCmd(`cd ${REMOTE_DIR} && ln -sf otter-windows-x64.exe otter.exe && chmod +x otter-* setup.sh 2>/dev/null || true`);
+sshCmd(`cd ${REMOTE_DIR} && rm -f otter-extension.zip && ln -sf otter-windows-x64.exe otter.exe && chmod +x otter-* setup.sh 2>/dev/null || true`);
 sshCmd(`chown -R www-data:www-data ${REMOTE_DIR} && chmod -R u=rwX,go=rX ${REMOTE_DIR}`);
 
 // 6. Cập nhật Backend Otter Monitor Server (/opt/otter-server)
@@ -186,12 +185,6 @@ const releaseEntries = [
     file: "otter-darwin-x64",
     url: "https://otter.gpt.io.vn/otter-darwin-x64",
     changelog: `Otter Daemon v${OTTER_VERSION} (macOS Intel x64)`,
-  },
-  {
-    component: "extension",
-    file: "otter-extension.zip",
-    url: "https://otter.gpt.io.vn/otter-extension.zip",
-    changelog: `### Tiện ích Chrome v${OTTER_VERSION}\n- Đồng bộ giao thức với Otter Daemon v${OTTER_VERSION} (tùy chọn phụ, mặc định chạy CDP).`,
   },
 ];
 

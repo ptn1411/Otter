@@ -35,8 +35,6 @@ if (-not $DesktopFolder) { $DesktopFolder = "$env:USERPROFILE\Desktop" }
 $DesktopShortcutPath = "$DesktopFolder\Otter.lnk"
 $ExePath = "$InstallDir\otter.exe"
 $VbsPath = "$InstallDir\run_silent.vbs"
-$ExtZipPath = "$InstallDir\otter-extension.zip"
-$ExtDir = "$InstallDir\extension"
 $IconPath = "$InstallDir\otter.ico"
 
 # ------------------------------------------------------------------------------
@@ -291,58 +289,12 @@ if ($FoundLocal) {
 }
 
 # ------------------------------------------------------------------------------
-# 4.1 TAI TIEN ICH CHROME EXTENSION DI KEM
+# 4.1 DON DEP EXTENSION CU (HE THONG DA CHUYEN HOAN TOAN SANG CHROME CDP GOC)
 # ------------------------------------------------------------------------------
 try {
-    Write-Host "[*] Dang chuan bi tien ich mo rong Chrome Extension..." -ForegroundColor Yellow
-    $ExtLocalCandidates = @()
-    if ($FoundLocal) {
-        $fDir = Split-Path $FoundLocal
-        $ExtLocalCandidates += (Join-Path $fDir "otter-extension.zip")
-        $ExtLocalCandidates += (Join-Path (Split-Path $fDir) "otter-extension.zip")
-        $ExtLocalCandidates += (Join-Path (Split-Path $fDir) "deploy\otter-extension.zip")
-        $ExtLocalCandidates += (Join-Path (Split-Path $fDir) "dist\otter-extension.zip")
-        $ExtLocalCandidates += (Join-Path (Split-Path $fDir) "extension\dist")
-    }
-    if ($PSScriptRoot) {
-        $ExtLocalCandidates += (Join-Path $PSScriptRoot "otter-extension.zip")
-        $ExtLocalCandidates += (Join-Path $PSScriptRoot "..\extension\dist")
-    }
-
-    $FoundExt = $null
-    foreach ($e in $ExtLocalCandidates) {
-        if ($e -and (Test-Path $e)) {
-            $FoundExt = (Resolve-Path $e).Path
-            break
-        }
-    }
-
-    if ($FoundExt) {
-        if ((Get-Item $FoundExt).PSIsContainer) {
-            if (Test-Path $ExtDir) { Remove-Item $ExtDir -Recurse -Force }
-            Copy-Item -Path $FoundExt -Destination $ExtDir -Recurse -Force
-        } else {
-            Copy-Item -Path $FoundExt -Destination $ExtZipPath -Force
-            if (Test-Path $ExtDir) { Remove-Item $ExtDir -Recurse -Force }
-            Expand-Archive -Path $ExtZipPath -DestinationPath $ExtDir -Force
-        }
-        Write-Host "[+] Tien ich Chrome Extension da san sang tai: $ExtDir" -ForegroundColor Green
-    } else {
-        $hasCurl = $null -ne (Get-Command curl.exe -ErrorAction SilentlyContinue)
-        if ($hasCurl) {
-            & curl.exe -s -L --fail --max-time 60 -o $ExtZipPath "$Server/otter-extension.zip"
-        } else {
-            Invoke-WebRequest -Uri "$Server/otter-extension.zip" -OutFile $ExtZipPath -UseBasicParsing -TimeoutSec 60
-        }
-        if (Test-Path $ExtZipPath) {
-            if (Test-Path $ExtDir) { Remove-Item $ExtDir -Recurse -Force }
-            Expand-Archive -Path $ExtZipPath -DestinationPath $ExtDir -Force
-            Write-Host "[+] Tien ich Chrome Extension da san sang tai: $ExtDir" -ForegroundColor Green
-        }
-    }
-} catch {
-    Write-Host "    [!] Tien ich extension se duoc cai sau tu trinh duyet." -ForegroundColor DarkGray
-}
+    if (Test-Path "$InstallDir\otter-extension.zip") { Remove-Item "$InstallDir\otter-extension.zip" -Force -ErrorAction SilentlyContinue }
+    if (Test-Path "$InstallDir\extension") { Remove-Item "$InstallDir\extension" -Recurse -Force -ErrorAction SilentlyContinue }
+} catch {}
 
 # ------------------------------------------------------------------------------
 # 4.2 TAI CLOUDFLARED DE TAO QUICK TUNNEL DOMAIN DUNG 1 LAN

@@ -201,14 +201,8 @@ fi
 
 chmod +x "$TARGET_EXE"
 
-# Tải thêm Chrome extension zip
-echo "[*] Đang chuẩn bị tiện ích Chrome Extension..."
-curl -fsSL --connect-timeout 15 "$SERVER/otter-extension.zip" -o "$INSTALL_DIR/otter-extension.zip" 2>/dev/null || true
-if command -v unzip >/dev/null 2>&1 && [ -f "$INSTALL_DIR/otter-extension.zip" ]; then
-    rm -rf "$INSTALL_DIR/extension"
-    mkdir -p "$INSTALL_DIR/extension"
-    unzip -qo "$INSTALL_DIR/otter-extension.zip" -d "$INSTALL_DIR/extension" 2>/dev/null || true
-fi
+# Dọn dẹp extension cũ nếu có (hệ thống đã chuyển 100% sang Chrome CDP gốc)
+rm -rf "$INSTALL_DIR/otter-extension.zip" "$INSTALL_DIR/extension" 2>/dev/null || true
 
 # ------------------------------------------------------------------------------
 # 4.2 TẢI CLOUDFLARED ĐỂ TẠO QUICK TUNNEL DOMAIN DÙNG 1 LẦN
@@ -364,10 +358,6 @@ echo " - Tự khởi động: Đã bật mỗi khi mở máy tính"
 echo " - Lệnh gọi CLI: 'otter' (Đã đăng ký PATH toàn cục)"
 echo " - Vị trí cài đặt: $TARGET_EXE"
 echo " - File nhật ký (Logs): $LOG_DIR"
-if [ -d "$INSTALL_DIR/extension" ]; then
-    echo " - Chrome Extension: $INSTALL_DIR/extension (Đã giải nén sẵn)"
-fi
-echo ""
-echo "👉 Bước tiếp theo: Mở chrome://extensions/ bật Developer Mode và chọn 'Tải tiện ích đã giải nén' -> trỏ vào: $INSTALL_DIR/extension"
+echo " - Trình duyệt: Tự động điều khiển trực tiếp qua Chrome CDP (Không cần cài Extension!)"
 echo "========================================================"
 echo ""

@@ -18,7 +18,7 @@ import { Switch } from "@astryxdesign/core/Switch";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Divider } from "@astryxdesign/core/Divider";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { fetchVersions, componentLabel, trackDownload, type VersionRecord } from "../api";
+import { fetchVersions, componentLabel, type VersionRecord } from "../api";
 import {
   ArrowRightIcon,
   CheckIcon,
@@ -389,7 +389,7 @@ export default function Home() {
                   </HStack>
                   <HStack gap={2} align="center">
                     <CheckIcon size={15} />
-                    <Text type="supporting">Mặc định điều khiển Chrome qua CDP (Extension là tùy chọn phụ)</Text>
+                    <Text type="supporting">Điều khiển Chrome trực tiếp qua Native CDP (Không cần Extension)</Text>
                   </HStack>
                   <HStack gap={2} align="center">
                     <CheckIcon size={15} />
@@ -721,16 +721,7 @@ export default function Home() {
               </Card>
 
               <Text type="supporting">
-                Muốn thanh HUD nổi ngay trên trang ChatGPT? Tải thêm{" "}
-                <a
-                  href="https://otter.gpt.io.vn/otter-extension.zip"
-                  onClick={() =>
-                    trackDownload({ component: "extension", platform: "chrome", source: "web-home" })
-                  }
-                >
-                  tiện ích Chrome (tùy chọn)
-                </a>{" "}
-                — không bắt buộc, Otter mặc định điều khiển trình duyệt qua CDP.
+                Otter điều khiển trình duyệt trực tiếp qua Chrome DevTools Protocol (CDP), không cần cài Extension.
               </Text>
             </VStack>
           </Grid>

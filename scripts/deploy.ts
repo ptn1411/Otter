@@ -35,25 +35,8 @@ for (const sub of oldSubdirs) {
 // Đảm bảo thư mục deploy/ tồn tại
 await fs.mkdir(deployDir, { recursive: true });
 
-// 2. Chạy Build Extension (Minified & TypeScript)
-console.log("\n[1/4] Đang đóng gói & nén Chrome Extension...");
-execSync("bun build.extension.ts", { stdio: "inherit", cwd: rootDir });
-
-// Nén extension zip trực tiếp vào deploy/otter-extension.zip
-const extZipPath = path.join(deployDir, "otter-extension.zip");
-try {
-  if (process.platform === "win32") {
-    execSync(
-      `powershell -NoProfile -Command "Compress-Archive -Path 'extension/dist/*' -DestinationPath '${extZipPath}' -Force"`,
-      { stdio: "inherit", cwd: rootDir }
-    );
-  } else {
-    execSync(`cd extension/dist && zip -r "${extZipPath}" ./*`, { stdio: "inherit", cwd: rootDir });
-  }
-  console.log(`[+] Đã tạo extension zip: ${extZipPath}`);
-} catch (err: any) {
-  console.warn(`[!] Không thể nén zip tự động: ${err.message}`);
-}
+// Dọn dẹp otter-extension.zip cũ nếu còn sót trong deploy/ (đã bỏ extension, dùng CDP gốc)
+await fs.rm(path.join(deployDir, "otter-extension.zip"), { force: true }).catch(() => {});
 
 // 2.5 Build & nhúng Dashboard (React + Astryx) vào binary otter trước khi biên dịch
 console.log("\n[1.5/4] Đang build & nhúng Dashboard vào binary Otter...");
@@ -302,10 +285,9 @@ const readmeContent = `# Otter Deployment Package (${targetVersion})
 
 ---
 
-### 3. Cài đặt Chrome Extension:
-1. Mở Chrome / Edge, truy cập: \`chrome://extensions/\`
-2. Bật **Chế độ dành cho nhà phát triển (Developer mode)** ở góc trên bên phải.
-3. Kéo thả file \`otter-extension.zip\` (hoặc giải nén rồi chọn *Tải tiện ích đã giải nén*).
+### 3. Tự Động Hóa Trình Duyệt:
+- Otter điều khiển trình duyệt trực tiếp qua **Chrome DevTools Protocol (CDP)** qua cổng Remote Debugging (port 9222).
+- Hoàn toàn **không cần cài Extension** vào Chrome/Edge.
 
 ---
 
@@ -346,10 +328,9 @@ const readmeContent = `# Otter Deployment Package (${targetVersion})
   \`\`\`
 *(To uninstall: \`./setup.sh --uninstall\`)*
 
-### 3. Install Chrome Extension:
-1. Open Chrome/Edge and go to: \`chrome://extensions/\`
-2. Enable **Developer mode** in the top-right corner.
-3. Drag & drop \`otter-extension.zip\` (or load unpacked).
+### 3. Browser Automation:
+- Otter automates browsers directly via **Chrome DevTools Protocol (CDP)** on port 9222.
+- **No Chrome Extension needed**.
 
 ### 4. VPS SSH & SFTP Engine (Dual Mode):
 - **Standalone Binary (Zero Python needed)**: Comes pre-compiled in \`bin/vps_ssh.exe\` (Windows) and \`bin/vps_ssh\` (macOS/Linux).
