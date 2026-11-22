@@ -3,8 +3,100 @@ import { z } from "zod";
 import * as fs from "node:fs/promises";
 import { existsSync } from "node:fs";
 import * as path from "node:path";
-import { executeCommand } from "../terminal";
+import { COMMAND_MAX_CHARS, COMMAND_TIMEOUT_MS, executeCommand } from "../terminal";
 import { assertSafePath } from "../security";
+
+const MAX_TEXT_BYTES = 1_000_000;
+const MAX_BASE64_BYTES = 2_000_000;
+const MAX_UNSCOPED_LINES = 1000;
+const MAX_RANGE_SCAN_BYTES = 32_000_000;
+
+function formatNumberedLines(lines: string[], start: number, withLineNumbers: boolean): string {
+  return lines.map((line, idx) => {
+    if (!withLineNumbers) return line;
+    return `${(start + idx).toString().padStart(4, " ")}: ${line}`;
+  }).join("\n");
+}
+
+function unscopedCutFooter(shown: number, detail: string): string {
+  return `\n\n[Đã cắt còn ${shown} dòng đầu / ${detail}. Dùng startLine và endLine để đọc tiếp.]`;
+}
+
+type StreamedLines = {
+  lines: string[];
+  start: number;
+  lineCount: number;
+  exhausted: boolean;
+};
+
+async function streamTextLines(
+  fullPath: string,
+  opts: { start?: number; end?: number; stopAfterLines?: number; maxBytes: number }
+): Promise<StreamedLines> {
+  const fh = await fs.open(fullPath, "r");
+  const buf = Buffer.alloc(64 * 1024);
+  const decoder = new TextDecoder("utf-8");
+  let pending = "";
+  let position = 0;
+  let bytes = 0;
+  let lineCount = 0;
+  let exhausted = true;
+  let stop = false;
+  const start = Math.max(1, opts.start ?? 1);
+  const collected: string[] = [];
+
+  const consider = (line: string) => {
+    lineCount++;
+    if (opts.stopAfterLines !== undefined && lineCount > opts.stopAfterLines) {
+      stop = true;
+      exhausted = false;
+      return;
+    }
+    const inWindow = lineCount >= start && (opts.end === undefined || lineCount <= opts.end);
+    if (inWindow) collected.push(line);
+  };
+
+  try {
+    while (!stop) {
+      const { bytesRead } = await fh.read(buf, 0, buf.length, position);
+      if (bytesRead === 0) break;
+      position += bytesRead;
+      bytes += bytesRead;
+      if (bytes > opts.maxBytes) {
+        exhausted = false;
+        break;
+      }
+      pending += decoder.decode(buf.subarray(0, bytesRead), { stream: true });
+      if (pending.length > opts.maxBytes) {
+        consider(pending.slice(0, opts.maxBytes));
+        exhausted = false;
+        stop = true;
+        break;
+      }
+      let nl = pending.indexOf("\n");
+      while (nl !== -1 && !stop) {
+        let line = pending.slice(0, nl);
+        pending = pending.slice(nl + 1);
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        consider(line);
+        nl = pending.indexOf("\n");
+      }
+    }
+    if (!stop && exhausted) {
+      pending += decoder.decode();
+      if (pending.length > 0) {
+        if (pending.endsWith("\r")) pending = pending.slice(0, -1);
+        consider(pending);
+      } else if (lineCount === 0 || bytes > 0) {
+        consider("");
+      }
+    }
+  } finally {
+    await fh.close();
+  }
+
+  return { lines: collected, start, lineCount, exhausted };
+}
 
 export function registerTerminalAndFileTools(mcp: McpServer, onActivity?: (event: any) => void): void {
   // Tool 1: Thực thi lệnh console
@@ -16,7 +108,7 @@ export function registerTerminalAndFileTools(mcp: McpServer, onActivity?: (event
     },
     async ({ command, cwd }) => {
       try {
-        const res = await executeCommand(command, cwd);
+        const res = await executeCommand(command, cwd, { timeoutMs: COMMAND_TIMEOUT_MS, maxChars: COMMAND_MAX_CHARS });
         onActivity?.({
           type: "terminal_output",
           output: res.stdout || res.stderr,
@@ -44,7 +136,7 @@ export function registerTerminalAndFileTools(mcp: McpServer, onActivity?: (event
   // Tool 2: Đọc file với hỗ trợ phân đoạn theo dòng, đọc nhị phân Base64 và bảo vệ chống Path Traversal
   mcp.tool(
     "read_file",
-    "Đọc nội dung tệp tin. Hỗ trợ đọc văn bản UTF-8 theo dòng (startLine..endLine) hoặc đọc tệp nhị phân (ảnh, zip, pdf) nguyên vẹn dưới dạng Base64 qua encoding='base64'.",
+    "Đọc nội dung tệp tin. Không có startLine/endLine thì tối đa 1000 dòng và 1MB; tệp lớn hơn phải chỉ định khoảng dòng. Ảnh, zip, pdf đọc base64 khi còn dưới 2MB.",
     {
       filePath: z.string().describe("Đường dẫn tuyệt đối hoặc tương đối của tệp"),
       startLine: z.number().int().min(1).optional().describe("Dòng bắt đầu đọc (1-indexed). Để trống để đọc từ đầu tệp."),
@@ -55,13 +147,27 @@ export function registerTerminalAndFileTools(mcp: McpServer, onActivity?: (event
     async ({ filePath, startLine, endLine, withLineNumbers, encoding }) => {
       try {
         const fullPath = assertSafePath(filePath);
-        const rawBuf = await fs.readFile(fullPath);
+        const stat = await fs.stat(fullPath);
+        if (!stat.isFile()) throw new Error("Not a file");
         const ext = path.extname(fullPath).toLowerCase();
         const binaryExts = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".ico", ".bmp", ".pdf", ".zip", ".gz", ".tar", ".mp4", ".mp3", ".wav", ".webm", ".exe", ".dll", ".sqlite", ".db"]);
-        const hasNullByte = rawBuf.subarray(0, Math.min(rawBuf.length, 4096)).includes(0);
-        const useBase64 = encoding === "base64" || (encoding === "auto" && (binaryExts.has(ext) || hasNullByte));
+        const ranged = startLine !== undefined || endLine !== undefined;
+        const peek = Buffer.alloc(Math.min(4096, stat.size));
+        if (peek.length > 0 && encoding !== "utf8") {
+          const fh = await fs.open(fullPath, "r");
+          try { await fh.read(peek, 0, peek.length, 0); }
+          finally { await fh.close(); }
+        }
+        const useBase64 = encoding === "base64" || (encoding === "auto" && (binaryExts.has(ext) || peek.includes(0)));
 
         if (useBase64) {
+          if (stat.size > MAX_BASE64_BYTES) {
+            return {
+              content: [{ type: "text", text: `File quá lớn để đọc base64 (${stat.size} byte, trần ${MAX_BASE64_BYTES}).` }],
+              isError: true
+            };
+          }
+          const rawBuf = await fs.readFile(fullPath);
           onActivity?.({
             type: "file_action",
             action: "read_base64",
@@ -81,33 +187,51 @@ export function registerTerminalAndFileTools(mcp: McpServer, onActivity?: (event
           };
         }
 
-        const content = rawBuf.toString("utf-8");
-        const allLines = content.split(/\r?\n/);
-        const totalLines = allLines.length;
-
         let resultText = "";
-        if (startLine !== undefined || endLine !== undefined) {
-          const start = Math.max(1, startLine || 1);
-          const end = Math.min(totalLines, endLine || totalLines);
-
-          if (start > totalLines) {
-            return {
-              content: [{ type: "text", text: `[Tệp ${path.basename(fullPath)} có tổng cộng ${totalLines} dòng. Dòng bắt đầu ${start} vượt quá độ dài tệp]` }]
-            };
-          }
-
-          const sliced = allLines.slice(start - 1, end);
-          resultText = sliced.map((line, idx) => {
-            const lineNum = start + idx;
-            return withLineNumbers ? `${lineNum.toString().padStart(4, " ")}: ${line}` : line;
-          }).join("\n");
-
-          resultText = `[Đang xem dòng ${start} - ${end} / Tổng số ${totalLines} dòng của ${path.basename(fullPath)}]\n\n` + resultText;
-        } else {
-          if (withLineNumbers && totalLines <= 1000) {
-            resultText = allLines.map((line, idx) => `${(idx + 1).toString().padStart(4, " ")}: ${line}`).join("\n");
+        let reportedLines = 0;
+        if (stat.size <= MAX_TEXT_BYTES) {
+          const content = await fs.readFile(fullPath, "utf-8");
+          const allLines = content.split(/\r?\n/);
+          const totalLines = allLines.length;
+          reportedLines = totalLines;
+          if (ranged) {
+            const start = Math.max(1, startLine || 1);
+            const end = Math.min(totalLines, endLine || totalLines);
+            if (start > totalLines) {
+              return {
+                content: [{ type: "text", text: `[Tệp ${path.basename(fullPath)} có tổng cộng ${totalLines} dòng. Dòng bắt đầu ${start} vượt quá độ dài tệp]` }]
+              };
+            }
+            resultText = `[Đang xem dòng ${start} - ${end} / Tổng số ${totalLines} dòng của ${path.basename(fullPath)}]\n\n` + formatNumberedLines(allLines.slice(start - 1, end), start, withLineNumbers);
+          } else if (totalLines > MAX_UNSCOPED_LINES) {
+            resultText = formatNumberedLines(allLines.slice(0, MAX_UNSCOPED_LINES), 1, withLineNumbers) + unscopedCutFooter(MAX_UNSCOPED_LINES, `tổng ${totalLines} dòng`);
+          } else if (withLineNumbers) {
+            resultText = formatNumberedLines(allLines, 1, true);
           } else {
             resultText = content;
+          }
+        } else {
+          const streamed = await streamTextLines(fullPath, {
+            start: ranged ? Math.max(1, startLine || 1) : 1,
+            end: ranged ? endLine : undefined,
+            stopAfterLines: ranged ? undefined : MAX_UNSCOPED_LINES,
+            maxBytes: ranged ? MAX_RANGE_SCAN_BYTES : MAX_TEXT_BYTES
+          });
+          reportedLines = streamed.lineCount;
+          const base = path.basename(fullPath);
+          if (ranged) {
+            const start = streamed.start;
+            if (streamed.exhausted && start > streamed.lineCount) {
+              return {
+                content: [{ type: "text", text: `[Tệp ${base} có tổng cộng ${streamed.lineCount} dòng. Dòng bắt đầu ${start} vượt quá độ dài tệp]` }]
+              };
+            }
+            const endShown = streamed.lines.length === 0 ? start : start + streamed.lines.length - 1;
+            const totalLabel = streamed.exhausted ? String(streamed.lineCount) : `ít nhất ${streamed.lineCount}`;
+            resultText = `[Đang xem dòng ${start} - ${endShown} / Tổng số ${totalLabel} dòng của ${base}]\n\n` + formatNumberedLines(streamed.lines, start, withLineNumbers);
+          } else {
+            const detail = streamed.exhausted ? `tổng ${streamed.lineCount} dòng` : `tệp ${stat.size} byte, chưa đọc hết`;
+            resultText = formatNumberedLines(streamed.lines, 1, withLineNumbers) + unscopedCutFooter(streamed.lines.length, detail);
           }
         }
 
@@ -115,7 +239,7 @@ export function registerTerminalAndFileTools(mcp: McpServer, onActivity?: (event
           type: "file_action",
           action: "read",
           path: fullPath,
-          lines: totalLines
+          lines: reportedLines
         });
 
         return {

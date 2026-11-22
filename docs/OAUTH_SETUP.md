@@ -131,7 +131,7 @@ Bạn có thể mở trình duyệt hoặc dùng `curl` kiểm tra nhanh:
    - Bạn sẽ thấy giao diện Dark Mode hiển thị các quyền hạn:
      - ⚡ Thực thi các lệnh terminal console trong workspace an toàn
      - 📂 Đọc và ghi tệp tin dự án khi có sự yêu cầu từ bạn
-     - 🌐 Tự động hóa tác vụ duyệt web qua Chrome Extension
+     - 🌐 Tự động hóa tác vụ duyệt web qua Chrome CDP
 5. Nhấn nút **"Cho phép & Kết nối"**:
    - Otter Daemon tự động sinh mã ủy quyền an toàn một lần (`code`), gắn kèm định danh `iss` chống giả mạo theo chuẩn **RFC 9207**.
    - Trình duyệt tự động chuyển hướng về ChatGPT.

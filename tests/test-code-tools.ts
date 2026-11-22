@@ -17,7 +17,7 @@ import { initDatabase } from "../src/daemon/db";
 import { createPlan } from "../src/daemon/plan";
 import { updatePlanTask } from "../src/daemon/plan";
 import { registerAllowedWorkspace } from "../src/daemon/security";
-import { registerCodeTools } from "../src/daemon/tools/code-tools";
+import { registerCodeTools, resolveRipgrepPath } from "../src/daemon/tools/code-tools";
 
 let failures = 0;
 let passed = 0;
@@ -44,6 +44,9 @@ const aTs = [
   "",
   "export class Beta {",
   "  nested() { return 2; }",
+  "  async ensureCdpChrome(port?: number) {",
+  "    return port;",
+  "  }",
   "}",
   "export interface Gamma {",
   "  x: number;",
@@ -63,9 +66,32 @@ const bPy = [
   "",
   "class Eta:",
   "    def method_inside(self):",
+  "        def deeper():",
+  "            return 3",
   "        return 2",
 ].join("\n") + "\n";
 fs.writeFileSync(path.join(srcDir, "b.py"), bPy);
+const rust = [
+  "pub struct TrayIcon {",
+  "    id: u32,",
+  "}",
+  "pub enum TrayEvent {",
+  "    Click,",
+  "}",
+  "impl TrayIcon {",
+  "    pub fn show(&self) {}",
+  "    fn hide_window(&self) {",
+  "        fn inner_fn() {}",
+  "    }",
+  "}",
+  "fn top_level_fn() {}",
+].join("\n") + "\n";
+fs.mkdirSync(path.join(root, "tray", "src"), { recursive: true });
+fs.writeFileSync(path.join(root, "tray", "src", "main.rs"), rust);
+fs.mkdirSync(path.join(root, "target"), { recursive: true });
+fs.writeFileSync(path.join(root, "target", "junk.ts"), "export function alpha() {}\n");
+fs.mkdirSync(path.join(root, ".bun-cache"), { recursive: true });
+fs.writeFileSync(path.join(root, ".bun-cache", "junk.ts"), "export function alpha() {}\n");
 
 fs.writeFileSync(path.join(root, "notes.md"), "# Notes\nalpha appears here too.\n");
 fs.mkdirSync(path.join(root, "node_modules"), { recursive: true });
@@ -101,7 +127,11 @@ const search = await callTool("code_search_text", { root, pattern: "alpha", maxR
 check("search finds a.ts hit", search.ok && search.data.hits.some((h: any) => h.file === "src/a.ts" && h.text.includes("alpha")));
 check("search skips node_modules", search.ok && !search.data.hits.some((h: any) => h.file.includes("node_modules")));
 check("search skips .git", search.ok && !search.data.hits.some((h: any) => h.file.includes(".git")));
+check("search skips target and .bun-cache", search.ok && !search.data.hits.some((h: any) => h.file.startsWith("target/") || h.file.startsWith(".bun-cache/")));
 check("search skips binary file", search.ok && !search.data.hits.some((h: any) => h.file === "bin.dat"));
+const rg = resolveRipgrepPath();
+check("ripgrep resolver returns null or a real file", rg === null || fs.existsSync(rg), rg);
+check("search reports an engine", search.ok && (search.data.engine === "rg" || search.data.engine === "ts" || search.data.engine === "grep"), search.data.engine);
 const capped = await callTool("code_search_text", { root, pattern: "a", maxResults: 2 });
 check("search respects maxResults with truncated flag", capped.ok && capped.data.hits.filter((h: any) => !h.isContext).length <= 2 && capped.data.truncated === true);
 const outside = await callTool("code_search_text", { root: "/etc", pattern: "x" });
@@ -114,7 +144,7 @@ const listedCap = await callTool("code_list_files", { root, maxResults: 2 });
 check("list_files caps with truncated flag", listedCap.ok && listedCap.data.files.length === 2 && listedCap.data.truncated === true);
 check("list_files capped output contains no skipped dirs", listedCap.ok && !listedCap.data.files.some((f: string) => f.includes("node_modules") || f.startsWith(".git/")), listedCap.data);
 const listedAll = await callTool("code_list_files", { root, maxResults: 1000 });
-check("list_files never returns skipped dirs", listedAll.ok && !listedAll.data.files.some((f: string) => f.includes("node_modules") || f.startsWith(".git/")));
+check("list_files never returns skipped dirs", listedAll.ok && !listedAll.data.files.some((f: string) => f.includes("node_modules") || f.startsWith(".git/") || f.startsWith("target/") || f.startsWith(".bun-cache/")));
 
 // 3. find_symbol across languages.
 const foundBeta = await callTool("code_find_symbol", { root, name: "Beta" });
@@ -133,12 +163,23 @@ check("outline lists top-level symbols with correct lines", outline.ok
   && outlineNames.includes("alpha") && outlineNames.includes("Beta") && outlineNames.includes("Gamma")
   && outlineNames.includes("Delta") && outlineNames.includes("epsilon") && outlineNames.includes("zeta")
   && outline.data.symbols.find((s: any) => s.name === "Beta")?.line === 5, outline.data);
-check("outline excludes indented definitions", outline.ok && !outlineNames.includes("hiddenHelper") && !outlineNames.includes("nested"));
+check("outline includes class methods but not nested helpers", outline.ok && outlineNames.includes("nested") && outlineNames.includes("ensureCdpChrome") && !outlineNames.includes("hiddenHelper"), outline.data);
 const outlinePy = await callTool("code_outline", { file: path.join(srcDir, "b.py") });
-check("outline python excludes indented method", outlinePy.ok
+check("outline python includes class methods but not nested defs", outlinePy.ok
   && outlinePy.data.symbols.some((s: any) => s.name === "zeta_func")
   && outlinePy.data.symbols.some((s: any) => s.name === "Eta")
-  && !outlinePy.data.symbols.some((s: any) => s.name === "method_inside"), outlinePy.data);
+  && outlinePy.data.symbols.some((s: any) => s.name === "method_inside")
+  && !outlinePy.data.symbols.some((s: any) => s.name === "deeper"), outlinePy.data);
+
+const foundRust = await callTool("code_find_symbol", { root, name: "Tray" });
+check("find_symbol finds Rust struct and enum", foundRust.ok
+  && foundRust.data.symbols.some((s: any) => s.name === "TrayIcon" && s.kind === "struct")
+  && foundRust.data.symbols.some((s: any) => s.name === "TrayEvent" && s.kind === "enum"), foundRust.data);
+const outlineRs = await callTool("code_outline", { file: path.join(root, "tray", "src", "main.rs") });
+const rustNames = outlineRs.ok ? outlineRs.data.symbols.map((s: any) => s.name) : [];
+check("outline rust keeps impl methods and drops nested fn", outlineRs.ok
+  && rustNames.includes("TrayIcon") && rustNames.includes("TrayEvent") && rustNames.includes("show")
+  && rustNames.includes("top_level_fn") && rustNames.includes("hide_window") && !rustNames.includes("inner_fn"), outlineRs.data);
 
 // 5. git_status: dirty repo + non-repo error (skip if git missing).
 const gitCheck = spawnSync("git", ["--version"], { encoding: "utf-8" });

@@ -221,7 +221,7 @@ export async function readTerminalOutput(
     }, Math.min(waitMs, 10000));
 
     const handler = (evts: TerminalEvent[]) => {
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       resolve(evts);
     };
 
@@ -274,10 +274,45 @@ export async function sendTerminalInput(sessionId: string, text: string): Promis
   return true;
 }
 
+export const COMMAND_TIMEOUT_MS = 60_000;
+export const COMMAND_MAX_CHARS = 200_000;
+
+async function readCapped(
+  stream: ReadableStream<Uint8Array> | null | undefined,
+  maxChars: number,
+  onOverflow: () => void
+): Promise<{ text: string; truncated: boolean }> {
+  if (!stream) return { text: "", truncated: false };
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+  let truncated = false;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value || truncated) continue;
+      text += decoder.decode(value, { stream: true });
+      if (text.length > maxChars) {
+        text = text.slice(0, maxChars);
+        truncated = true;
+        onOverflow();
+      }
+    }
+  } finally {
+    try { reader.releaseLock(); } catch { /* stream already closed */ }
+  }
+  if (!truncated) text += decoder.decode();
+  return { text, truncated };
+}
+
 export async function executeCommand(
   cmd: string,
-  cwd?: string
+  cwd?: string,
+  limits?: { timeoutMs?: number; maxChars?: number }
 ): Promise<TerminalExecutionResult> {
+  const timeoutMs = limits?.timeoutMs;
+  const maxChars = limits?.maxChars ?? Number.POSITIVE_INFINITY;
   const isWindows = process.platform === "win32";
   const shell = isWindows
     ? ["powershell.exe", "-NoProfile", "-Command", cmd]
@@ -290,9 +325,30 @@ export async function executeCommand(
     stderr: "pipe"
   });
 
-  const stdout = await new Response(proc.stdout).text();
-  const stderr = await new Response(proc.stderr).text();
-  const exitCode = await proc.exited;
+  let killed = false;
+  const kill = () => {
+    if (killed) return;
+    killed = true;
+    try { proc.kill(); } catch { /* already exited */ }
+  };
+  let timedOut = false;
+  const timer = timeoutMs === undefined ? undefined : setTimeout(() => {
+    timedOut = true;
+    kill();
+  }, timeoutMs);
 
-  return { stdout, stderr, exitCode };
+  try {
+    const [out, err] = await Promise.all([
+      readCapped(proc.stdout, maxChars, kill),
+      readCapped(proc.stderr, maxChars, kill)
+    ]);
+    const exitCode = await proc.exited;
+    const clip = (piece: { text: string; truncated: boolean }, label: string) =>
+      piece.truncated ? `${piece.text}\n[${label} truncated at ${maxChars} chars]` : piece.text;
+    let stderr = clip(err, "stderr");
+    if (timedOut) stderr = `${stderr}\n[timed out after ${timeoutMs}ms]`.trim();
+    return { stdout: clip(out, "stdout"), stderr, exitCode };
+  } finally {
+    clearTimeout(timer);
+  }
 }

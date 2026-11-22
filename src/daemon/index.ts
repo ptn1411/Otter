@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { getTailscaleIp, ensureAuthToken } from "./security";
 import { initDatabase } from "./db";
-import { initSettings } from "./settings";
+import { initSettings, onSettingsChange } from "./settings";
 import { createMcpServer } from "./mcp";
 import { cleanupAfterUpdate, startUpdateScheduler, registerBeforeRestartHook } from "./updater";
 import { OTTER_VERSION } from "./version";
@@ -206,6 +206,16 @@ Ví dụ lệnh thực tế:
 }
 
 const appSettings = initSettings();
+if (appSettings.cdpPort) {
+  cdpBridge.setPort(appSettings.cdpPort);
+}
+if (appSettings.cdpWsEndpoint) {
+  cdpBridge.setWsEndpoint(appSettings.cdpWsEndpoint);
+}
+onSettingsChange((updated) => {
+  if (updated.cdpPort) cdpBridge.setPort(updated.cdpPort);
+  if (updated.cdpWsEndpoint !== undefined) cdpBridge.setWsEndpoint(updated.cdpWsEndpoint);
+});
 const PORT = Number(process.env.PORT || 1993);
 const db = initDatabase();
 
@@ -230,16 +240,16 @@ function handleMcpActivity(evt: any) {
   lastMcpActivityAt = Date.now();
   broadcast(evt);
 
-  // Tự động đẩy báo cáo hoàn thành task từ IDE lên khung chat ChatGPT Web (qua Chrome Extension)
+  // Tự động đẩy báo cáo hoàn thành task từ IDE lên khung chat ChatGPT Web (qua Chrome CDP)
   if (evt.type === "ide_task_completed" && evt.autoNotifyWeb !== false) {
     try {
       // Phase 4/5: task thuộc plan thì inject continuation/final prompt qua
-      // outbox (không mất khi extension chưa kết nối), thay vì report một lần.
+      // outbox (không mất khi tab chưa kết nối), thay vì report một lần.
       const loopPrompt: string | undefined = evt.continuationPrompt || evt.retryPrompt;
       if (evt.planId && loopPrompt) {
         const entry = enqueueInjection(db, { planId: evt.planId, taskId: evt.taskId, text: loopPrompt });
         void flushInjectionOutbox(db, (text, id) => browserBridge.injectPrompt(text, true, id)).then((result) => {
-          if (result.remaining > 0) console.log(`[Loop] ${result.remaining} prompt(s) đang chờ trong outbox (extension chưa kết nối hoặc inject thất bại).`);
+          if (result.remaining > 0) console.log(`[Loop] ${result.remaining} prompt(s) đang chờ trong outbox (chưa kết nối hoặc inject thất bại).`);
         });
         void entry;
       } else {
@@ -375,7 +385,7 @@ setInterval(() => {
   }
 }, 60_000);
 
-// Tự động đồng bộ công cụ và phát thông báo tool list changed cho các phiên kết nối MCP và Extension
+// Tự động đồng bộ công cụ và phát thông báo tool list changed cho các phiên kết nối MCP
 onExternalServersReloaded(() => {
   for (const [, s] of sseSessions) {
     try {
@@ -636,7 +646,7 @@ const server = Bun.serve<WsClientData>({
   websocket: {
     open(ws) {
       activeSockets.add(ws);
-      console.log("[WS] Extension client connected");
+      console.log("[WS] Client connected");
     },
     message(ws, msg) {
       try {
@@ -671,16 +681,16 @@ const server = Bun.serve<WsClientData>({
           }));
 
           console.log(`[WS] Subscribed conversation: ${convId}`);
-          // Phase 5: extension vừa kết nối lại -> gửi các prompt đang kẹt trong outbox.
+          // Phase 5: gửi các prompt đang kẹt trong outbox.
           void flushInjectionOutbox(db, (text, id) => browserBridge.injectPrompt(text, true, id)).then((result) => {
             if (result.delivered > 0 || result.failed > 0) console.log(`[Loop] Outbox flush on subscribe: delivered=${result.delivered} failed=${result.failed} remaining=${result.remaining}`);
           });
         } else if (data.type === "inject_result") {
-          // Phase 5 ack: extension báo kết quả inject cho một outbox entry.
+          // Phase 5 ack: báo kết quả inject cho một outbox entry.
           try {
             if (data.injectionId) {
               if (data.ok) markInjectionDelivered(db, data.injectionId);
-              else markInjectionFailed(db, data.injectionId, data.error || "Extension reported inject failure");
+              else markInjectionFailed(db, data.injectionId, data.error || "Client reported inject failure");
             }
           } catch (err) {
             console.warn("[WS] inject_result handling failed:", err);

@@ -1,14 +1,12 @@
 /**
  * Mở Chrome theo profile — pure logic, không MCP/Zod.
  *
- * Vấn đề nó giải quyết: extension Otter chỉ điều khiển được tab
- * ChatGPT ĐÃ mở trong một profile Chrome. Trước đây không có cách
- * nào gọi từ daemon/ChatGPT để mở đúng profile đó ra (mỗi profile
- * = một bộ login ChatGPT + một bộ cấu hình server riêng trong
- * chrome.storage.local). Từ nay daemon có tool chrome_open_profile:
+ * Vấn đề nó giải quyết: điều khiển Chrome theo đúng profile
+ * chỉ định với --profile-directory, kết nối qua Chrome DevTools
+ * Protocol (CDP) trực tiếp mà không cần cài extension.
  * ChatGPT của hub/worker gọi tool → daemon spawn Chrome trên máy
  * đó với --profile-directory đúng → cửa sổ Chrome profile đó mở
- * ra, extension trong profile đó nối về daemon, rồi mới làm việc.
+ * ra và kết nối về daemon qua CDP.
  *
  * An toàn:
  * - Không bao giờ kill Chrome đang chạy, không đóng tab của user.
@@ -322,7 +320,7 @@ export function openChromeProfile(input: {
     willCreate,
     url,
     note: willCreate
-      ? `Chrome sẽ tự tạo profile '${profile.directory}' lần đầu mở. Sau khi mở, extension Otter trong profile đó nối về daemon này thì mới làm việc được.`
+      ? `Chrome sẽ tự tạo profile '${profile.directory}' lần đầu mở.`
       : "Chrome có thể ủy quyền cho tiến trình Chrome đang chạy (pid chỉ là tiến trình khởi động). Nếu Chrome đang chạy với user-data-dir khác, hãy đóng Chrome đó trước hoặc dùng cùng user-data-dir.",
   };
 }

@@ -337,7 +337,7 @@ export async function handleOAuthRoutes(req: Request, url: URL): Promise<Respons
     <ul class="permissions">
       <li><span>⚡</span><span>Thực thi các lệnh terminal console trong workspace an toàn</span></li>
       <li><span>📂</span><span>Đọc và ghi tệp tin dự án khi có sự yêu cầu từ bạn</span></li>
-      <li><span>🌐</span><span>Tự động hóa tác vụ duyệt web qua Chrome Extension</span></li>
+      <li><span>🌐</span><span>Tự động hóa tác vụ duyệt web qua Chrome CDP</span></li>
     </ul>
 
     <form method="POST" action="/oauth/authorize">

@@ -87,7 +87,7 @@ export function registerMuseTools(mcp: McpServer, onActivity?: (event: any) => v
         return {
           content: [{
             type: "text",
-            text: `Lỗi kết nối tới Muse qua Extension: ${err.message}`
+            text: `Lỗi kết nối tới Muse qua CDP: ${err.message}`
           }],
           isError: true
         };

@@ -58,25 +58,26 @@ if (mk.status !== 0) throw new Error(`Không tạo được fixture SQLite: ${mk
 // 1. CLI đã copy chạy được từ cây chatmcp
 const cliPath = resolveDbmCli();
 check("resolveDbmCli trỏ vào tools/db-manager/bin/dbm", cliPath.replace(/\\/g, "/").endsWith("tools/db-manager/bin/dbm") && fs.existsSync(cliPath), cliPath);
-const help = spawnSync("python3", ["tools/db-manager/bin/dbm", "--help"], { encoding: "utf-8", cwd: process.cwd() });
-check("python3 tools/db-manager/bin/dbm --help chạy từ repo root", help.status === 0 && String(help.stdout).includes("read-only by default"));
-const info = runDbm(["info"]);
+const pythonBin = process.platform === "win32" ? "python" : "python3";
+const help = spawnSync(pythonBin, ["tools/db-manager/bin/dbm", "--help"], { encoding: "utf-8", cwd: process.cwd() });
+check(`${pythonBin} tools/db-manager/bin/dbm --help chạy từ repo root`, help.status === 0 && String(help.stdout).includes("read-only by default"));
+const info = await runDbm(["info"]);
 check("runDbm(['info']) liệt kê sqlite", info.includes("sqlite"));
 
 // 2. Profile round-trip qua wrapper
-const added = runDbm(["profile", "add", "--name", "t", "--type", "sqlite", "--database", dbPath]);
+const added = await runDbm(["profile", "add", "--name", "t", "--type", "sqlite", "--database", dbPath]);
 check("profile add qua wrapper", added.includes("profile 't' added"));
-const list = JSON.parse(runDbm(["--json", "profile", "list"])) as { profiles: Record<string, { type: string }> };
+const list = JSON.parse(await runDbm(["--json", "profile", "list"])) as { profiles: Record<string, { type: string }> };
 check("profile list thấy profile vừa thêm", list.profiles.t?.type === "sqlite");
-const shown = JSON.parse(runDbm(["--json", "profile", "show", "t"])) as { profile: { type: string; database: string } };
+const shown = JSON.parse(await runDbm(["--json", "profile", "show", "t"])) as { profile: { type: string; database: string } };
 check("profile show đúng type + database", shown.profile.type === "sqlite" && shown.profile.database === dbPath);
 
 // 3. tables/describe/query qua wrapper
-const tables = JSON.parse(runDbm(["--profile", "t", "--json", "--limit", "100", "--timeout", "30", "tables"])) as unknown;
+const tables = JSON.parse(await runDbm(["--profile", "t", "--json", "--limit", "100", "--timeout", "30", "tables"])) as unknown;
 check("tables trả về users", JSON.stringify(tables).includes("users"), JSON.stringify(tables).slice(0, 200));
-const desc = JSON.parse(runDbm(["--profile", "t", "--json", "describe", "users"])) as unknown;
+const desc = JSON.parse(await runDbm(["--profile", "t", "--json", "describe", "users"])) as unknown;
 check("describe users có cột id + name", JSON.stringify(desc).includes("id") && JSON.stringify(desc).includes("name"));
-const q = JSON.parse(runDbm(["--profile", "t", "--json", "query", "SELECT * FROM users ORDER BY id"])) as {
+const q = JSON.parse(await runDbm(["--profile", "t", "--json", "query", "SELECT * FROM users ORDER BY id"])) as {
   columns: string[];
   rows: unknown[][];
 };
@@ -117,7 +118,7 @@ const dbRemove = registered.get("db_profile_remove")!;
 // 4. DROP không đủ cờ -> từ chối, bảng vẫn còn
 const refused = await dbQuery({ profile: "t", statement: "DROP TABLE users" });
 check("db_query DROP không cờ -> isError", refused.isError === true, JSON.stringify(refused).slice(0, 200));
-const stillThere = JSON.parse(runDbm(["--profile", "t", "--json", "tables"])) as unknown;
+const stillThere = JSON.parse(await runDbm(["--profile", "t", "--json", "tables"])) as unknown;
 check("bảng users vẫn còn sau lần DROP bị từ chối", JSON.stringify(stillThere).includes("users"));
 const halfRefused = await dbQuery({ profile: "t", statement: "DROP TABLE users", allowWrite: true });
 check("db_query DROP chỉ có allowWrite (thiếu confirmWrite) -> isError", halfRefused.isError === true);
@@ -125,7 +126,7 @@ check("db_query DROP chỉ có allowWrite (thiếu confirmWrite) -> isError", ha
 // 5. DROP có cả hai cờ -> thực thi thật
 const dropped = await dbQuery({ profile: "t", statement: "DROP TABLE users", allowWrite: true, confirmWrite: true });
 check("db_query DROP có cả hai cờ -> không lỗi", dropped.isError !== true, JSON.stringify(dropped).slice(0, 200));
-const gone = JSON.parse(runDbm(["--profile", "t", "--json", "tables"])) as unknown;
+const gone = JSON.parse(await runDbm(["--profile", "t", "--json", "tables"])) as unknown;
 check("bảng users đã mất sau DROP có đủ cờ", !JSON.stringify(gone).includes("users"), JSON.stringify(gone).slice(0, 200));
 
 // 6. profile remove: không cờ -> từ chối; có cờ -> xóa
@@ -133,7 +134,7 @@ const rmRefused = await dbRemove({ name: "t", confirmRemove: false });
 check("db_profile_remove không cờ -> isError", rmRefused.isError === true);
 const rmOk = await dbRemove({ name: "t", confirmRemove: true });
 check("db_profile_remove có cờ -> không lỗi", rmOk.isError !== true, JSON.stringify(rmOk).slice(0, 200));
-const listAfter = JSON.parse(runDbm(["--json", "profile", "list"])) as { profiles: Record<string, unknown> };
+const listAfter = JSON.parse(await runDbm(["--json", "profile", "list"])) as { profiles: Record<string, unknown> };
 check("profile t đã mất sau khi xóa", !("t" in listAfter.profiles));
 
 fs.rmSync(tmpHome, { recursive: true, force: true });

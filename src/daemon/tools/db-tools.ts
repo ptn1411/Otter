@@ -23,7 +23,7 @@
  *   CLI dùng mặc định của nó (~/.config/dbm/).
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { spawnSync } from "node:child_process";
+
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { z } from "zod";
@@ -33,13 +33,25 @@ export const DBM_MAX_TIMEOUT_SECS = 120;
 export const DBM_DEFAULT_LIMIT = 100;
 
 /** Tìm CLI Python: ưu tiên DBM_CLI_PATH, rồi đường dẫn từ cwd (daemon chạy từ repo root), rồi đường dẫn tương đối từ file này. */
+let cachedDbmCli: string | null = null;
+
 export function resolveDbmCli(): string {
+  if (cachedDbmCli) return cachedDbmCli;
   const override = process.env.DBM_CLI_PATH;
-  if (override) return override;
+  if (override) {
+    cachedDbmCli = override;
+    return override;
+  }
   const fromCwd = path.resolve("tools/db-manager/bin/dbm");
-  if (fs.existsSync(fromCwd)) return fromCwd;
+  if (fs.existsSync(fromCwd)) {
+    cachedDbmCli = fromCwd;
+    return fromCwd;
+  }
   const fromHere = path.resolve(import.meta.dir, "../../../tools/db-manager/bin/dbm");
-  if (fs.existsSync(fromHere)) return fromHere;
+  if (fs.existsSync(fromHere)) {
+    cachedDbmCli = fromHere;
+    return fromHere;
+  }
   throw new Error(
     "Không tìm thấy Python DB manager (tools/db-manager/bin/dbm). " +
       "Chạy daemon từ thư mục gốc của repo chatmcp, hoặc đặt DBM_CLI_PATH.",
@@ -64,30 +76,42 @@ function clampLimit(limit?: number): number {
  * trình hiện tại được truyền nguyên vẹn, nên DBM_HOME (nơi lưu profile)
  * dùng chung giữa daemon và CLI standalone.
  */
-export function runDbm(argv: string[], timeoutSecs?: number): string {
+export async function runDbm(argv: string[], timeoutSecs?: number): Promise<string> {
   const cli = resolveDbmCli();
   const timeout = clampTimeout(timeoutSecs);
   const pythonBin = process.platform === "win32" ? "python" : "python3";
-  const res = spawnSync(pythonBin, [cli, ...argv], {
-    encoding: "utf-8",
-    timeout: timeout * 1000,
-    env: process.env,
-  });
-  if (res.error) {
-    const code = (res.error as NodeJS.ErrnoException).code;
-    if (code === "ETIMEDOUT") {
+  let proc: ReturnType<typeof Bun.spawn>;
+  try {
+    proc = Bun.spawn([pythonBin, cli, ...argv], {
+      stdout: "pipe",
+      stderr: "pipe",
+      env: process.env as Record<string, string>,
+    });
+  } catch (error: any) {
+    throw new Error(`Không chạy được dbm: ${error?.message ?? error}`);
+  }
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    try { proc.kill(); } catch { /* already exited */ }
+  }, timeout * 1000);
+  try {
+    const [stdout, stderr] = await Promise.all([
+      new Response(proc.stdout).text(),
+      new Response(proc.stderr).text(),
+    ]);
+    const status = await proc.exited;
+    if (timedOut) {
       throw new Error(`dbm timed out sau ${timeout}s (giới hạn tối đa ${DBM_MAX_TIMEOUT_SECS}s)`);
     }
-    throw new Error(`Không chạy được dbm: ${res.error.message}`);
+    if (status !== 0) {
+      const detail = String(stderr || stdout || "").trim().slice(0, 2000);
+      throw new Error(detail ? `dbm lỗi (exit ${status}): ${detail}` : `dbm lỗi (exit ${status})`);
+    }
+    return String(stdout ?? "");
+  } finally {
+    clearTimeout(timer);
   }
-  if (res.signal) {
-    throw new Error(`dbm bị dừng bởi signal ${res.signal}`);
-  }
-  if (res.status !== 0) {
-    const detail = String(res.stderr || res.stdout || "").trim().slice(0, 2000);
-    throw new Error(detail ? `dbm lỗi (exit ${res.status}): ${detail}` : `dbm lỗi (exit ${res.status})`);
-  }
-  return String(res.stdout ?? "");
 }
 
 /** Cờ global của CLI phải đứng TRƯỚC subcommand (argparse). */
@@ -153,7 +177,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
         if (args.sshUser) argv.push("--ssh-user", args.sshUser);
         if (args.sshPort !== undefined) argv.push("--ssh-port", String(args.sshPort));
         if (args.sshKey) argv.push("--ssh-key", args.sshKey);
-        const out = runDbm(argv);
+        const out = await runDbm(argv);
         onActivity?.({ type: "db", action: "profile_add", profile: args.name });
         return text(out.trim());
       } catch (e: any) {
@@ -168,7 +192,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
     {},
     async () => {
       try {
-        return text(runDbm(["--json", "profile", "list"]).trim());
+        return text(await runDbm(["--json", "profile", "list"]).trim());
       } catch (e: any) {
         return err(e.message);
       }
@@ -181,7 +205,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
     { name: z.string() },
     async ({ name }) => {
       try {
-        return text(runDbm(["--json", "profile", "show", name]).trim());
+        return text(await runDbm(["--json", "profile", "show", name]).trim());
       } catch (e: any) {
         return err(e.message);
       }
@@ -200,7 +224,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
         if (!confirmRemove) {
           throw new Error("Từ chối xóa profile: cần confirmRemove=true (tương đương xác nhận YES của CLI).");
         }
-        const out = runDbm(["profile", "remove", name, "--yes"]);
+        const out = await runDbm(["profile", "remove", name, "--yes"]);
         onActivity?.({ type: "db", action: "profile_remove", profile: name });
         return text(out.trim());
       } catch (e: any) {
@@ -218,7 +242,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
     },
     async ({ profile, timeoutSecs }) => {
       try {
-        return text(runDbm([...globalFlags(profile, undefined, timeoutSecs), "test"]).trim());
+        return text(await runDbm([...globalFlags(profile, undefined, timeoutSecs), "test"]).trim());
       } catch (e: any) {
         return err(e.message);
       }
@@ -234,7 +258,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
     },
     async ({ profile, timeoutSecs }) => {
       try {
-        return text(runDbm([...globalFlags(profile, undefined, timeoutSecs), "dbs"]).trim());
+        return text(await runDbm([...globalFlags(profile, undefined, timeoutSecs), "dbs"]).trim());
       } catch (e: any) {
         return err(e.message);
       }
@@ -250,7 +274,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
     },
     async ({ profile, timeoutSecs }) => {
       try {
-        return text(runDbm([...globalFlags(profile, undefined, timeoutSecs), "tables"]).trim());
+        return text(await runDbm([...globalFlags(profile, undefined, timeoutSecs), "tables"]).trim());
       } catch (e: any) {
         return err(e.message);
       }
@@ -267,7 +291,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
     },
     async ({ profile, table, timeoutSecs }) => {
       try {
-        return text(runDbm([...globalFlags(profile, undefined, timeoutSecs), "describe", table]).trim());
+        return text(await runDbm([...globalFlags(profile, undefined, timeoutSecs), "describe", table]).trim());
       } catch (e: any) {
         return err(e.message);
       }
@@ -297,7 +321,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
         const argv = [...globalFlags(profile, limit, timeoutSecs), "query", statement];
         if (dryRun) argv.push("--dry-run");
         if (allowWrite === true && confirmWrite === true) argv.push("--write", "--yes");
-        const out = runDbm(argv, timeoutSecs);
+        const out = await runDbm(argv, timeoutSecs);
         onActivity?.({ type: "db", action: "query", profile, write: allowWrite === true && confirmWrite === true });
         return text(out.trim());
       } catch (e: any) {
@@ -321,7 +345,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
       try {
         const argv = [...globalFlags(profile, limit, timeoutSecs), "export", table, "--format", format ?? "csv"];
         if (output) argv.push("--output", output);
-        const out = runDbm(argv, timeoutSecs);
+        const out = await runDbm(argv, timeoutSecs);
         onActivity?.({ type: "db", action: "export", profile, table });
         return text(out.trim());
       } catch (e: any) {

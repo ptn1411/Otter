@@ -608,3 +608,9 @@ export function updateBotPresence(
     WHERE bot_id = ?
   `, [status, now, now, botId]);
 }
+
+export function deleteBot(botId: string, db: DbLike = getDatabase()): boolean {
+  ensureA2aInboxTables(db);
+  const res = db.run(`DELETE FROM a2a_bots WHERE bot_id = ?`, [botId]);
+  return ((res as any)?.changes || 0) > 0;
+}

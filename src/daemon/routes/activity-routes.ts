@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { executeCommand } from "../terminal";
-import { browserBridge } from "../browser-bridge";
+import { browserBridge, cdpBridge } from "../browser-bridge";
 import { getSettings, updateSettings } from "../settings";
 import { getDatabase } from "../db";
 import {
@@ -163,7 +163,7 @@ export async function handleActivityRoutes(
     if (browserAction === "open" && req.method === "POST") {
       try {
         const body: any = await req.json();
-        const res = await browserBridge.execute("open", { url: body.url });
+        const res = await browserBridge.execute("open", { url: body.url, cdpPort: body.cdpPort || body.port, wsEndpoint: body.wsEndpoint });
         handleMcpActivity({ type: "browser_action", action: "open", url: res?.url, title: res?.title });
         return jsonResponse(res || { ok: false });
       } catch (err: any) {
@@ -174,13 +174,17 @@ export async function handleActivityRoutes(
     if (browserAction === "read" && (req.method === "POST" || req.method === "GET")) {
       try {
         let urlPattern = url.searchParams.get("urlPattern") || undefined;
+        let cdpPort: number | undefined;
+        let wsEndpoint: string | undefined;
         if (req.method === "POST") {
           try {
             const body: any = await req.json();
             if (body?.urlPattern) urlPattern = body.urlPattern;
+            if (body?.cdpPort || body?.port) cdpPort = Number(body.cdpPort || body.port);
+            if (body?.wsEndpoint) wsEndpoint = String(body.wsEndpoint);
           } catch {}
         }
-        const res = await browserBridge.execute("read_page", { urlPattern });
+        const res = await browserBridge.execute("read_page", { urlPattern, cdpPort, wsEndpoint });
         if (!res) {
           return errorResponse("Không thể đọc trang (trang đang tải hoặc chưa sẵn sàng)", 500);
         }
@@ -194,7 +198,12 @@ export async function handleActivityRoutes(
     if (browserAction === "click" && req.method === "POST") {
       try {
         const body: any = await req.json();
-        const res = await browserBridge.execute("click", { index: Number(body.index), urlPattern: body.urlPattern });
+        const res = await browserBridge.execute("click", {
+          index: Number(body.index),
+          urlPattern: body.urlPattern,
+          cdpPort: body.cdpPort || body.port,
+          wsEndpoint: body.wsEndpoint
+        });
         handleMcpActivity({ type: "browser_action", action: "click", index: body.index });
         return jsonResponse(res);
       } catch (err: any) {
@@ -205,7 +214,14 @@ export async function handleActivityRoutes(
     if (browserAction === "type" && req.method === "POST") {
       try {
         const body: any = await req.json();
-        const res = await browserBridge.execute("type", { index: Number(body.index), text: body.text, pressEnter: Boolean(body.pressEnter), urlPattern: body.urlPattern });
+        const res = await browserBridge.execute("type", {
+          index: Number(body.index),
+          text: body.text,
+          pressEnter: Boolean(body.pressEnter),
+          urlPattern: body.urlPattern,
+          cdpPort: body.cdpPort || body.port,
+          wsEndpoint: body.wsEndpoint
+        });
         handleMcpActivity({ type: "browser_action", action: "type", index: body.index, text: body.text });
         return jsonResponse(res);
       } catch (err: any) {
@@ -216,7 +232,12 @@ export async function handleActivityRoutes(
     if (browserAction === "select" && req.method === "POST") {
       try {
         const body: any = await req.json();
-        const res = await browserBridge.execute("select", { index: Number(body.index), option: body.option });
+        const res = await browserBridge.execute("select", {
+          index: Number(body.index),
+          option: body.option,
+          cdpPort: body.cdpPort || body.port,
+          wsEndpoint: body.wsEndpoint
+        });
         handleMcpActivity({ type: "browser_action", action: "select", index: body.index, option: body.option });
         return jsonResponse(res);
       } catch (err: any) {
@@ -227,7 +248,12 @@ export async function handleActivityRoutes(
     if (browserAction === "scroll" && req.method === "POST") {
       try {
         const body: any = await req.json();
-        const res = await browserBridge.execute("scroll", { direction: body.direction || "down", amount: body.amount });
+        const res = await browserBridge.execute("scroll", {
+          direction: body.direction || "down",
+          amount: body.amount,
+          cdpPort: body.cdpPort || body.port,
+          wsEndpoint: body.wsEndpoint
+        });
         return jsonResponse(res);
       } catch (err: any) {
         return errorResponse(err.message, 500);
@@ -255,15 +281,6 @@ export async function handleActivityRoutes(
       }
     }
 
-    if (browserAction === "extension/reload" && (req.method === "POST" || req.method === "GET")) {
-      try {
-        const res = await browserBridge.execute("reload_extension");
-        return jsonResponse(res);
-      } catch (err: any) {
-        return errorResponse(err.message, 500);
-      }
-    }
-
     if (browserAction === "engine" && (req.method === "GET" || req.method === "POST")) {
       try {
         let body: any = {};
@@ -278,7 +295,16 @@ export async function handleActivityRoutes(
         if (typeof body.headless === "boolean") toUpdate.cdpHeadless = body.headless;
         if (typeof body.hud === "boolean") toUpdate.cdpHud = body.hud;
         if (typeof body.autoClose === "boolean") toUpdate.cdpAutoClose = body.autoClose;
-        if (typeof body.port === "number") toUpdate.cdpPort = body.port;
+        const reqPort = typeof body.cdpPort === "number" ? body.cdpPort : (typeof body.port === "number" ? body.port : undefined);
+        if (reqPort && reqPort > 0) {
+          toUpdate.cdpPort = reqPort;
+          cdpBridge.setPort(reqPort);
+        }
+        const wsEndpoint = body.wsEndpoint || body.cdpWsEndpoint;
+        if (typeof wsEndpoint === "string") {
+          toUpdate.cdpWsEndpoint = wsEndpoint;
+          cdpBridge.setWsEndpoint(wsEndpoint);
+        }
         if (typeof body.browserPath === "string") toUpdate.browserPath = body.browserPath;
         if (typeof body.userDataDir === "string") toUpdate.userDataDir = body.userDataDir;
         if (Object.keys(toUpdate).length > 0) {
@@ -296,6 +322,8 @@ export async function handleActivityRoutes(
           hud: currentSettings.cdpHud,
           autoClose: currentSettings.cdpAutoClose,
           port: currentSettings.cdpPort,
+          cdpPort: currentSettings.cdpPort,
+          wsEndpoint: currentSettings.cdpWsEndpoint,
           browserPath: currentSettings.browserPath,
           userDataDir: currentSettings.userDataDir,
           ...(benchmarkResult ? { benchmark: benchmarkResult } : {})
@@ -307,7 +335,11 @@ export async function handleActivityRoutes(
 
     if ((browserAction === "close" || browserAction === "browser/close") && (req.method === "POST" || req.method === "GET")) {
       try {
-        const res = await browserBridge.execute("close");
+        let body: any = {};
+        if (req.method === "POST") {
+          try { body = await req.json(); } catch {}
+        }
+        const res = await browserBridge.execute("close", { cdpPort: body?.cdpPort || body?.port, wsEndpoint: body?.wsEndpoint });
         handleMcpActivity({ type: "browser_action", action: "close" });
         return jsonResponse(res);
       } catch (err: any) {
@@ -317,7 +349,12 @@ export async function handleActivityRoutes(
 
     if (browserAction === "tabs/list" && (req.method === "GET" || req.method === "POST")) {
       try {
-        const res = await browserBridge.execute("list_tabs");
+        let body: any = {};
+        if (req.method === "POST") {
+          try { body = await req.json(); } catch {}
+        }
+        const res = await browserBridge.execute("list_tabs", { cdpPort: body?.cdpPort || body?.port, wsEndpoint: body?.wsEndpoint });
+        return jsonResponse(res);
         return jsonResponse(res);
       } catch (err: any) {
         return errorResponse(err.message, 500);
@@ -1105,17 +1142,7 @@ export async function handleActivityRoutes(
     }
   }
 
-  // 11. Extension Reload
-  if (url.pathname === "/api/activity/v1/browser/reload-extension" && req.method === "POST") {
-    try {
-      const res = await browserBridge.execute("reload_extension", {});
-      return jsonResponse({ ok: true, message: res?.message || "Đang nạp lại tiện ích..." });
-    } catch (err: any) {
-      return errorResponse(err.message, 500);
-    }
-  }
-
-  // 12. GPM Automate & GPM Login API Routes
+  // 11. GPM Automate & GPM Login API Routes
   if (url.pathname === "/api/activity/v1/gpm/status" && req.method === "GET") {
     try {
       const health = await getGpmHealth();
@@ -1142,8 +1169,7 @@ export async function handleActivityRoutes(
       const body: any = await req.json();
       if (!body.profileId) return errorResponse("Missing profileId", 400);
       const res = await startGpmProfile(body.profileId, {
-        additionArgs: body.additionArgs,
-        loadOtterExtension: body.loadOtterExtension !== false
+        additionArgs: body.additionArgs
       });
       handleMcpActivity({ type: "gpm_start_profile", profileId: body.profileId, res });
       return jsonResponse(res);

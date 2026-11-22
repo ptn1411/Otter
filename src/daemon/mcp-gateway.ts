@@ -3,7 +3,7 @@
  * 
  * Allows users to configure external MCP servers (HTTP / Streamable HTTP / Stdio)
  * in 'mcp_config.json', aggregating all their tools dynamically into Otter's
- * MCP Server, ChatGPT Web Extension, and OpenAPI endpoints.
+ * MCP Server, ChatGPT Web, and OpenAPI endpoints.
  */
 import * as fs from "node:fs/promises";
 import * as fsSync from "node:fs";

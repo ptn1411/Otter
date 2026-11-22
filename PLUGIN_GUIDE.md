@@ -9,7 +9,7 @@ Tài liệu này hướng dẫn từng bước cách tích hợp **ChatGPT Web**
 Otter vận hành với mô hình song song cực kỳ mạnh mẽ:
 1. **ChatGPT (AI Brain):** Tiếp nhận yêu cầu của người dùng, phân tích mục tiêu và gọi các Tool (Actions / MCP) của Otter.
 2. **Otter Daemon (Port 1993):** Lắng nghe yêu cầu từ ChatGPT qua HTTPS Tunnel (`otter.gpt.io.vn` hoặc Cloudflare Tunnel) và điều phối công việc.
-3. **Otter Chrome Extension:** Bắt sóng WebSocket 24/7 trực tiếp từ Daemon, sử dụng thuật toán nén DOM của Alibaba Page Agent để đọc nội dung trang web mà không gây tràn token.
+3. **Chrome CDP (Chrome DevTools Protocol):** Kết nối trực tiếp tới trình duyệt qua CDP (port 9222 hoặc port GPM 57326), tự động nạp thuật toán nén DOM của Alibaba Page Agent để đọc nội dung trang web siêu tốc 2ms mà không cần cài Extension.
 
 ---
 
@@ -61,14 +61,10 @@ ngrok http 1993
 
 ---
 
-## 4. BƯỚC 3: KÍCH HOẠT ĐIỀU KHIỂN TRÊN TRÌNH DUYỆT
+## 4. BƯỚC 3: KÍCH HOẠT ĐIỀU KHIỂN TRÊN TRÌNH DUYỆT (CHROME CDP)
 
-1. Mở bất kỳ trang web nào bạn muốn điều khiển (ví dụ `google.com`).
-2. Bấm vào biểu tượng **Otter** trên thanh công cụ tiện ích.
-3. Tab sẽ xuất hiện viền sáng ngọc lục bảo và banner:
-   ```text
-   🦦 Otter Active • Sẵn sàng cho ChatGPT Web điều khiển
-   ```
-4. Sang ChatGPT Web, mention `@Otter Assistant` hoặc chat trực tiếp:
+1. Mở bất kỳ trang web nào bạn muốn điều khiển (ví dụ `google.com`) trên Chrome hoặc GPM Browser đã bật remote debugging (CDP).
+2. Otter sẽ tự động nhận diện tab và gắn Page-Agent Core vào trang.
+3. Sang ChatGPT Web, mention `@Otter Assistant` hoặc chat trực tiếp:
    > *"Đọc trang web hiện tại và tìm kiếm từ khóa 'Otter tool use' giúp tôi."*
-5. ChatGPT sẽ tự động gọi `browserReadPage`, phân tích thanh tìm kiếm, gọi `browserType` và trả kết quả cho bạn!
+4. ChatGPT sẽ tự động gọi `browserReadPage`, phân tích thanh tìm kiếm, gọi `browserType` và trả kết quả cho bạn!

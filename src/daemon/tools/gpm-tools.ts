@@ -4,7 +4,7 @@
  * Tools (6):
  * 1. gpm_status: Kiểm tra trạng thái GPM Login (9495) và GPM Automate MCP (19977).
  * 2. gpm_list_profiles: Liệt kê các profile GPM kèm proxy và trạng thái chạy.
- * 3. gpm_start_profile: Khởi động profile GPM kèm cổng CDP và nạp extension Otter.
+ * 3. gpm_start_profile: Khởi động profile GPM kèm cổng CDP.
  * 4. gpm_stop_profile: Đóng profile GPM.
  * 5. gpm_test_xpath: Kiểm tra tính hợp lệ và cấu trúc điều kiện hasElement() của XPath.
  * 6. gpm_generate_script: Sinh kịch bản JSON .NET chuẩn paste-ready cho GPM Automate V3.
@@ -71,17 +71,15 @@ export function registerGpmTools(mcp: McpServer, onActivity?: (event: any) => vo
   // 3. Khởi động profile
   mcp.tool(
     "gpm_start_profile",
-    "Khởi động một profile GPM Login, tự động nạp tiện ích mở rộng Otter và lấy cổng kết nối CDP",
+    "Khởi động một profile GPM Login và lấy cổng/WebSocket kết nối CDP",
     {
       profileId: z.string().describe("ID của profile GPM Login cần mở"),
-      additionArgs: z.string().optional().describe("Tham số bổ sung cho Chromium"),
-      loadOtterExtension: z.boolean().optional().describe("Nạp tiện ích Otter vào trình duyệt (mặc định true)")
+      additionArgs: z.string().optional().describe("Tham số bổ sung cho Chromium")
     },
-    async ({ profileId, additionArgs, loadOtterExtension }) => {
+    async ({ profileId, additionArgs }) => {
       try {
         const res = await startGpmProfile(profileId, {
-          additionArgs,
-          loadOtterExtension: loadOtterExtension !== false
+          additionArgs
         });
         onActivity?.({ type: "gpm_start_profile", profileId, res });
         return text(res);

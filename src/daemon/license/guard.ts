@@ -119,6 +119,6 @@ export function printLicenseLockBanner(supportCode: string): void {
   console.log(`║  Sau khi có License Key, bạn có thể:                            ║`);
   console.log(`║  1. Gọi API: \x1b[36mPOST http://127.0.0.1:1993/api/system/license/activate\x1b[0m\x1b[31m  ║`);
   console.log(`║  2. Hoặc chạy: \x1b[36motter license activate <key>\x1b[0m\x1b[31m                     ║`);
-  console.log(`║  3. Hoặc mở giao diện Chrome Extension để kích hoạt.             ║`);
+  console.log(`║  3. Hoặc mở giao diện Dashboard để kích hoạt.                    ║`);
   console.log(`╚${line}╝\x1b[0m\n`);
 }

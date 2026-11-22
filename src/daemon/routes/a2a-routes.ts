@@ -78,6 +78,7 @@ import {
   getBot,
   registerBot,
   updateBotPresence,
+  deleteBot,
   type A2aMessageType,
   type BotPresenceStatus,
 } from "../a2a-inbox";
@@ -969,6 +970,25 @@ export async function handleA2aRoutes(req: Request, url: URL, db?: DbLike): Prom
         database
       );
       return jsonResponse({ ok: true, bot }, 200, {}, req);
+    } catch (err: any) {
+      return jsonResponse({ ok: false, error: err.message }, 500, {}, req);
+    }
+  }
+
+  // DELETE /api/a2a/bots/:botId or POST /api/a2a/bots/delete
+  if (url.pathname.startsWith("/api/a2a/bots/") && req.method === "DELETE") {
+    const botId = decodeURIComponent(url.pathname.slice("/api/a2a/bots/".length));
+    if (!botId) return jsonResponse({ ok: false, error: "Missing botId" }, 400, {}, req);
+    deleteBot(botId, database);
+    return jsonResponse({ ok: true, deleted: botId }, 200, {}, req);
+  }
+
+  if (url.pathname === "/api/a2a/bots/delete" && req.method === "POST") {
+    try {
+      const body = (await req.json()) as any;
+      if (!body.botId) return jsonResponse({ ok: false, error: "Missing botId" }, 400, {}, req);
+      deleteBot(body.botId, database);
+      return jsonResponse({ ok: true, deleted: body.botId }, 200, {}, req);
     } catch (err: any) {
       return jsonResponse({ ok: false, error: err.message }, 500, {}, req);
     }

@@ -10,12 +10,15 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { PageHeader } from "../components/PageHeader";
 import {
+  apiDelete,
   apiGet,
   apiPost,
   type A2aBotItem,
   type A2aMessageItem,
   type A2aStats,
 } from "../api";
+
+const SYSTEM_BOT_IDS = new Set(["user_pham", "ai_sunny", "ai_antigravity"]);
 
 interface Props {
   busy: string | null;
@@ -37,6 +40,15 @@ export default function A2aCoordinationTab({ busy, act }: Props) {
   const [goal, setGoal] = useState("");
   const [details, setDetails] = useState("");
   const [priority, setPriority] = useState("0");
+
+  // Form tạo Bot mới
+  const [showCreateBotForm, setShowCreateBotForm] = useState(false);
+  const [newBotId, setNewBotId] = useState("");
+  const [newBotName, setNewBotName] = useState("");
+  const [newBotDescription, setNewBotDescription] = useState("");
+  const [newBotCapabilities, setNewBotCapabilities] = useState("");
+  const [newBotPreferredNode, setNewBotPreferredNode] = useState("");
+  const [newBotStatus, setNewBotStatus] = useState<"online" | "busy" | "offline" | "paused">("online");
 
   const loadData = useCallback(async () => {
     const [statsRes, botsRes, msgsRes] = await Promise.all([
@@ -90,6 +102,55 @@ export default function A2aCoordinationTab({ busy, act }: Props) {
     );
   };
 
+  const handleCreateBot = async () => {
+    const trimmedId = newBotId.trim().toLowerCase().replace(/\s+/g, "_");
+    const trimmedName = newBotName.trim();
+    if (!trimmedId || !trimmedName) return;
+
+    await act(
+      "create_a2a_bot",
+      async () => {
+        const caps = newBotCapabilities
+          .split(",")
+          .map((c) => c.trim().toLowerCase())
+          .filter(Boolean);
+
+        const res = await apiPost<{ ok: boolean; bot: A2aBotItem }>("/api/a2a/bots", {
+          botId: trimmedId,
+          name: trimmedName,
+          description: newBotDescription.trim() || undefined,
+          capabilities: caps,
+          preferredNode: newBotPreferredNode.trim() || undefined,
+          status: newBotStatus,
+        });
+
+        if (res.ok) {
+          setNewBotId("");
+          setNewBotName("");
+          setNewBotDescription("");
+          setNewBotCapabilities("");
+          setNewBotPreferredNode("");
+          setNewBotStatus("online");
+          setShowCreateBotForm(false);
+          await loadData();
+        }
+      },
+      `Đã tạo Bot Persona @${trimmedId} thành công!`
+    );
+  };
+
+  const handleDeleteBot = async (botId: string) => {
+    if (!confirm(`Bạn có chắc muốn xóa Bot Persona @${botId} không?`)) return;
+    await act(
+      `delete_bot_${botId}`,
+      async () => {
+        await apiDelete(`/api/a2a/bots/${encodeURIComponent(botId)}`);
+        await loadData();
+      },
+      `Đã xóa Bot Persona @${botId}`
+    );
+  };
+
   const filteredMessages = messages.filter((m) => {
     if (filterStatus !== "all" && m.status !== filterStatus) return false;
     if (filterBot !== "all" && m.recipientId !== filterBot && m.senderId !== filterBot) return false;
@@ -111,10 +172,22 @@ export default function A2aCoordinationTab({ busy, act }: Props) {
               isDisabled={busy !== null}
             />
             <Button
-              label={showDispatchForm ? "Đóng form" : "➕ Giao việc A2A mới"}
+              label={showCreateBotForm ? "Đóng form Bot" : "🤖 Tạo Bot mới"}
+              variant={showCreateBotForm ? "secondary" : "secondary"}
+              size="sm"
+              onClick={() => {
+                setShowCreateBotForm(!showCreateBotForm);
+                if (!showCreateBotForm) setShowDispatchForm(false);
+              }}
+            />
+            <Button
+              label={showDispatchForm ? "Đóng form việc" : "➕ Giao việc A2A"}
               variant="primary"
               size="sm"
-              onClick={() => setShowDispatchForm(!showDispatchForm)}
+              onClick={() => {
+                setShowDispatchForm(!showDispatchForm);
+                if (!showDispatchForm) setShowCreateBotForm(false);
+              }}
             />
           </HStack>
         }
@@ -247,9 +320,121 @@ export default function A2aCoordinationTab({ busy, act }: Props) {
         </Card>
       )}
 
+      {/* Form Tạo Bot mới */}
+      {showCreateBotForm && (
+        <Card padding={5}>
+          <VStack gap={4}>
+            <Heading level={3}>Thêm Bot Persona Mới vào Mạng Lưới A2A</Heading>
+            <HStack gap={3} style={{ flexWrap: "wrap" }}>
+              <VStack gap={1} style={{ flex: "1 1 200px" }}>
+                <TextInput
+                  label="Mã định danh (Bot ID) *"
+                  value={newBotId}
+                  onChange={setNewBotId}
+                  placeholder="Ví dụ: ai_reviewer, bot_telegram..."
+                  isRequired
+                />
+                <Text type="supporting" style={{ fontSize: "11px" }}>
+                  Chữ thường, không dấu, gạch dưới (VD: ai_writer)
+                </Text>
+              </VStack>
+
+              <VStack gap={1} style={{ flex: "1 1 220px" }}>
+                <TextInput
+                  label="Tên hiển thị (Name) *"
+                  value={newBotName}
+                  onChange={setNewBotName}
+                  placeholder="Ví dụ: Code Reviewer, Bot Dịch thuật..."
+                  isRequired
+                />
+              </VStack>
+
+              <VStack gap={1} style={{ flex: "1 1 160px" }}>
+                <TextInput
+                  label="Node ưu tiên (Tùy chọn)"
+                  value={newBotPreferredNode}
+                  onChange={setNewBotPreferredNode}
+                  placeholder="Ví dụ: nam-windows"
+                />
+              </VStack>
+
+              <VStack gap={1} style={{ width: "150px" }}>
+                <Text type="supporting">Trạng thái ban đầu</Text>
+                <select
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: "6px",
+                    border: "1px solid var(--border-color, #444)",
+                    background: "var(--card-bg, #222)",
+                    color: "inherit",
+                  }}
+                  value={newBotStatus}
+                  onChange={(e) => setNewBotStatus(e.target.value as any)}
+                >
+                  <option value="online">Online (Trực tuyến)</option>
+                  <option value="busy">Busy (Đang bận)</option>
+                  <option value="paused">Paused (Tạm dừng)</option>
+                  <option value="offline">Offline (Ngoại tuyến)</option>
+                </select>
+              </VStack>
+            </HStack>
+
+            <VStack gap={1}>
+              <TextInput
+                label="Kỹ năng / Capabilities (cách nhau bởi dấu phẩy)"
+                value={newBotCapabilities}
+                onChange={setNewBotCapabilities}
+                placeholder="Ví dụ: code, review, cdp, media, translation, audit"
+              />
+            </VStack>
+
+            <VStack gap={1}>
+              <Text type="supporting">Mô tả vai trò / Nhiệm vụ của Bot</Text>
+              <textarea
+                style={{
+                  width: "100%",
+                  minHeight: "65px",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  border: "1px solid var(--border-color, #444)",
+                  background: "var(--card-bg, #222)",
+                  color: "inherit",
+                  fontFamily: "inherit",
+                }}
+                value={newBotDescription}
+                onChange={(e) => setNewBotDescription(e.target.value)}
+                placeholder="Mô tả tóm tắt năng lực và phạm vi công việc của bot này..."
+              />
+            </VStack>
+
+            <HStack gap={3} justify="end">
+              <Button label="Hủy" variant="ghost" size="sm" onClick={() => setShowCreateBotForm(false)} />
+              <Button
+                label="Lưu & Kích hoạt Bot"
+                variant="primary"
+                size="sm"
+                onClick={() => void handleCreateBot()}
+                isDisabled={!newBotId.trim() || !newBotName.trim() || busy !== null}
+              />
+            </HStack>
+          </VStack>
+        </Card>
+      )}
+
       {/* Danh sách Bot Personas */}
       <VStack gap={3}>
-        <Heading level={3}>Mạng lưới Bot Persona & Hiện diện ({bots.length})</Heading>
+        <HStack justify="between" align="center">
+          <Heading level={3}>Mạng lưới Bot Persona & Hiện diện ({bots.length})</Heading>
+          <Button
+            label={showCreateBotForm ? "Đóng form Bot" : "➕ Thêm Bot mới"}
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setShowCreateBotForm(!showCreateBotForm);
+              if (!showCreateBotForm) setShowDispatchForm(false);
+            }}
+          />
+        </HStack>
         <HStack gap={3} style={{ flexWrap: "wrap" }}>
           {bots.map((b) => (
             <Card key={b.botId} padding={4} style={{ flex: "1 1 260px" }}>
@@ -267,6 +452,27 @@ export default function A2aCoordinationTab({ busy, act }: Props) {
                   {b.capabilities.map((c) => (
                     <Badge key={c} variant="neutral" label={c} />
                   ))}
+                </HStack>
+                <HStack justify="between" align="center" style={{ marginTop: "4px", paddingTop: "8px", borderTop: "1px solid var(--border-color, rgba(255,255,255,0.06))" }}>
+                  <Button
+                    label="Giao việc"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setRecipientId(b.botId);
+                      setShowDispatchForm(true);
+                      setShowCreateBotForm(false);
+                    }}
+                  />
+                  {!SYSTEM_BOT_IDS.has(b.botId) && (
+                    <Button
+                      label="Xóa"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => void handleDeleteBot(b.botId)}
+                      isDisabled={busy !== null}
+                    />
+                  )}
                 </HStack>
               </VStack>
             </Card>

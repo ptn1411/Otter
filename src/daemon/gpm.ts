@@ -121,7 +121,6 @@ export async function startGpmProfile(
   id: string,
   options?: {
     additionArgs?: string;
-    loadOtterExtension?: boolean;
     skipProxyCheck?: boolean;
     remoteDebuggingPort?: number;
   }
@@ -140,18 +139,7 @@ export async function startGpmProfile(
     query.set("remote_debugging_port", String(options.remoteDebuggingPort));
   }
 
-  let additionArgs = options?.additionArgs || "";
-  if (options?.loadOtterExtension !== false) {
-    const extCandidates = [
-      path.resolve("extension/dist"),
-      ...(process.env.LOCALAPPDATA ? [path.join(process.env.LOCALAPPDATA, "Otter", "extension")] : []),
-    ];
-    const extDist = extCandidates.find((p) => fs.existsSync(path.join(p, "manifest.json")));
-    if (extDist) {
-      const loadArg = `--load-extension="${extDist}"`;
-      additionArgs = additionArgs ? `${additionArgs} ${loadArg}` : loadArg;
-    }
-  }
+  const additionArgs = options?.additionArgs || "";
   if (additionArgs) {
     query.set("addition_args", additionArgs);
   }

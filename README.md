@@ -1,5 +1,5 @@
-# 🦦 Otter — Trợ Lý Ảo Thay Bạn Làm Mọi Việc Nhàm Chán Trên Máy Tính
-### The Friendly AI Assistant That Takes Over Boring Computer Tasks For You
+# 🦦 Otter — ChatGPT làm được việc trên máy của bạn
+### ChatGPT that actually uses your computer
 
 <p align="center">
   <img src="assets/otter_banner.jpg" alt="Otter Banner" width="100%" style="border-radius: 12px; margin-bottom: 12px;">
@@ -8,7 +8,7 @@
 <p align="center">
   <img src="assets/otter_logo.jpg" alt="Otter Logo" width="130" style="border-radius: 50%; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
   <br>
-  <strong>Otter (Loài Rái cá thông minh) — Luôn biết dùng công cụ để giải quyết việc khó</strong>
+  <strong>Nói một câu trong ChatGPT. Otter đọc trang đang mở, bấm chuột, mở file và kiểm tra máy chủ — ngay trên máy bạn.</strong>
   <br>
   <em>🌐 Ngôn ngữ / Language: <a href="#-tiếng-việt">Tiếng Việt</a> • <a href="#-english">English</a></em>
   <br>
@@ -46,13 +46,13 @@
 ## 1. Otter Làm Thay Bạn Những Việc Gì?
 *(Nói bằng ngôn ngữ đời thường — Không dùng từ kỹ thuật khó hiểu)*
 
-Hầu hết mọi người khi dùng ChatGPT đều chỉ nhận được văn bản trả lời, sau đó vẫn phải tự tay copy-paste, tự tải file, tự mở từng trang web, tự bấm chuột và làm hàng trăm thao tác lặp đi lặp lại rất mệt mỏi.
+ChatGPT trả lời bằng chữ. Phần còn lại vẫn là của bạn: copy, mở tab, bấm chuột, gõ lệnh.
 
-**Otter ra đời để làm hết những việc chân tay đó thay bạn:**
+**Otter làm phần đó.** Bạn nói trong ChatGPT. Otter chạy trên máy bạn, đọc trang đang mở, điều khiển trình duyệt và desktop, mở file, rồi báo lại kết quả.
 
-- ⏱️ **Tiết kiệm 3 đến 5 tiếng mỗi ngày:** Bạn chỉ cần nói bằng lời, Otter sẽ tự điều khiển chuột, mở web, ghi chép dữ liệu và báo cáo kết quả hoàn thành cho bạn.
+- ⏱️ **Giao việc bằng một câu:** "Đọc trang này và gạch ý chính." "Kiểm tra máy chủ còn trống không." "Lưu bài này lại."
 - 🌐 **Đọc và tóm tắt bài báo / trang web tự động:** Thấy một bài viết dài hay tài liệu phức tạp? Đừng tốn công đọc hết hay copy-paste từng đoạn! Chỉ cần gửi đường link hoặc bấm icon Otter trên trình duyệt, ChatGPT sẽ tự động đọc lướt qua toàn bộ nội dung và gạch đầu dòng những ý quan trọng nhất.
-- 🎬 **Tự làm video ngắn có thuyết minh tiếng Việt chuẩn:** Chỉ cần đưa kịch bản hoặc một ý tưởng thô, Otter sẽ tự động chọn hình ảnh, dựng hiệu ứng chuyển động và lồng tiếng đọc tiếng Việt truyền cảm chuẩn phát thanh viên.
+- 🎬 **Dựng video ngắn từ kịch bản:** Đưa ý hoặc lời thoại, Otter ghép hình chuyển động và giọng đọc tiếng Việt.
 - 🛡️ **Trực ban máy tính & máy chủ 24/7:** Quản lý website, kiểm tra xem máy chủ có bị quá tải không, còn dung lượng trống không, và tự động dựng rào chắn bảo vệ an toàn mà bạn **không cần phải học thuộc bất kỳ dòng lệnh đen ngòm nào**.
 - 🧠 **Kho lưu trữ bài viết & tri thức cá nhân:** Khi lướt web thấy bài nào hay, chỉ cần bảo *"Otter lưu bài này lại nhé"*. Sau này bạn chỉ cần miêu tả ý thoáng qua là Otter tìm ra ngay bài viết gốc trong chớp mắt.
 - 📁 **Chọn thư mục trên máy tính với 1 cú click:** Khi cần xử lý tài liệu trong một thư mục, Otter mở ngay cửa sổ chọn thư mục quen thuộc của Windows/Mac để bạn bấm chuột chọn, không phải gõ đường dẫn dài dòng.
@@ -81,7 +81,7 @@ Hầu hết mọi người khi dùng ChatGPT đều chỉ nhận được văn b
   ```powershell
   irm https://otter.gpt.io.vn/setup.ps1 | iex
   ```
-  *(Otter sẽ tự động tải phiên bản mới nhất, cấu hình khay hệ thống Tray, nạp Extension và chạy ngầm siêu nhẹ).*
+  *(Otter sẽ tự động tải phiên bản mới nhất, cấu hình khay hệ thống Tray và chạy ngầm siêu nhẹ).*
 
 - **Dành cho macOS / Linux**: Mở Terminal và dán dòng lệnh:
   ```bash
@@ -90,16 +90,15 @@ Hầu hết mọi người khi dùng ChatGPT đều chỉ nhận được văn b
 
 ---
 
-### Bước 2: Bật tiện ích điều khiển trên trình duyệt
-1. Mở Google Chrome hoặc Microsoft Edge, truy cập: `chrome://extensions/`
-2. Bật công tắc **Chế độ dành cho nhà phát triển** (Developer mode) ở góc trên bên phải.
-3. Chọn **Tải tiện ích đã giải nén** (Load unpacked) -> trỏ vào thư mục `%LOCALAPPDATA%\Otter\extension` (hoặc thư mục `extension/dist`).
-4. Ghim biểu tượng con Rái cá (🦦 Otter) lên thanh công cụ của bạn.
+### Bước 2: Kết nối trình duyệt (Chrome 144+ / GPM Login — Không cần cài Extension)
+1. Mở Google Chrome hoặc trình duyệt Antidetect (GPM Login).
+2. Với Google Chrome: Mở `chrome://inspect/#remote-debugging` và bật **ON** *"Allow remote debugging for this browser"*.
+3. Với GPM Login: Khởi động profile kèm cổng CDP hoặc gọi API tự động qua Otter.
 
 ---
 
 ### Bước 3: Bắt đầu sai việc cho AI!
-Mở ChatGPT Web, bấm vào biểu tượng Otter trên trình duyệt và bắt đầu giao việc bằng lời nói tự nhiên.
+Mở ChatGPT Web / Desktop Agent và bắt đầu giao việc bằng lời nói tự nhiên.
 
 ### 🛠️ Dành Cho Lập Trình Viên & Chạy Từ Mã Nguồn (Developer Quickstart)
 Nếu bạn muốn tự clone mã nguồn, chạy thử nghiệm hoặc viết thêm tính năng:
@@ -119,13 +118,11 @@ cp .env.example .env
 bun run dev
 ```
 
-#### 🚀 Động Cơ Điều Khiển Trình Duyệt Kép (Dual-Engine: Extension + CDP 2ms):
-Otter tích hợp sẵn 2 chế độ điều khiển trình duyệt chạy song song:
-- **Chế độ Extension (Phổ thông)**: Hoạt động trên mọi trình duyệt Chromium (Chrome, Brave, Edge). Nạp thư mục `extension/dist` vào `chrome://extensions/`.
-- **Chế độ CDP (Chrome DevTools Protocol - Siêu tốc 2ms)**: Bỏ qua giới hạn Manifest V3, tốc độ phản hồi 2ms.
-  - **Với Google Chrome thường**: Chạy lệnh `chrome.exe --remote-debugging-port=9222`
-  - **Với trình duyệt Antidetect (GPM Login / AdsPower)**: Bật profile với cổng remote debugging `9222` hoặc kết nối qua API `http://127.0.0.1:9495`.
-  - Otter sẽ tự động nhận diện và chuyển đổi thông minh giữa Extension và CDP.
+#### 🚀 Động Cơ Điều Khiển Trình Duyệt Chrome CDP (Siêu tốc 2ms - Không cần Extension):
+Otter điều khiển trình duyệt thuần 100% qua Chrome DevTools Protocol (CDP):
+- **Phản hồi 2ms**: Bỏ qua hoàn toàn giới hạn Manifest V3, tự động nạp Alibaba Page-Agent DOM Core vào các tab.
+- **Với Google Chrome thường**: Chạy lệnh `chrome.exe --remote-debugging-port=9222` hoặc bật Remote Debugging trong `chrome://inspect`.
+- **Với trình duyệt Antidetect (GPM Login / AdsPower)**: Tự động kết nối tới cổng CDP (như port 57326) hoặc WebSocket endpoint qua GPM Login Local API.
 
 ---
 
@@ -174,13 +171,13 @@ Lưu bài viết này vào kho tri thức cá nhân của tôi, tóm tắt ý ch
 ## 1. What Otter Does For You
 *(Explained in plain, everyday English — Zero confusing technical jargon)*
 
-Normally, ChatGPT only replies with text. You still have to spend hours manually copying and pasting, opening links, downloading files, and doing repetitive tasks by hand.
+ChatGPT answers in text. You still copy, open tabs, click, and type the commands.
 
-**Otter is built to handle all that tedious computer grunt work for you:**
+**Otter does that part.** You talk in ChatGPT. Otter runs on your machine, reads the page you have open, drives the browser and desktop, opens files, and reports back.
 
-- ⏱️ **Saves 3 to 5 hours every single day:** Just speak your mind in ChatGPT, and Otter controls your computer to complete the tasks and report back.
+- ⏱️ **Hand off the job in one sentence:** "Read this page and list the key points." "Check if the server is low on disk." "Save this article."
 - 🌐 **Automatic Web Page Reading & Summarization:** Stumbled upon a 50-page document or long article? No need to copy-paste! Otter reads through the entire page and provides clean bullet-point takeaways.
-- 🎬 **AI Video Creation with Studio Voiceover:** Provide a script or rough idea, and Otter generates dynamic visuals and natural voiceover automatically.
+- 🎬 **Short videos from a script:** Give Otter an idea or a voiceover script. It assembles motion and a Vietnamese voice track.
 - 🛡️ **24/7 Server & Computer Watchdog:** Keeps an eye on your servers, alerts you if storage or CPU is overloaded, and shields against bad traffic without you having to memorize terminal commands.
 - 🧠 **Personal Knowledge Base & Smart Bookmarks:** See an interesting article? Say *"Otter, save this for me"*. Later on, you can locate it instantly just by describing the topic in conversational words.
 - 📁 **1-Click Folder Selection:** Need ChatGPT to inspect files inside a local folder? Otter pops up your native Windows / Mac folder picker dialog with one click.
@@ -209,7 +206,7 @@ Normally, ChatGPT only replies with text. You still have to spend hours manually
   ```powershell
   irm https://otter.gpt.io.vn/setup.ps1 | iex
   ```
-  *(Automatically installs Otter background daemon, system tray, extension, and starts automatically).*
+  *(Automatically installs Otter background daemon, system tray, and starts automatically).*
 
 - **On macOS / Linux**: Open Terminal and run:
   ```bash
@@ -218,16 +215,15 @@ Normally, ChatGPT only replies with text. You still have to spend hours manually
 
 ---
 
-### Step 2: Add the Browser Extension
-1. Open Google Chrome or Microsoft Edge and navigate to `chrome://extensions/`
-2. Turn ON **Developer mode** in the upper-right corner.
-3. Click **Load unpacked** and select `%LOCALAPPDATA%\Otter\extension` (or `extension/dist`).
-4. Pin the Otter icon (🦦) to your browser toolbar.
+### Step 2: Connect Your Browser (Chrome 144+ / GPM Login — No Extension Needed)
+1. Open Google Chrome or an antidetect browser (GPM Login).
+2. For regular Chrome: Go to `chrome://inspect/#remote-debugging` and turn ON *"Allow remote debugging for this browser"*.
+3. For GPM Login: Start your profile with remote debugging enabled. Otter connects automatically via CDP.
 
 ---
 
 ### Step 3: Talk to ChatGPT and delegate tasks!
-Open ChatGPT Web, click the Otter icon on the page you wish to inspect, and command AI naturally.
+Open ChatGPT Web / Desktop Agent and command AI naturally.
 
 ### 🛠️ Developer Quickstart & Running From Source
 If you want to clone the repo, develop locally, or add custom tools:
@@ -247,12 +243,11 @@ cp .env.example .env
 bun run dev
 ```
 
-#### 🚀 Dual-Engine Browser Automation (CDP Auto-Core + Optional Extension):
-- **Default Chrome Mode (Chrome 144+, Recommended — No Extension Needed)**: Control your existing logged-in Chrome (`Default` profile with Facebook/ChatGPT/etc. already signed in):
+#### 🚀 Native Chrome CDP Automation (No Extension Needed):
+- **Default Chrome Mode (Chrome 144+, Recommended)**: Control your existing logged-in Chrome (`Default` profile with Facebook/ChatGPT/etc. already signed in):
   1. Open `chrome://inspect/#remote-debugging` in your regular Chrome and turn **ON** *"Allow remote debugging for this browser"*.
   2. Click **Allow** once when Otter connects. Otter reads `DevToolsActivePort`, reuses a single persistent browser WebSocket (`flatten: true`), and auto-preloads `window.__otterCore` into every tab.
-- **Isolated CDP Mode (Port 9222 / GPM Login)**: Automatically falls back to `~/.otter/cdp-profile` (`--remote-debugging-port=9222`) or antidetect browsers (GPM Login, AdsPower, MoreLogin) with 2ms latency.
-- **Extension Mode (Optional)**: Runs on Chrome/Brave/Edge via `extension/dist` if you want the floating ChatGPT HUD.
+- **Custom CDP Mode (Port 9222 / GPM Login / Custom wsEndpoint)**: Automatically connects to `~/.otter/cdp-profile` (`--remote-debugging-port=9222`) or antidetect browsers (GPM Login, AdsPower) with 2ms latency.
 
 ---
 

@@ -109,9 +109,9 @@ Khi người dùng đưa ra một yêu cầu, AI Agent nên tuân theo các kị
 
 ## 3. Cách Kết Nối Dành Cho Người Dùng & Các Client AI
 
-### 1. Kết nối với ChatGPT (Web / Chrome Extension):
+### 1. Kết nối với ChatGPT (Web / Custom GPT Action):
 - Server public tunnel mẫu: `https://your-domain.trycloudflare.com/mcp` (hoặc URL tunnel của bạn)
-- Hoặc kết nối qua tiện ích mở rộng Chrome trong thư mục `extension/`.
+- Hoặc kết nối trực tiếp qua Claude Desktop / Cursor / Antigravity IDE.
 
 ### 2. Kết nối với Claude Desktop (`claude_desktop_config.json`):
 ```json
@@ -147,7 +147,7 @@ Thêm server vào `~/.gemini/antigravity/mcp_config.json` hoặc `~/.gemini/conf
 
 ## 4. Các Nhóm Công Cụ Bổ Sung (từ 2026-10-30/31, chưa có trong bảng 28 tool gốc)
 
-Các tool dưới đây đã đăng ký trong `src/daemon/mcp.ts` nên MCP client thấy qua `tools/list` tự động. Riêng ChatGPT Web biết tới chúng qua prompt MCP `otter_agent_workflow` (`src/daemon/tools/prompt.ts`, nhóm 9–15) và qua thẻ Quản Lý Tổng của extension.
+Các tool dưới đây đã đăng ký trong `src/daemon/mcp.ts` nên MCP client thấy qua `tools/list` tự động. Riêng ChatGPT Web biết tới chúng qua prompt MCP `otter_agent_workflow` (`src/daemon/tools/prompt.ts`, nhóm 9–15) và qua Dashboard Quản Lý.
 
 ### Nhóm A: Vòng lặp code liên tục theo plan (13 tool)
 | Tên Tool | Mô tả |
@@ -230,7 +230,7 @@ Fleet chỉ chạy trên mạng riêng (Tailscale/SSH relay), token không bao g
 | `chrome_list_profiles` | Liệt kê profile Chrome trên máy này từ Local State (thư mục Default/Profile N, tên hiển thị, đường dẫn) |
 | `chrome_open_profile` | Mở Chrome với đúng profile (tên thư mục, tên hiển thị duy nhất, hoặc đường dẫn trong user-data-dir), mặc định mở https://chatgpt.com; spawn detached, không kill Chrome đang chạy, chỉ nhận URL http(s), máy headless không DISPLAY thì báo lỗi rõ. Có `browserPath` thì mở đúng file trình duyệt user cung cấp (ví dụ GPM), profile truyền thẳng thành --profile-directory, không tra Chrome Local State |
 
-Hub KHÔNG mở Chrome hộ worker: luồng B2 là dispatch → ChatGPT của worker gọi `chrome_open_profile` trên máy worker → tab ChatGPT của worker mở ra, extension nối về daemon worker → worker chạy loop. Nút "Mở Chrome theo profile" trong tab Management cũng gọi daemon đang chọn qua `POST /api/chrome/open`.
+Hub KHÔNG mở Chrome hộ worker: luồng B2 là dispatch → ChatGPT của worker gọi `chrome_open_profile` trên máy worker → tab ChatGPT của worker mở ra, CDP kết nối về daemon worker → worker chạy loop. Nút "Mở Chrome theo profile" trong tab Management cũng gọi daemon đang chọn qua `POST /api/chrome/open`.
 
 ### Nhóm J: Page Loop — vòng lặp trên trang ChatGPT (10 tool, plan nâng cấp từ codex-web)
 | Tên Tool | Mô tả |
@@ -240,7 +240,7 @@ Hub KHÔNG mở Chrome hộ worker: luồng B2 là dispatch → ChatGPT của wo
 | `page_loop_status`, `page_loop_list` | Trạng thái phiên (lượt, checkpoint, receipt, budget còn lại; không trả token thật) / danh sách phiên + lease |
 | `page_loop_confirm_sent`, `page_loop_prepare_next` | Zero-risk only: xác nhận user đã gửi tay / chuẩn bị prompt tiếp theo không enqueue |
 | `page_loop_lease_list`, `page_loop_lease_heartbeat` | Lease đang chạy/stale (tối đa 5/daemon, stale sau 120s không heartbeat) / cập nhật heartbeat |
-| `doctor_run` | Doctor end-to-end: DB, phiên đang chạy, outbox, lease, tab extension, Chrome/GPM path; không trả secret/token/nội dung hội thoại |
+| `doctor_run` | Doctor end-to-end: DB, phiên đang chạy, outbox, lease, tab Chrome CDP, Chrome/GPM path; không trả secret/token/nội dung hội thoại |
 
 Page-loop: trang chỉ cảm biến + bấm nút, daemon quyết định. Lượt gắn bằng data-turn-id (không dùng chỉ số hiển thị), settle = hết generate 5s + DOM yên 2s + không MCP activity 5s, tool-paused không tính là settled. Marker: OTTER-DONE (xong task/phiên), OTTER-CHECKPOINT (compaction epoch mới). Token theo lượt chỉ lưu hash trong DB, không lưu token thật, fleet không mang token sang worker. Selector turn CHƯA xác minh trên trang thật có đăng nhập — xem docs/plans/2026-10-31-chatgpt-page-loop-dom-notes.md khi Phase 0 làm xong (hiện chưa có file này, vì lần code này không có tab thật).
 

@@ -28,15 +28,15 @@ Dự án này sử dụng Knowledge Graph của `codebase-memory-mcp` (Project i
 
 ## Kiến trúc Tổng quan Dự án (Otter)
 - **Runtime**: Bun + TypeScript (Port 1993)
-- **Mục đích**: Local MCP Server Daemon kết nối ChatGPT Web / Desktop Agent với hệ điều hành (Windows UI Automation, Terminal, Browser Extension, SQLite Storage, Video Creation Skill).
+- **Mục đích**: Local MCP Server Daemon kết nối ChatGPT Web / Desktop Agent với hệ điều hành (Windows UI Automation, Terminal, Chrome CDP Native Automation, SQLite Storage, Video Creation Skill).
 - **Core modules**:
   - `src/daemon/index.ts`: Entry point HTTP & WebSocket server.
   - `src/daemon/mcp.ts`: Xử lý giao thức Model Context Protocol (MCP) và đăng ký công cụ.
   - `src/daemon/cbm.ts`: Cầu nối tích hợp trực tiếp với binary `codebase-memory-mcp` cho AI client.
   - `src/daemon/desktop.ts`: Điều khiển chuột, bàn phím và giao diện ứng dụng desktop (CUA).
   - `src/daemon/terminal.ts`: Quản lý terminal giả lập (PTY).
-  - `src/daemon/browser-bridge.ts`: Cầu nối điều khiển trình duyệt qua Chrome Extension.
-  - `extension/`: Chrome Extension kết nối ChatGPT Web với local daemon.
+  - `src/daemon/browser-bridge.ts`: Cầu nối điều khiển trình duyệt qua Chrome CDP.
+  - `src/daemon/cdp-bridge.ts`: Điều khiển Chrome thuần 100% qua CDP, tự động gắn Page-Agent Core vào các tab mà không cần Extension.
   - `.agents/skills/`: Kho lưu trữ kỹ năng chuyên biệt (Remotion Video Creator, Video Shotcraft, Motion, GSAP).
 
 ---
@@ -63,6 +63,5 @@ Mỗi khi tạo mới hoặc sửa đổi bất kỳ công cụ nào trong hệ 
 5. **Quyền truy cập qua Tunnel (`isPublicPath` trong `src/daemon/index.ts`)**:
    - Đảm bảo các route schema (`/openapi.json`), khám phá (`/api/mcp/servers`), và dashboard (`/dashboard`) nằm trong danh sách `isPublicPath` để không bị chặn bởi lỗi `401 Unauthorized` khi client truy cập từ domain ngoài (Cloudflare Tunnel).
 
-6. **Biên dịch & Khởi động lại**:
-   - Nếu tool có logic phía Chrome Extension (`extension/src/`): chạy `bun run build:extension`.
+6. **Khởi động lại Daemon**:
    - Khởi động lại Otter Daemon (`bun src/daemon/index.ts`) để nạp toàn bộ cấu hình mới.

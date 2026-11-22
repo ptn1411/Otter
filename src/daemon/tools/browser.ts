@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { browserBridge } from "../browser-bridge";
+import { browserBridge, cdpBridge } from "../browser-bridge";
 import { getSettings, updateSettings } from "../settings";
 import { getDatabase } from "../db";
 import { getOrCreateConversation, recordMessage, getMessengerListenerStatus } from "../fb-sales";
@@ -10,11 +10,13 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
   mcp.tool(
     "browser_open",
     {
-      url: z.string().describe("Địa chỉ URL trang web cần mở (VD: 'https://google.com')")
+      url: z.string().describe("Địa chỉ URL trang web cần mở (VD: 'https://google.com')"),
+      cdpPort: z.number().optional().describe("Cổng Chrome DevTools Protocol (CDP) tùy chỉnh (VD: 57326 cho GPM)"),
+      wsEndpoint: z.string().optional().describe("WebSocket CDP endpoint tùy chỉnh (VD: 'ws://127.0.0.1:57326/devtools/browser/...')")
     },
-    async ({ url }) => {
+    async ({ url, cdpPort, wsEndpoint }) => {
       try {
-        const res = await browserBridge.execute("open", { url });
+        const res = await browserBridge.execute("open", { url, cdpPort, wsEndpoint });
         onActivity?.({
           type: "browser_action",
           action: "open",
@@ -40,11 +42,13 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
   mcp.tool(
     "browser_read_page",
     {
-      urlPattern: z.string().optional().describe("Bộ lọc tên miền URL của tab cần đọc (ví dụ: 'facebook.com', 'youtube.com')")
+      urlPattern: z.string().optional().describe("Bộ lọc tên miền URL của tab cần đọc (ví dụ: 'facebook.com', 'youtube.com')"),
+      cdpPort: z.number().optional().describe("Cổng CDP tùy chỉnh (VD: 57326 cho GPM)"),
+      wsEndpoint: z.string().optional().describe("WebSocket CDP endpoint tùy chỉnh")
     },
-    async ({ urlPattern }) => {
+    async ({ urlPattern, cdpPort, wsEndpoint }) => {
       try {
-        const res = await browserBridge.execute("read_page", { urlPattern });
+        const res = await browserBridge.execute("read_page", { urlPattern, cdpPort, wsEndpoint });
         onActivity?.({
           type: "browser_action",
           action: "read_page",
@@ -96,11 +100,13 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
     "browser_click",
     {
       index: z.number().describe("Chỉ số phần tử [index] cần click (lấy từ kết quả 'browser_read_page')"),
-      urlPattern: z.string().optional().describe("Bộ lọc tên miền URL của tab cần click (ví dụ: 'facebook.com')")
+      urlPattern: z.string().optional().describe("Bộ lọc tên miền URL của tab cần click (ví dụ: 'facebook.com')"),
+      cdpPort: z.number().optional().describe("Cổng CDP tùy chỉnh (VD: 57326 cho GPM)"),
+      wsEndpoint: z.string().optional().describe("WebSocket CDP endpoint tùy chỉnh")
     },
-    async ({ index, urlPattern }) => {
+    async ({ index, urlPattern, cdpPort, wsEndpoint }) => {
       try {
-        const res = await browserBridge.execute("click", { index, urlPattern });
+        const res = await browserBridge.execute("click", { index, urlPattern, cdpPort, wsEndpoint });
         onActivity?.({
           type: "browser_action",
           action: "click",
@@ -128,11 +134,13 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
       index: z.number().describe("Chỉ số ô nhập liệu [index] cần gõ chữ"),
       text: z.string().describe("Nội dung văn bản cần nhập"),
       pressEnter: z.boolean().optional().describe("Có tự động nhấn phím Enter sau khi gõ không (mặc định: false)"),
-      urlPattern: z.string().optional().describe("Bộ lọc tên miền URL của tab cần gõ chữ (ví dụ: 'facebook.com')")
+      urlPattern: z.string().optional().describe("Bộ lọc tên miền URL của tab cần gõ chữ (ví dụ: 'facebook.com')"),
+      cdpPort: z.number().optional().describe("Cổng CDP tùy chỉnh (VD: 57326 cho GPM)"),
+      wsEndpoint: z.string().optional().describe("WebSocket CDP endpoint tùy chỉnh")
     },
-    async ({ index, text, pressEnter, urlPattern }) => {
+    async ({ index, text, pressEnter, urlPattern, cdpPort, wsEndpoint }) => {
       try {
-        const res = await browserBridge.execute("type", { index, text, pressEnter, urlPattern });
+        const res = await browserBridge.execute("type", { index, text, pressEnter, urlPattern, cdpPort, wsEndpoint });
 
         // Tự động ghi lại tin nhắn trả lời của bot/AI vào SQLite
         try {
@@ -258,7 +266,7 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
         return {
           content: [{
             type: "text",
-            text: ok ? "✅ Đã tự động gửi thông điệp vào ô chat ChatGPT Web thành công!" : "Lỗi: Cả Extension lẫn CDP đều chưa sẵn sàng để nhận thông điệp (cần mở ChatGPT Web trong Chrome CDP hoặc bật Extension)."
+            text: ok ? "✅ Đã tự động gửi thông điệp vào ô chat ChatGPT Web thành công!" : "Lỗi: Trình duyệt Chrome CDP chưa mở hoặc không tìm thấy tab ChatGPT Web đang chạy."
           }]
         };
       } catch (err: any) {
@@ -273,10 +281,13 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
   // Tool: Liệt kê danh sách các tab đang mở
   mcp.tool(
     "browser_list_tabs",
-    {},
-    async () => {
+    {
+      cdpPort: z.number().optional().describe("Cổng CDP tùy chỉnh (VD: 57326 cho GPM)"),
+      wsEndpoint: z.string().optional().describe("WebSocket CDP endpoint tùy chỉnh")
+    },
+    async ({ cdpPort, wsEndpoint }) => {
       try {
-        const res = await browserBridge.execute("list_tabs");
+        const res = await browserBridge.execute("list_tabs", { cdpPort, wsEndpoint });
         let listText = (res.tabs || []).map((t: any) =>
           `- [ID: ${t.id}] "${t.title}" (${t.url})${t.isControlled ? " 🎯 [Đang điều khiển]" : ""}${t.active ? " 👁️ [Đang xem]" : ""}`
         ).join("\n");
@@ -343,35 +354,16 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
     }
   );
 
-  // Tool: Nạp lại tiện ích mở rộng Otter (Chrome Extension)
-  mcp.tool(
-    "browser_reload_extension",
-    {},
-    async () => {
-      try {
-        const res = await browserBridge.execute("reload_extension", {});
-        return {
-          content: [{
-            type: "text",
-            text: `✅ ${res.message || "Đang nạp lại tiện ích mở rộng Otter..."}`
-          }]
-        };
-      } catch (err: any) {
-        return {
-          content: [{ type: "text", text: `Lỗi nạp lại extension: ${err.message}` }],
-          isError: true
-        };
-      }
-    }
-  );
-
   // Tool: Đóng toàn bộ trình duyệt Chrome CDP để giải phóng RAM và CPU
   mcp.tool(
     "browser_close",
-    {},
-    async () => {
+    {
+      cdpPort: z.number().optional().describe("Cổng CDP tùy chỉnh (VD: 57326 cho GPM)"),
+      wsEndpoint: z.string().optional().describe("WebSocket CDP endpoint tùy chỉnh")
+    },
+    async ({ cdpPort, wsEndpoint }) => {
       try {
-        const res = await browserBridge.execute("close");
+        const res = await browserBridge.execute("close", { cdpPort, wsEndpoint });
         return {
           content: [{
             type: "text",
@@ -387,22 +379,32 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
     }
   );
 
-  // Tool: Quản lý & đo lường trạng thái 2 động cơ trình duyệt (CDP chính vs Extension dự phòng)
+  // Tool: Quản lý & kiểm tra trạng thái động cơ Chrome CDP
   mcp.tool(
     "browser_engine_status",
     {
-      mode: z.enum(["auto", "extension", "cdp"]).optional().describe("Chuyển đổi chế độ động cơ: 'cdp' (mặc định — chỉ CDP, tự mở Chrome CDP khi cần), 'auto' (ưu tiên CDP, fallback Extension), 'extension' (chỉ dùng Extension)"),
+      mode: z.enum(["cdp"]).optional().describe("Chế độ động cơ trình duyệt: 'cdp' (Chrome DevTools Protocol mặc định)"),
+      cdpPort: z.number().optional().describe("Cổng Chrome DevTools Protocol (CDP) tùy chỉnh (VD: 57326 cho GPM Login/Automate, mặc định: 9222)"),
+      wsEndpoint: z.string().optional().describe("Địa chỉ WebSocket CDP tùy chỉnh do GPM hoặc Chrome cấp (VD: 'ws://127.0.0.1:57326/devtools/browser/...')"),
       headless: z.boolean().optional().describe("Bật/tắt chế độ chạy ngầm Chrome (headless) không hiện cửa sổ"),
       hud: z.boolean().optional().describe("Bật/tắt thanh HUD điều khiển và viền xanh trên trang web"),
       autoClose: z.boolean().optional().describe("Bật/tắt tự động đóng Chrome sau 60s không có tác vụ duyệt web (mặc định: true)"),
-      benchmark: z.boolean().optional().describe("Có chạy đo đạc so sánh tốc độ phản hồi (latency) giữa 2 động cơ không (mặc định: false)")
+      benchmark: z.boolean().optional().describe("Có chạy đo đạc tốc độ phản hồi (latency) của động cơ CDP không (mặc định: false)")
     },
-    async ({ mode, headless, hud, autoClose, benchmark }) => {
+    async ({ mode, cdpPort, wsEndpoint, headless, hud, autoClose, benchmark }) => {
       try {
         const toUpdate: any = {};
         if (mode) {
           browserBridge.setEngineMode(mode);
           toUpdate.browserEngine = mode;
+        }
+        if (typeof cdpPort === "number" && cdpPort > 0) {
+          toUpdate.cdpPort = cdpPort;
+          cdpBridge.setPort(cdpPort);
+        }
+        if (typeof wsEndpoint === "string") {
+          toUpdate.cdpWsEndpoint = wsEndpoint;
+          cdpBridge.setWsEndpoint(wsEndpoint);
         }
         if (typeof headless === "boolean") toUpdate.cdpHeadless = headless;
         if (typeof hud === "boolean") toUpdate.cdpHud = hud;
@@ -414,24 +416,20 @@ export function registerBrowserTools(mcp: McpServer, onActivity?: (event: any) =
         const status = await browserBridge.getStatus();
         const settings = getSettings();
         let report = [
-          `⚙️ TRẠNG THÁI ĐỘNG CƠ ĐIỀU KHIỂN TRÌNH DUYỆT (DUAL-ENGINE):`,
-          `- Chế độ cấu hình (Mode): ${status.mode.toUpperCase()}`,
-          `- Động cơ đang hoạt động (Active): ${status.activeEngine.toUpperCase()}`,
+          `⚙️ TRẠNG THÁI ĐỘNG CƠ ĐIỀU KHIỂN TRÌNH DUYỆT (CHROME CDP):`,
+          `- Chế độ (Mode): ${status.mode.toUpperCase()} (100% Native CDP)`,
+          `- Trạng thái (Active): ${status.activeEngine === "cdp" ? "✅ ĐANG HOẠT ĐỘNG" : "❌ CHƯA KẾT NỐI"}`,
+          `- Khả dụng: ${status.cdp.available ? "✅ Sẵn sàng" : "❌ Cổng chưa mở"}`,
+          `- Cổng (Port): ${status.cdp.port}`,
+          `- WebSocket Endpoint: ${status.cdp.wsEndpoint || "(mặc định: http://127.0.0.1:" + status.cdp.port + ")"}`,
           `- Chạy ngầm (Headless): ${settings.cdpHeadless ? "✅ Bật (Ẩn cửa sổ)" : "❌ Tắt (Hiện cửa sổ)"}`,
           `- Thanh HUD & Viền xanh: ${settings.cdpHud ? "✅ Bật" : "❌ Tắt"}`,
           `- Tự động đóng khi rảnh (Auto Close): ${settings.cdpAutoClose ? "✅ Bật (sau 60s idle)" : "❌ Tắt"}`,
-          `\n1. Động cơ Chrome Extension:`,
-          `   + Kết nối: ${status.extension.connected ? "✅ Đang kết nối" : "❌ Chưa kết nối"}`,
-          `   + Số socket mở: ${status.extension.socketsCount}`,
-          `\n2. Động cơ Chrome DevTools Protocol (CDP):`,
-          `   + Khả dụng: ${status.cdp.available ? "✅ Đang sẵn sàng" : "❌ Chưa mở"}`,
-          `   + Cổng (Port): ${status.cdp.port}`,
         ];
 
         if (benchmark) {
-          report.push(`\n📊 KẾT QUẢ ĐO ĐẠC SO SÁNH TỐC ĐỘ (BENCHMARK):`);
+          report.push(`\n📊 KẾT QUẢ ĐO ĐẠC TỐC ĐỘ PHẢN HỒI CDP (BENCHMARK):`);
           const bench = await browserBridge.benchmark();
-          report.push(`   + Độ trễ Extension: ${bench.extension.latencyMs >= 0 ? bench.extension.latencyMs + " ms" : "Không khả dụng"}`);
           report.push(`   + Độ trễ CDP: ${bench.cdp.latencyMs >= 0 ? bench.cdp.latencyMs + " ms" : "Không khả dụng"}`);
           report.push(`   + Đánh giá: ${bench.recommendation}`);
         }

@@ -165,7 +165,7 @@ export function registerPageLoopTools(mcp: McpServer, onActivity?: (event: any) 
 
   mcp.tool(
     "doctor_run",
-    "Chạy doctor end-to-end: DB, phiên đang chạy, outbox, lease, tab extension, Chrome/GPM path. Không trả secret/token/nội dung hội thoại.",
+    "Chạy doctor end-to-end: DB, phiên đang chạy, outbox, lease, tab Chrome CDP, Chrome/GPM path. Không trả secret/token/nội dung hội thoại.",
     {},
     async () => {
       try {

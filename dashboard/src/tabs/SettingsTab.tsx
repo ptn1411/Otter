@@ -24,7 +24,7 @@ export default function SettingsTab({ busy, act }: Props) {
   const [, setSettings] = useState<OtterSettings | null>(null);
 
   // Form states
-  const [browserEngine, setBrowserEngine] = useState<"cdp" | "auto" | "extension">("cdp");
+  const [browserEngine, setBrowserEngine] = useState<"cdp">("cdp");
   const [cdpHeadless, setCdpHeadless] = useState<boolean>(false);
   const [cdpHud, setCdpHud] = useState<boolean>(true);
   const [cdpAutoClose, setCdpAutoClose] = useState<boolean>(true);
@@ -141,10 +141,8 @@ export default function SettingsTab({ busy, act }: Props) {
 
             <VStack gap={1.5}>
               <Text weight="medium">Chế độ Engine (OTTER_BROWSER_ENGINE)</Text>
-              <SegmentedControl label="Engine" value={browserEngine} onChange={(v) => setBrowserEngine(v as any)}>
-                <SegmentedControlItem value="cdp" label="CDP (Khuyên dùng)" />
-                <SegmentedControlItem value="auto" label="Auto" />
-                <SegmentedControlItem value="extension" label="Extension" />
+              <SegmentedControl label="Engine" value="cdp" onChange={() => {}}>
+                <SegmentedControlItem value="cdp" label="CDP (Thuần 100%)" />
               </SegmentedControl>
             </VStack>
 

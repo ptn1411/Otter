@@ -189,11 +189,12 @@ export interface CustomCommandItem {
 }
 
 export interface OtterSettings {
-  browserEngine: "cdp" | "auto" | "extension";
+  browserEngine: "cdp";
   cdpHeadless: boolean;
   cdpHud: boolean;
   cdpAutoClose: boolean;
   cdpPort: number;
+  cdpWsEndpoint?: string;
   browserPath: string;
   userDataDir: string;
   fullAccess: boolean;
@@ -205,18 +206,18 @@ export interface OtterSettings {
 }
 
 export interface BrowserEngineInfo {
-  mode: "cdp" | "auto" | "extension";
-  activeEngine?: "extension" | "cdp" | "none";
-  extension?: { connected: boolean; socketsCount: number };
-  cdp?: { available: boolean; port: number };
+  mode: "cdp";
+  activeEngine?: "cdp" | "none";
+  cdp?: { available: boolean; port: number; wsEndpoint?: string };
   headless?: boolean;
   hud?: boolean;
   autoClose?: boolean;
   port?: number;
+  cdpPort?: number;
+  wsEndpoint?: string;
   browserPath?: string;
   userDataDir?: string;
   benchmark?: {
-    extension?: { latencyMs: number };
     cdp?: { latencyMs: number };
     recommendation?: string;
   };

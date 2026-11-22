@@ -29,6 +29,7 @@ export default function BrowserTab({ busy, act }: Props) {
   const [hud, setHud] = useState<boolean>(true);
   const [autoClose, setAutoClose] = useState<boolean>(true);
   const [cdpPort, setCdpPort] = useState<string>("9222");
+  const [wsEndpoint, setWsEndpoint] = useState<string>("");
   const [benchmarkText, setBenchmarkText] = useState<string | null>(null);
   const [chromeProfiles, setChromeProfiles] = useState<ChromeProfileItem[]>([]);
   const [customBrowserPath, setCustomBrowserPath] = useState("");
@@ -47,6 +48,7 @@ export default function BrowserTab({ busy, act }: Props) {
       if (typeof eng.hud === "boolean") setHud(eng.hud);
       if (typeof eng.autoClose === "boolean") setAutoClose(eng.autoClose);
       if (eng.port) setCdpPort(String(eng.port));
+      if (eng.wsEndpoint) setWsEndpoint(eng.wsEndpoint);
     }
     if (prof) setChromeProfiles(prof.profiles || []);
   }, []);
@@ -59,7 +61,7 @@ export default function BrowserTab({ busy, act }: Props) {
     <VStack gap={6}>
       <PageHeader
         title="Trình duyệt & CDP"
-        description="Quản lý động cơ điều khiển trình duyệt (CDP mặc định / Extension phụ) và mở nhanh Chrome Profiles."
+        description="Quản lý động cơ điều khiển trình duyệt qua Chrome CDP và mở nhanh Chrome Profiles."
         actions={
           <HStack gap={2}>
             <Button
@@ -109,33 +111,19 @@ export default function BrowserTab({ busy, act }: Props) {
         }
       />
 
-      {/* Dual-Engine Control */}
+      {/* CDP Engine Control */}
       <Grid columns={{ minWidth: 300, max: 2 }} gap={4} align="start">
         <Card padding={4}>
           <VStack gap={3}>
             <Text weight="semibold">Trạng thái kết nối</Text>
             <List hasDividers edge="bleed">
               <ListItem
-                label="Chrome CDP (Engine chính)"
+                label="Chrome CDP"
                 description={<Text type="supporting">{`Cổng ${engine?.cdp?.port || 9222}`}</Text>}
                 endContent={
                   <Badge
                     variant={engine?.cdp?.available ? "success" : "warning"}
                     label={engine?.cdp?.available ? "Sẵn sàng" : "Chưa mở"}
-                  />
-                }
-              />
-              <ListItem
-                label="Chrome Extension (Tùy chọn phụ)"
-                description={
-                  <Text type="supporting">
-                    {`${engine?.extension?.socketsCount || 0} tab/socket đang nối`}
-                  </Text>
-                }
-                endContent={
-                  <Badge
-                    variant={engine?.extension?.connected ? "success" : "neutral"}
-                    label={engine?.extension?.connected ? "Đã kết nối" : "Chưa kết nối"}
                   />
                 }
               />
@@ -174,14 +162,10 @@ export default function BrowserTab({ busy, act }: Props) {
                     );
                     const b = data?.benchmark;
                     if (b) {
-                      const extMs =
-                        b.extension && b.extension.latencyMs >= 0
-                          ? `${b.extension.latencyMs}ms`
-                          : "N/A";
                       const cdpMs =
                         b.cdp && b.cdp.latencyMs >= 0 ? `${b.cdp.latencyMs}ms` : "N/A";
                       setBenchmarkText(
-                        `CDP: ${cdpMs} | Extension: ${extMs}${b.recommendation ? ` — ${b.recommendation}` : ""}`
+                        `Độ trễ phản hồi CDP: ${cdpMs}${b.recommendation ? ` — ${b.recommendation}` : ""}`
                       );
                     }
                   })
@@ -198,14 +182,12 @@ export default function BrowserTab({ busy, act }: Props) {
 
         <Card padding={4}>
           <VStack gap={3}>
-            <Text weight="semibold">Chế độ ưu tiên Engine</Text>
+            <Text weight="semibold">Động cơ điều khiển: Chrome CDP</Text>
             <Text type="supporting">
-              CDP chạy độc lập không cần tiện ích Chrome. Chế độ Auto ưu tiên CDP trước rồi dự phòng Extension.
+              Otter điều khiển trình duyệt 100% độc lập qua Chrome DevTools Protocol (CDP), không cần cài đặt tiện ích mở rộng.
             </Text>
-            <SegmentedControl label="Chế độ engine" value={engineMode} onChange={setEngineMode}>
-              <SegmentedControlItem value="cdp" label="CDP (Mặc định)" />
-              <SegmentedControlItem value="auto" label="Auto" />
-              <SegmentedControlItem value="extension" label="Extension" />
+            <SegmentedControl label="Chế độ engine" value="cdp" onChange={() => {}}>
+              <SegmentedControlItem value="cdp" label="CDP (Thuần 100%)" />
             </SegmentedControl>
 
             <Divider />
@@ -258,7 +240,18 @@ export default function BrowserTab({ busy, act }: Props) {
                   isLabelHidden
                   value={cdpPort}
                   onChange={setCdpPort}
-                  placeholder="9222"
+                  placeholder="9222 (VD GPM: 57326)"
+                />
+              </HStack>
+
+              <HStack gap={2} align="center">
+                <Text style={{ minWidth: 120 }}>WebSocket CDP:</Text>
+                <TextInput
+                  label="WebSocket Endpoint"
+                  isLabelHidden
+                  value={wsEndpoint}
+                  onChange={setWsEndpoint}
+                  placeholder="ws://localhost:57326/devtools/browser/..."
                 />
               </HStack>
             </VStack>
@@ -279,10 +272,12 @@ export default function BrowserTab({ busy, act }: Props) {
                         hud,
                         autoClose,
                         port: Number(cdpPort) || 9222,
+                        cdpPort: Number(cdpPort) || 9222,
+                        wsEndpoint: wsEndpoint.trim(),
                       });
                       await loadAll();
                     },
-                    `Đã lưu cấu hình trình duyệt: Engine ${engineMode.toUpperCase()}, Headless: ${headless ? "Bật" : "Tắt"}, HUD: ${hud ? "Bật" : "Tắt"}, AutoClose: ${autoClose ? "Bật" : "Tắt"}, Port: ${cdpPort}.`
+                    `Đã lưu cấu hình trình duyệt: Engine ${engineMode.toUpperCase()}, Headless: ${headless ? "Bật" : "Tắt"}, HUD: ${hud ? "Bật" : "Tắt"}, AutoClose: ${autoClose ? "Bật" : "Tắt"}, Port: ${cdpPort}${wsEndpoint ? `, WS: ${wsEndpoint}` : ""}.`
                   )
                 }
               />

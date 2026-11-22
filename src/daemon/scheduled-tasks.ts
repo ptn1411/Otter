@@ -196,9 +196,6 @@ export async function ensureChatGptBrowserOpen(): Promise<{ port: number }> {
   // 2. Nếu chưa mở, gọi GPM API để tự động khởi động Profile ChatGPT
   console.log(`[Task Runner] 🚀 Trình duyệt chưa mở. Đang khởi động GPM Profile: ${DEFAULT_GPM_PROFILE_ID}...`);
   try {
-    const extPath = path.resolve("extension/dist");
-    const additionArgs = `--load-extension="${extPath}"`;
-
     const gpmRes = await fetch(DEFAULT_GPM_API_URL, {
       method: "POST",
       headers: {
@@ -212,8 +209,7 @@ export async function ensureChatGptBrowserOpen(): Promise<{ port: number }> {
         params: {
           name: "start_profile",
           arguments: {
-            id: DEFAULT_GPM_PROFILE_ID,
-            addition_args: additionArgs
+            id: DEFAULT_GPM_PROFILE_ID
           }
         }
       }),

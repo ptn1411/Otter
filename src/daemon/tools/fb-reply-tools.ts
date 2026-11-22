@@ -254,7 +254,7 @@ export function registerFbReplyTools(mcp: McpServer, onActivity?: (event: any) =
 
   mcp.tool(
     "fb_reply_send_to_chatgpt",
-    "Gửi một bình luận vào ChatGPT Web qua injection outbox (dedupe theo nội dung, gửi lại khi extension kết nối lại). ChatGPT nhận prompt sẽ soạn câu trả lời và, tùy mode, gửi lên Facebook rồi ghi sổ bằng fb_reply_*. Dùng cho vòng lặp: đọc bình luận ở tab Facebook → gửi về ChatGPT → ChatGPT trả lời → gửi lên Facebook, từng cái một.",
+    "Gửi một bình luận vào ChatGPT Web qua injection outbox (dedupe theo nội dung, gửi lại khi tab ChatGPT kết nối lại). ChatGPT nhận prompt sẽ soạn câu trả lời và, tùy mode, gửi lên Facebook rồi ghi sổ bằng fb_reply_*. Dùng cho vòng lặp: đọc bình luận ở tab Facebook → gửi về ChatGPT → ChatGPT trả lời → gửi lên Facebook, từng cái một.",
     {
       runId: z.string(),
       commentKey: z.string(),

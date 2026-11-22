@@ -5,8 +5,8 @@
  * Chạy trên daemon của máy đó (local): hub không mở Chrome hộ
  * worker được — worker phải tự mở trên máy của nó. Luồng fleet B2:
  * dispatch tới worker → ChatGPT của worker gọi chrome_open_profile
- * với profile của worker → tab ChatGPT của worker mở ra, extension
- * nối về daemon worker → worker mới chạy loop. Xem fleet.ts prompt.
+ * với profile của worker → tab ChatGPT của worker mở ra, CDP
+ * kết nối về daemon worker → worker mới chạy loop. Xem fleet.ts prompt.
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
@@ -34,7 +34,7 @@ export function registerChromeTools(mcp: McpServer, onActivity?: (event: any) =>
 
   mcp.tool(
     "chrome_open_profile",
-    "Mở Chrome với đúng profile chỉ định trên máy này, mặc định mở https://chatgpt.com để extension Otter trong profile đó làm việc. Không kill Chrome đang chạy, không đóng tab của user. Profile có thể là tên thư mục (Profile 1), tên hiển thị (Work, phải duy nhất), hoặc đường dẫn tuyệt đối trong user-data-dir. Trên máy headless không có DISPLAY thì báo lỗi rõ, không mở giả. Nếu cung cấp browserPath (ví dụ đường dẫn file .exe của GPM Browser), tool chuyển sang chế độ custom: mở đúng file đó, profile (nếu có) truyền thẳng thành --profile-directory, không tra Chrome Local State — phù hợp khi user nói 'mở bằng GPM, mình cung cấp đường dẫn'.",
+    "Mở Chrome với đúng profile chỉ định trên máy này, mặc định mở https://chatgpt.com để Otter điều khiển qua CDP. Không kill Chrome đang chạy, không đóng tab của user. Profile có thể là tên thư mục (Profile 1), tên hiển thị (Work, phải duy nhất), hoặc đường dẫn tuyệt đối trong user-data-dir. Trên máy headless không có DISPLAY thì báo lỗi rõ, không mở giả. Nếu cung cấp browserPath (ví dụ đường dẫn file .exe của GPM Browser), tool chuyển sang chế độ custom: mở đúng file đó, profile (nếu có) truyền thẳng thành --profile-directory, không tra Chrome Local State — phù hợp khi user nói 'mở bằng GPM, mình cung cấp đường dẫn'.",
     {
       profile: z.string().optional().describe("Profile cần mở; để trống = Default (hoặc profile đầu tiên). Ở chế độ custom (có browserPath), profile này truyền thẳng thành --profile-directory."),
       url: z.string().optional().describe("URL mở kèm, mặc định https://chatgpt.com; chỉ nhận http(s)"),

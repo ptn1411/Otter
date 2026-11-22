@@ -164,8 +164,7 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
 
       if (toolName === "gpm_start_profile") {
         const res = await startGpmProfile(body.profileId, {
-          additionArgs: body.additionArgs,
-          loadOtterExtension: body.loadOtterExtension !== false
+          additionArgs: body.additionArgs
         });
         return jsonResponse(res);
       }
@@ -461,8 +460,8 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
         {
           name: "browser_engine_status",
           qualifiedName: "otter_core_browser_engine_status",
-          title: "Trạng thái 2 động cơ trình duyệt (Extension vs CDP)",
-          description: "Kiểm tra kết nối của Extension và CDP port 9222, đo đạc tốc độ benchmark và chuyển đổi linh hoạt chế độ."
+          title: "Trạng thái động cơ trình duyệt CDP",
+          description: "Kiểm tra kết nối của Chrome CDP port (9222 hoặc tùy chỉnh như GPM 57326/wsEndpoint), đo đạc tốc độ benchmark và cấu hình linh hoạt."
         },
         {
           name: "fb_feed_auto_engage",
@@ -558,7 +557,7 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
           name: "gpm_start_profile",
           qualifiedName: "otter_core_gpm_start_profile",
           title: "Khởi động Profile GPM Login",
-          description: "Mở profile GPM Login kèm cổng CDP và nạp extension Otter."
+          description: "Mở profile GPM Login kèm cổng/WebSocket CDP để Otter kết nối trực tiếp."
         },
         {
           name: "gpm_stop_profile",

@@ -77,7 +77,7 @@ export function registerFbEngageTools(mcp: McpServer, onActivity?: (event: any) 
   // 2. Tool Tương tác bài viết (Like + Comment)
   mcp.tool(
     "fb_feed_engage_post",
-    "Thực thi tương tác (Thích/Thả tim và Bình luận) vào một bài viết cụ thể trên Facebook qua Extension, sau đó lưu lịch sử SQLite chống trùng.",
+    "Thực thi tương tác (Thích/Thả tim và Bình luận) vào một bài viết cụ thể trên Facebook qua Chrome CDP, sau đó lưu lịch sử SQLite chống trùng.",
     {
       author: z.string().describe("Tên tác giả / fanpage của bài viết"),
       postSnippet: z.string().describe("Đoạn trích nội dung bài viết"),
@@ -186,7 +186,7 @@ export function registerFbEngageTools(mcp: McpServer, onActivity?: (event: any) 
         const salesStep = nextSalesReply(db, args.recipientName, args.customerMessage);
         const replyText = args.customReply || salesStep.replyText;
 
-        // Nếu có inputIndex, gõ trực tiếp qua Extension
+        // Nếu có inputIndex, gõ trực tiếp qua CDP
         if (args.inputIndex) {
           await browserBridge.execute("type", {
             index: args.inputIndex,

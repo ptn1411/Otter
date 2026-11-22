@@ -1,10 +1,9 @@
 /**
- * Chrome HTTP routes — cho tab Management của extension gọi trực tiếp
+ * Chrome HTTP routes — cho Dashboard hoặc client gọi trực tiếp
  * (cùng pattern manageFetch, sau global auth check, không public).
  * - GET  /api/chrome/profiles
  * - POST /api/chrome/open   { profile?, url?, userDataDir?, createIfMissing? }
- * MCP tools chrome_* vẫn là đường chính cho ChatGPT; route này chỉ
- * là nút bấm tiện tay trong extension.
+ * MCP tools chrome_* vẫn là đường chính cho AI; route này là API quản lý.
  */
 import { jsonResponse, errorResponse } from "./common";
 import { listChromeProfiles, openChromeProfile } from "../chrome-profile";

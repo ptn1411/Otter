@@ -695,7 +695,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
       filesTouched: z.array(z.string()).optional(),
       verify: z.array(z.string()).optional(),
       silent: z.boolean().default(false),
-      autoNotifyWeb: z.boolean().default(true).describe("Tự động gửi báo cáo vào khung chat ChatGPT Web qua Chrome Extension")
+      autoNotifyWeb: z.boolean().default(true).describe("Tự động gửi báo cáo vào khung chat ChatGPT Web qua Chrome CDP")
     },
     completeHandler
   );
@@ -710,7 +710,7 @@ export function registerTaskBridgeTools(mcp: McpServer, onActivity?: (event: any
       filesTouched: z.array(z.string()).optional(),
       verify: z.array(z.string()).optional(),
       silent: z.boolean().default(false),
-      autoNotifyWeb: z.boolean().default(true).describe("Tự động gửi báo cáo vào khung chat ChatGPT Web qua Chrome Extension")
+      autoNotifyWeb: z.boolean().default(true).describe("Tự động gửi báo cáo vào khung chat ChatGPT Web qua Chrome CDP")
     },
     completeHandler
   );

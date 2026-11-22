@@ -12,11 +12,12 @@ import { isFullAccessEnabled, setFullAccess } from "./security";
 
 export interface OtterSettings {
   // Trình duyệt & CDP
-  browserEngine: "cdp" | "auto" | "extension";
+  browserEngine: "cdp";
   cdpHeadless: boolean;
   cdpHud: boolean;
   cdpAutoClose: boolean;
   cdpPort: number;
+  cdpWsEndpoint: string;
   browserPath: string;
   userDataDir: string;
 
@@ -41,11 +42,7 @@ function settingsFilePath(): string {
 }
 
 function getDefaultSettings(): OtterSettings {
-  const envEngine = (process.env.OTTER_BROWSER_ENGINE || "").trim().toLowerCase();
-  const browserEngine: "cdp" | "auto" | "extension" =
-    envEngine === "extension" || envEngine === "auto" || envEngine === "cdp"
-      ? (envEngine as "cdp" | "auto" | "extension")
-      : "cdp";
+  const browserEngine: "cdp" = "cdp";
 
   const headlessEnv = (process.env.OTTER_CDP_HEADLESS || "").trim().toLowerCase();
   const cdpHeadless = headlessEnv === "1" || headlessEnv === "true";
@@ -57,6 +54,7 @@ function getDefaultSettings(): OtterSettings {
   const cdpAutoClose = autoCloseEnv !== "0" && autoCloseEnv !== "false" && autoCloseEnv !== "off";
 
   const cdpPort = parseInt(process.env.OTTER_CDP_PORT || process.env.CDP_PORT || "9222", 10) || 9222;
+  const cdpWsEndpoint = (process.env.OTTER_CDP_WS_ENDPOINT || "").trim();
   const browserPath = (process.env.OTTER_BROWSER_PATH || process.env.OTTER_CHROME_PATH || "").trim();
   const userDataDir = (process.env.OTTER_CHROME_USER_DATA_DIR || "").trim();
 
@@ -78,6 +76,7 @@ function getDefaultSettings(): OtterSettings {
     cdpHud,
     cdpAutoClose,
     cdpPort,
+    cdpWsEndpoint,
     browserPath,
     userDataDir,
     fullAccess,
@@ -97,6 +96,11 @@ function applySettingsToEnvironment(settings: OtterSettings): void {
   process.env.OTTER_CDP_AUTO_CLOSE = settings.cdpAutoClose ? "1" : "0";
   process.env.OTTER_CDP_PORT = String(settings.cdpPort);
   process.env.CDP_PORT = String(settings.cdpPort);
+  if (settings.cdpWsEndpoint) {
+    process.env.OTTER_CDP_WS_ENDPOINT = settings.cdpWsEndpoint;
+  } else {
+    delete process.env.OTTER_CDP_WS_ENDPOINT;
+  }
 
   if (settings.browserPath) {
     process.env.OTTER_BROWSER_PATH = settings.browserPath;

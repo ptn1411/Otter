@@ -29,7 +29,7 @@ export function runDoctor(facts: DoctorFact): { ok: boolean; checks: DoctorCheck
     { name: "page_loops_active", ok: true, detail: `${facts.activeLoops} phiên page-loop đang chạy.` },
     { name: "outbox_pending", ok: true, detail: `${facts.pendingOutbox} prompt đang chờ trong outbox.` },
     { name: "leases", ok: true, detail: `${facts.activeLeases} lease đang chạy, ${facts.staleLeases} lease stale.` },
-    { name: "extension_tabs", ok: true, detail: `${facts.connectedTabs} tab extension đang nối WS.` },
+    { name: "connected_tabs", ok: true, detail: `${facts.connectedTabs} tab đang kết nối.` },
     { name: "chrome_path", ok: !facts.chromePath || fs.existsSync(facts.chromePath), detail: facts.chromePath ? (fs.existsSync(facts.chromePath) ? `Chrome path tồn tại: ${facts.chromePath}` : `Chrome path KHÔNG tồn tại: ${facts.chromePath}`) : "Không đặt OTTER_CHROME_PATH (dùng Chrome mặc định nếu có)." },
     { name: "browser_path", ok: !facts.browserPath || fs.existsSync(facts.browserPath), detail: facts.browserPath ? (fs.existsSync(facts.browserPath) ? `Browser path tồn tại: ${facts.browserPath}` : `Browser path KHÔNG tồn tại: ${facts.browserPath}`) : "Không đặt OTTER_BROWSER_PATH." },
   ];

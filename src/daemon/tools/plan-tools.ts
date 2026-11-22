@@ -156,7 +156,7 @@ export function registerPlanTools(mcp: McpServer, onActivity?: (event: any) => v
   // Phase 5: xem injection outbox đang chờ gửi.
   mcp.tool(
     "plan_outbox",
-    "Xem các prompt đang chờ gửi vào ChatGPT Web (injection outbox) — những prompt bị kẹt khi extension mất kết nối sẽ nằm ở đây.",
+    "Xem các prompt đang chờ gửi vào ChatGPT Web (injection outbox) — những prompt bị kẹt khi mất kết nối sẽ nằm ở đây.",
     {},
     async () => {
       const db = getDatabase();
@@ -165,10 +165,10 @@ export function registerPlanTools(mcp: McpServer, onActivity?: (event: any) => v
     },
   );
 
-  // Phase 5 helper: đưa một prompt vào outbox (để daemon tự gửi lại khi extension quay lại).
+  // Phase 5 helper: đưa một prompt vào outbox (để daemon tự gửi lại khi tab ChatGPT kết nối lại).
   mcp.tool(
     "plan_enqueue_prompt",
-    "Đưa một prompt vào injection outbox (dedupe theo nội dung, không trùng lặp). Daemon sẽ gửi lại khi extension kết nối lại.",
+    "Đưa một prompt vào injection outbox (dedupe theo nội dung, không trùng lặp). Daemon sẽ gửi lại khi tab ChatGPT kết nối lại.",
     {
       text: z.string(),
       planId: z.string().optional(),

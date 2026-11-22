@@ -18,6 +18,7 @@ import * as path from "node:path";
 import { spawn, type ChildProcess } from "node:child_process";
 import { findChromeExecutable, getChromeUserDataDir } from "./chrome-profile";
 import { getOtterDir } from "./db";
+import { getSettings, onSettingsChange } from "./settings";
 import {
   OTTER_CORE_VERSION,
   OTTER_PAGE_CORE_SCRIPT,
@@ -117,10 +118,36 @@ export class CdpBridge {
   private static readonly BROWSER_WS_DENIED_COOLDOWN_MS = 5 * 60 * 1000;
   // Chống chạy trùng ensureCdpChrome (getTabs -> ensureCdpChrome -> preload -> getTabs)
   private ensureCdpInFlight: Promise<boolean> | null = null;
+  private customWsEndpoint: string | null = null;
 
   constructor(defaultPort = 9222, defaultChromeUserDataDir?: string) {
-    this.defaultPort = process.env.OTTER_CDP_PORT ? Number(process.env.OTTER_CDP_PORT) : defaultPort;
+    let initialPort = defaultPort;
+    let initialWs: string | null = null;
+    if (defaultPort === 9222) {
+      try {
+        const s = getSettings();
+        if (s?.cdpPort) initialPort = s.cdpPort;
+        if (s?.cdpWsEndpoint) initialWs = s.cdpWsEndpoint;
+      } catch {}
+      if (process.env.OTTER_CDP_PORT) {
+        initialPort = Number(process.env.OTTER_CDP_PORT);
+      }
+      if (process.env.OTTER_CDP_WS_ENDPOINT) {
+        initialWs = process.env.OTTER_CDP_WS_ENDPOINT;
+      }
+    }
+    this.defaultPort = initialPort;
     this.defaultChromeUserDataDir = defaultChromeUserDataDir;
+    if (initialWs) {
+      this.setWsEndpoint(initialWs);
+    }
+
+    try {
+      onSettingsChange((updated) => {
+        if (updated.cdpPort) this.setPort(updated.cdpPort);
+        if (updated.cdpWsEndpoint !== undefined) this.setWsEndpoint(updated.cdpWsEndpoint);
+      });
+    } catch {}
   }
 
   private getPreferredDefaultChromeInfo(port?: number): DevToolsActivePortInfo | null {
@@ -279,8 +306,8 @@ export class CdpBridge {
 
   private async sendOnBrowserWs(method: string, params: any = {}, sessionId?: string, timeoutMs = 25000): Promise<any> {
     const info = this.getPreferredDefaultChromeInfo();
-    const targetWsUrl = this.browserWsUrl || info?.browserWsUrl;
-    if (!targetWsUrl) throw new Error("Không tìm thấy Browser WebSocket của Chrome mặc định");
+    const targetWsUrl = this.browserWsUrl || this.customWsEndpoint || info?.browserWsUrl;
+    if (!targetWsUrl) throw new Error("Không tìm thấy Browser WebSocket (hãy chỉ định wsEndpoint hoặc bật remote debugging)");
     await this.ensureBrowserWs(targetWsUrl);
     if (!this.browserWs || this.browserWs.readyState !== WebSocket.OPEN) {
       throw new Error("Browser WebSocket chưa sẵn sàng");
@@ -345,7 +372,45 @@ export class CdpBridge {
   }
 
   setPort(port: number): void {
-    this.defaultPort = port;
+    if (Number.isFinite(port) && port > 0) {
+      this.defaultPort = port;
+    }
+  }
+
+  getWsEndpoint(): string | null {
+    return this.customWsEndpoint;
+  }
+
+  setWsEndpoint(wsUrl?: string | null): void {
+    if (!wsUrl || !wsUrl.trim()) {
+      this.customWsEndpoint = null;
+      return;
+    }
+    const clean = wsUrl.trim();
+    this.customWsEndpoint = clean;
+
+    // Phân giải cổng từ wsEndpoint nếu có (ví dụ: ws://localhost:57326/... hoặc ws://127.0.0.1:57326/devtools/browser/...)
+    try {
+      const url = new URL(clean.replace(/^ws:\/\//i, "http://").replace(/^wss:\/\//i, "https://"));
+      if (url.port) {
+        const p = Number(url.port);
+        if (Number.isFinite(p) && p > 0) {
+          this.defaultPort = p;
+        }
+      }
+    } catch {
+      const m = clean.match(/:(\d+)/);
+      if (m && m[1]) {
+        const p = Number(m[1]);
+        if (Number.isFinite(p) && p > 0) {
+          this.defaultPort = p;
+        }
+      }
+    }
+
+    if (clean.includes("/devtools/browser/")) {
+      this.browserWsUrl = clean;
+    }
   }
 
   /**
@@ -354,16 +419,40 @@ export class CdpBridge {
    */
   async isAvailable(port?: number, _profileId?: string): Promise<boolean> {
     const targetPort = port || this.defaultPort;
-    try {
-      const res = await fetch(`http://127.0.0.1:${targetPort}/json/version`, {
-        signal: AbortSignal.timeout(800),
-      });
-      if (res.ok) return true;
-    } catch {}
+
+    // 1. Thử HTTP /json/version trên 127.0.0.1 và localhost
+    for (const host of ["127.0.0.1", "localhost"]) {
+      try {
+        const res = await fetch(`http://${host}:${targetPort}/json/version`, {
+          signal: AbortSignal.timeout(800),
+        });
+        if (res.ok) return true;
+      } catch {}
+    }
+
+    // 2. Thử customWsEndpoint nếu có
+    if (this.customWsEndpoint) {
+      try {
+        const url = new URL(this.customWsEndpoint.replace(/^ws:\/\//i, "http://").replace(/^wss:\/\//i, "https://"));
+        const host = url.hostname || "127.0.0.1";
+        const p = url.port ? Number(url.port) : targetPort;
+        for (const h of [host, "127.0.0.1", "localhost"]) {
+          try {
+            const res = await fetch(`http://${h}:${p}/json/version`, {
+              signal: AbortSignal.timeout(800),
+            });
+            if (res.ok) {
+              this.defaultPort = p;
+              return true;
+            }
+          } catch {}
+        }
+      } catch {}
+    }
 
     if (await this.shouldUseBrowserWs(port)) return true;
 
-    if (!port) {
+    if (!port && targetPort === 9222) {
       const candidatePorts = [
         process.env.OTTER_CDP_PORT ? Number(process.env.OTTER_CDP_PORT) : null,
         Number(process.env.CDP_PORT) || null,
@@ -372,13 +461,15 @@ export class CdpBridge {
 
       for (const p of candidatePorts) {
         if (p === targetPort) continue;
-        try {
-          const res = await fetch(`http://127.0.0.1:${p}/json/version`, { signal: AbortSignal.timeout(500) });
-          if (res.ok) {
-            this.defaultPort = p;
-            return true;
-          }
-        } catch {}
+        for (const host of ["127.0.0.1", "localhost"]) {
+          try {
+            const res = await fetch(`http://${host}:${p}/json/version`, { signal: AbortSignal.timeout(500) });
+            if (res.ok) {
+              this.defaultPort = p;
+              return true;
+            }
+          } catch {}
+        }
       }
 
       // Chỉ dò cổng READ-ONLY từ danh sách GPM Login (TUYỆT ĐỐI KHÔNG gọi /profiles/start trong isAvailable!)
@@ -446,17 +537,19 @@ export class CdpBridge {
     const targetPort = port || this.defaultPort;
 
     // 1. Nếu cổng targetPort (mặc định 9222) đang mở và có danh sách tab qua HTTP /json, dùng ngay lập tức (< 5ms)
-    try {
-      const res = await fetch(`http://127.0.0.1:${targetPort}/json`, {
-        signal: AbortSignal.timeout(1000),
-      });
-      if (res.ok) {
-        return (await res.json()) as CdpTab[];
-      }
-    } catch {}
+    for (const host of ["127.0.0.1", "localhost"]) {
+      try {
+        const res = await fetch(`http://${host}:${targetPort}/json`, {
+          signal: AbortSignal.timeout(1000),
+        });
+        if (res.ok) {
+          return (await res.json()) as CdpTab[];
+        }
+      } catch {}
+    }
 
-    // 2. Thử qua persistent Browser WebSocket (DevToolsActivePort Chrome 144+)
-    if (await this.shouldUseBrowserWs(port)) {
+    // 2. Thử qua persistent Browser WebSocket (DevToolsActivePort Chrome 144+ hoặc customWsEndpoint)
+    if ((await this.shouldUseBrowserWs(port)) || this.customWsEndpoint) {
       try {
         const res = await this.sendOnBrowserWs("Target.getTargets", {}, undefined, 3000);
         const infos = Array.isArray(res?.targetInfos) ? res.targetInfos : [];
@@ -468,27 +561,27 @@ export class CdpBridge {
           viaBrowserWs: true,
         }));
       } catch (err: any) {
-        console.warn(`[CDP Bridge] Không đọc được tab từ Chrome mặc định (${err.message}), thử cổng dự phòng...`);
+        console.warn(`[CDP Bridge] Không đọc được tab từ Browser WebSocket (${err.message}), thử cổng dự phòng...`);
       }
     }
 
     if (!(await this.isAvailable(targetPort))) {
       await this.ensureProfileRunning(undefined, targetPort);
     }
-    try {
-      const res = await fetch(`http://127.0.0.1:${targetPort}/json`, {
-        signal: AbortSignal.timeout(3000),
-      });
-      if (!res.ok) throw new Error(`Không thể lấy danh sách tab từ CDP port ${targetPort}`);
-      return (await res.json()) as CdpTab[];
-    } catch (err: any) {
-      if (!(await this.isAvailable(targetPort))) {
-        throw new Error(
-          `Trình duyệt Chrome CDP (port ${targetPort}) hiện chưa chạy. Vui lòng gọi browser_open trước để khởi động Chrome CDP.`
-        );
-      }
-      throw err;
+    for (const host of ["127.0.0.1", "localhost"]) {
+      try {
+        const res = await fetch(`http://${host}:${targetPort}/json`, {
+          signal: AbortSignal.timeout(3000),
+        });
+        if (res.ok) return (await res.json()) as CdpTab[];
+      } catch {}
     }
+    if (!(await this.isAvailable(targetPort))) {
+      throw new Error(
+        `Trình duyệt Chrome CDP (port ${targetPort}) hiện chưa chạy. Vui lòng gọi browser_open trước để khởi động Chrome CDP.`
+      );
+    }
+    throw new Error(`Không thể lấy danh sách tab từ CDP port ${targetPort}`);
   }
 
   /**
@@ -739,22 +832,22 @@ export class CdpBridge {
       } catch {}
     }
     const targetPort = port || this.defaultPort;
-    try {
-      const newTabRes = await fetch(`http://127.0.0.1:${targetPort}/json/new?${encodeURIComponent(url)}`, {
-        method: "PUT",
-      });
-      if (!newTabRes.ok) {
-        throw new Error(`Không thể tạo tab mới trên CDP port ${targetPort}`);
-      }
-      return (await newTabRes.json()) as CdpTab;
-    } catch (err: any) {
+    for (const host of ["127.0.0.1", "localhost"]) {
+      try {
+        const newTabRes = await fetch(`http://${host}:${targetPort}/json/new?${encodeURIComponent(url)}`, {
+          method: "PUT",
+        });
+        if (newTabRes.ok) {
+          return (await newTabRes.json()) as CdpTab;
+        }
+      } catch {}
+    }
       if (!(await this.isAvailable(targetPort))) {
         throw new Error(
           `Trình duyệt Chrome CDP (port ${targetPort}) hiện chưa chạy. Vui lòng gọi browser_open trước để khởi động Chrome CDP.`
         );
       }
-      throw err;
-    }
+      throw new Error(`Không mở được tab CDP tại port ${targetPort}`);
   }
 
   private shouldAutoHud(): boolean {
@@ -1549,32 +1642,41 @@ export class CdpBridge {
    */
   async execute(action: string, params: any = {}): Promise<any> {
     this.resetIdleTimer();
+    const explicitPort = params?.cdpPort ? Number(params.cdpPort) : (params?.port ? Number(params.port) : undefined);
+    if (explicitPort && Number.isFinite(explicitPort) && explicitPort > 0) {
+      this.setPort(explicitPort);
+    }
+    if (params?.wsEndpoint) {
+      this.setWsEndpoint(String(params.wsEndpoint));
+    }
+    const port = explicitPort || this.defaultPort;
+
     switch (action) {
       case "close":
       case "close_browser":
-        return this.closeBrowser();
+        return this.closeBrowser(port);
       case "open":
-        return this.openUrl(params.url);
+        return this.openUrl(params.url, port);
       case "read_page":
-        return this.readPage(params.urlPattern);
+        return this.readPage(params.urlPattern, port);
       case "click":
-        return this.click(params.index, params.urlPattern);
+        return this.click(params.index, params.urlPattern, port);
       case "type":
-        return this.type(params.index, params.text, params.pressEnter, params.urlPattern);
+        return this.type(params.index, params.text, params.pressEnter, params.urlPattern, port);
       case "select":
-        return this.select(params.index, params.option, params.urlPattern);
+        return this.select(params.index, params.option, params.urlPattern, port);
       case "scroll":
-        return this.scroll(params.direction || "down", params.amount, params.urlPattern);
+        return this.scroll(params.direction || "down", params.amount, params.urlPattern, port);
       case "back":
-        return this.back(params.urlPattern);
+        return this.back(params.urlPattern, port);
       case "list_tabs":
-        return this.listTabs();
+        return this.listTabs(port);
       case "switch_tab":
-        return this.switchTab(params.tabId);
+        return this.switchTab(params.tabId, port);
       case "close_tab":
-        return this.closeTab(params.tabId);
+        return this.closeTab(params.tabId, port);
       case "inject_chat_message":
-        return this.injectChatMessage(params.text ?? params.message ?? "", params.autoSubmit !== false);
+        return this.injectChatMessage(params.text ?? params.message ?? "", params.autoSubmit !== false, port);
       case "evaluate_js":
         return this.evaluateOnTab(params.script || params.code || "", params.urlPattern);
       case "close_messenger_docks":
@@ -1614,7 +1716,7 @@ export class CdpBridge {
         return this.injectHud(Boolean(params.toggle), params.urlPattern);
       case "reload_extension":
         this.preloadedTabIds.clear();
-        const count = await this.preloadCoreOnAllTabs();
+        const count = await this.preloadCoreOnAllTabs(port);
         return {
           ok: true,
           message: `Đã nạp lại Otter Page-Agent Core (${OTTER_CORE_VERSION}) vào ${count} tab Chrome CDP (không cần Extension).`,

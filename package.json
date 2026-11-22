@@ -1,7 +1,7 @@
 {
   "name": "otter",
   "version": "2.3.6",
-  "description": "Otter — Agentic AI Desktop & Browser Controller built with Bun + TypeScript (Port 1993)",
+  "description": "ChatGPT that uses your computer. Otter runs locally, reads the open page, drives the browser and desktop, and checks your servers. One command to install.",
   "license": "MIT",
   "author": "PHAM THANH NAM (@ptn1411)",
   "module": "src/daemon/index.ts",
@@ -26,7 +26,7 @@
     "build:all": "bun run build:dashboard && bun run build:win && bun run build:mac-arm && bun run build:mac-x64",
     "build:vps-ssh": "bun scripts/build-vps-engine.ts",
     "build:tray": "cargo build --release --manifest-path tray/Cargo.toml",
-    "package": "bun run build:extension && powershell -Command \"New-Item -ItemType Directory -Force -Path dist; Compress-Archive -Path extension/dist/* -DestinationPath dist/otter-extension.zip -Force\" && bun run build:exe",
+    "package": "bun run build:dashboard && bun run build:exe",
     "deploy": "bun scripts/deploy.ts",
     "deploy:vps": "bun scripts/deploy-to-vps.ts",
     "redeploy": "bun scripts/redeploy.ts",

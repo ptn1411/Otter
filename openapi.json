@@ -685,8 +685,8 @@
     "/api/activity/v1/browser/engine": {
       "post": {
         "operationId": "browserEngineStatus",
-        "summary": "Quản lý và đo lường trạng thái 2 động cơ trình duyệt (Extension vs CDP)",
-        "description": "Kiểm tra kết nối của Chrome Extension và CDP port 9222, chạy đo đạc tốc độ phản hồi (benchmark) và chuyển đổi chế độ auto/extension/cdp",
+        "summary": "Quản lý và đo lường trạng thái động cơ trình duyệt CDP",
+        "description": "Kiểm tra kết nối của Chrome CDP (port mặc định 9222 hoặc port tùy chỉnh của GPM Login), chạy đo đạc tốc độ phản hồi (benchmark)",
         "requestBody": {
           "required": false,
           "content": {
@@ -697,11 +697,21 @@
                   "mode": {
                     "type": "string",
                     "enum": [
-                      "auto",
-                      "extension",
                       "cdp"
                     ],
-                    "description": "Chế độ động cơ muốn chuyển đổi"
+                    "description": "Chế độ động cơ trình duyệt (cdp)"
+                  },
+                  "cdpPort": {
+                    "type": "integer",
+                    "description": "Cổng Chrome DevTools Protocol (CDP) tùy chỉnh (VD: 57326 cho GPM Login/Automate, mặc định: 9222)"
+                  },
+                  "port": {
+                    "type": "integer",
+                    "description": "Bí danh cho cdpPort"
+                  },
+                  "wsEndpoint": {
+                    "type": "string",
+                    "description": "Địa chỉ WebSocket CDP tùy chỉnh do GPM hoặc Chrome cấp (VD: ws://127.0.0.1:57326/devtools/browser/...)"
                   },
                   "benchmark": {
                     "type": "boolean",
@@ -847,7 +857,7 @@
       "post": {
         "operationId": "fb_feed_engage_post",
         "summary": "Tương tác Like/Love và Bình luận vào một bài viết Facebook",
-        "description": "Thực thi tương tác (Thích/Thả tim và Bình luận) vào một bài viết cụ thể trên Facebook qua Extension, sau đó lưu lịch sử SQLite chống trùng.",
+        "description": "Thực thi tương tác (Thích/Thả tim và Bình luận) vào một bài viết cụ thể trên Facebook qua CDP, sau đó lưu lịch sử SQLite chống trùng.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1815,7 +1825,7 @@
       "post": {
         "operationId": "startGpmProfile",
         "summary": "Khởi động Profile GPM Login",
-        "description": "Mở profile GPM Login kèm cổng CDP và nạp extension Otter",
+        "description": "Mở profile GPM Login kèm cổng CDP để Otter kết nối trực tiếp",
         "requestBody": {
           "required": true,
           "content": {
@@ -1824,8 +1834,7 @@
                 "type": "object",
                 "properties": {
                   "profileId": { "type": "string", "description": "ID profile GPM" },
-                  "additionArgs": { "type": "string", "description": "Tham số bổ sung Chromium" },
-                  "loadOtterExtension": { "type": "boolean", "default": true }
+                  "additionArgs": { "type": "string", "description": "Tham số bổ sung Chromium" }
                 },
                 "required": ["profileId"]
               }
