@@ -30,16 +30,19 @@
 ### Phase 3: Sunset, Verification & Deployment
 - [x] Version bumped to v2.3.6 in `package.json`
 - [x] Full end-to-end multi-agent test (`tests/test-a2a-e2e.test.ts` - passing)
-- [x] Binary compilation (`otter.exe` v2.3.6 via Bun)
-- [x] Backups of previous binaries (`otter.exe.bak-pre-2.3.6`)
-- [x] Deployment to `%LOCALAPPDATA%\Otter` (`otter.exe`, `bin\otter.exe`, `openapi.json`)
-- [x] Daemon restart on Port 1993 with `--tunnel`
-- [x] Live health check verification: Local (`127.0.0.1:1993/health`) and Tailscale (`100.66.170.39:1993/health`) both returning `v2.3.6`
+- [x] Binary compilation (`otter.exe` v2.3.6 via Bun for Windows, `otter-linux-x64` for Linux)
+- [x] Backups of previous binaries (`otter.exe.bak-pre-2.3.6` on Windows, `/home/nam/.otter/bin/otter.bak-pre-2.3.6` on Linux)
+- [x] Deployment to Windows node (`%LOCALAPPDATA%\Otter` - `otter.exe`, `bin\otter.exe`, `openapi.json`)
+- [x] Windows live daemon restart & health check verification: Local (`127.0.0.1:1993/health`) and Tailscale (`100.66.170.39:1993/health`) both returning `v2.3.6`
+- [x] Deployment to always-on Linux node `nam` (`100.111.68.103:1993` / `/home/nam/.otter/bin/otter`)
+- [x] Linux systemd user service (`systemctl --user restart otter`) restarted and running
+- [x] Linux live health check verification: `http://100.111.68.103:1993/health` returning `{"service":"otter-daemon","version":"2.3.6","platform":"linux"}`
+- [x] Automatic legacy inbox ingestion on `nam`: 75 backlog files from `/home/nam/muse-shared/inbox/` auto-migrated into SQLite queue (`/api/a2a/stats` -> 75 queued, 0 failed)
 - [x] Live A2A Send -> Pull -> Ack tested on running instance
-- [x] Core MCP Server discovery: 58 tools connected (53 previous + 5 new A2A tools)
+- [x] Core MCP Server discovery: 58 tools connected (53 previous + 5 new A2A tools) on both nodes
 
 ---
 
 ## Blockers & Notes
-- None. Full 3-phase implementation completed and verified live.
+- None. Full 3-phase implementation and multi-node deployment (Windows Worker & Linux Hub `nam`) completed and verified live.
 
