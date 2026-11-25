@@ -1,6 +1,6 @@
 {
   "name": "otter",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "ChatGPT that uses your computer. Otter runs locally, reads the open page, drives the browser and desktop, and checks your servers. One command to install.",
   "license": "MIT",
   "author": "PHAM THANH NAM (@ptn1411)",
@@ -26,6 +26,7 @@
     "build:all": "bun run build:dashboard && bun run build:win && bun run build:mac-arm && bun run build:mac-x64",
     "build:vps-ssh": "bun scripts/build-vps-engine.ts",
     "build:tray": "cargo build --release --manifest-path tray/Cargo.toml",
+    "build:apk": "bun scripts/build-android-apk.ts",
     "package": "bun run build:dashboard && bun run build:exe",
     "deploy": "bun scripts/deploy.ts",
     "deploy:vps": "bun scripts/deploy-to-vps.ts",

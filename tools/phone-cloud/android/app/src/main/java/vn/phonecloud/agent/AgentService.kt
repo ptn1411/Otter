@@ -49,7 +49,7 @@ class AgentService : Service() {
     private var lastW = 0
     private var lastH = 0
     private var lastSps = ""
-    private var lastPps = 
+    private var lastPps = ""
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -126,7 +126,7 @@ class AgentService : Service() {
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             nm.createNotificationChannel(
-                NotificationChannel(CHANNEL_ID, "PhoneCloud Agent", NotificationManager.IMPORTANCE_LOW)
+                NotificationChannel(CHANNEL_ID, "Otter Phone", NotificationManager.IMPORTANCE_LOW)
             )
         }
         val openIntent = PendingIntent.getActivity(
@@ -135,9 +135,9 @@ class AgentService : Service() {
             PendingIntent.FLAG_IMMUTABLE
         )
         val notif: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("PhoneCloud Agent đang chạy")
-            .setContentText("Sẵn sàng nhận điều khiển từ xa")
-            .setSmallIcon(android.R.drawable.ic_menu_view)
+            .setContentTitle("Otter Phone đang hoạt động")
+            .setContentText("Đã kết nối sẵn sàng nhận lệnh điều khiển từ Otter")
+            .setSmallIcon(R.drawable.ic_stat_otter)
             .setContentIntent(openIntent)
             .setOngoing(true)
             .build()

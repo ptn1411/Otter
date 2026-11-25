@@ -114,6 +114,14 @@ try {
   console.warn(`[!] Bỏ qua biên dịch tray (Rust): ${err.message}`);
 }
 
+// 3.3 Biên dịch ứng dụng Android Otter Phone (otter-phone.apk)
+console.log("\n[*] Đang biên dịch ứng dụng Android Otter Phone (otter-phone.apk)...");
+try {
+  execSync("bun scripts/build-android-apk.ts", { stdio: "inherit", cwd: rootDir });
+} catch (err: any) {
+  console.warn(`[!] Bỏ qua biên dịch otter-phone.apk: ${err.message}`);
+}
+
 // 4. Sao chép các Script cài đặt & chạy ngầm
 console.log("\n[3/4] Sao chép scripts cài đặt 1-click & helper...");
 
@@ -175,13 +183,25 @@ if (await fs.stat(binDir).then(() => true).catch(() => false)) {
   console.log(`[+] Đã đồng bộ thư mục bin/ vào bản deploy`);
 }
 
-// Sao chép trọn bộ thư mục tools (skill.exe, cua, vps-ssh, db-manager)
+// Sao chép trọn bộ thư mục tools (skill.exe, cua, vps-ssh, db-manager, phone-cloud — loại bỏ cache Gradle)
 const targetToolsDir = path.join(deployDir, "tools");
+await fs.rm(targetToolsDir, { recursive: true, force: true }).catch(() => {});
 await fs.mkdir(targetToolsDir, { recursive: true });
 const srcToolsDir = path.join(rootDir, "tools");
 if (await fs.stat(srcToolsDir).then(() => true).catch(() => false)) {
-  await fs.cp(srcToolsDir, targetToolsDir, { recursive: true, force: true });
-  console.log(`[+] Đã đồng bộ trọn bộ thư mục tools/ (skill, cua, vps-ssh, db-manager) vào gói deploy`);
+  await fs.cp(srcToolsDir, targetToolsDir, {
+    recursive: true,
+    force: true,
+    filter: (src) => {
+      const norm = src.replace(/\\/g, "/");
+      if (norm.includes("/phone-cloud/android/.gradle")) return false;
+      if (norm.includes("/phone-cloud/android/build")) return false;
+      if (norm.includes("/phone-cloud/android/app/build")) return false;
+      if (norm.endsWith("/phone-cloud/android/local.properties")) return false;
+      return true;
+    },
+  });
+  console.log(`[+] Đã đồng bộ trọn bộ thư mục tools/ (skill, cua, vps-ssh, db-manager, phone-cloud) vào gói deploy`);
 }
 
 // Sao chép Landing Page, OpenAPI Schema và Icon ứng dụng

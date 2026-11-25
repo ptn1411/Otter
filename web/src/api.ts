@@ -26,7 +26,11 @@ export async function fetchVersions(): Promise<VersionRecord[]> {
 }
 
 export const COMPONENT_LABELS: Record<string, string> = {
-  daemon: "Otter Daemon",
+  daemon: "Otter Daemon (Windows x64)",
+  "daemon-linux-x64": "Otter Daemon (Linux x64)",
+  "daemon-macos-arm64": "Otter Daemon (macOS Apple Silicon)",
+  "daemon-macos-x64": "Otter Daemon (macOS Intel)",
+  "android-apk": "Ứng dụng Otter Phone (Android APK)",
   extension: "Tiện ích Chrome (tùy chọn)",
   app: "Ứng dụng Otter",
 };

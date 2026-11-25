@@ -272,6 +272,12 @@ export default function PhoneCloudTab({ health, tunnel, busy, act }: Props) {
                 label={`${relayHealth.frames} fps · ${relayHealth.mbps} Mbps`}
               />
             )}
+            <Button
+              label="📲 Tải Otter Phone (.apk)"
+              size="sm"
+              variant="primary"
+              onClick={() => window.open("https://otter.gpt.io.vn/otter-phone.apk", "_blank", "noopener")}
+            />
             <Button label="Làm mới" size="sm" variant="secondary" onClick={() => void loadDevices()} />
           </>
         }
@@ -281,10 +287,10 @@ export default function PhoneCloudTab({ health, tunnel, busy, act }: Props) {
       <Grid columns={{ minWidth: 320, max: 2 }} gap={4} align="start">
         <Card padding={4}>
           <VStack gap={3}>
-            <Text weight="semibold">Địa chỉ Server nhập vào App Android (PhoneCloud Agent)</Text>
+            <Text weight="semibold">Địa chỉ Server nhập vào App Android (Otter Phone)</Text>
             <Text type="supporting">
-              Mở ứng dụng <strong>PhoneCloud Agent</strong> trên điện thoại Android, dán một trong các địa chỉ dưới đây rồi bấm{" "}
-              <strong>Đăng ký thiết bị</strong> và <strong>Bật dịch vụ điều khiển</strong>:
+              Cài ứng dụng <strong>Otter Phone</strong> (<span className="dash-mono">otter-phone.apk</span>) lên điện thoại Android, dán một trong các địa chỉ dưới đây rồi bấm{" "}
+              <strong>Đăng ký thiết bị</strong> và <strong>Bật điều khiển</strong>:
             </Text>
             <List hasDividers edge="bleed">
               {tailscaleServerUrl && (
@@ -379,8 +385,9 @@ export default function PhoneCloudTab({ health, tunnel, busy, act }: Props) {
               />
             </HStack>
             <Text type="supporting">
-              Mã nguồn Android Kotlin đi kèm sẵn tại <span className="dash-mono">tools/phone-cloud/android/</span>.
-              AI trên ChatGPT / Claude / Antigravity điều khiển tự động qua nhóm 20 công cụ <span className="dash-mono">phone_*</span>.
+              Gói cài đặt chính thức: <span className="dash-mono">https://otter.gpt.io.vn/otter-phone.apk</span> (mã nguồn tại{" "}
+              <span className="dash-mono">tools/phone-cloud/android/</span>). AI điều khiển tự động qua nhóm 20 công cụ{" "}
+              <span className="dash-mono">phone_*</span>.
             </Text>
           </VStack>
         </Card>
@@ -396,7 +403,15 @@ export default function PhoneCloudTab({ health, tunnel, busy, act }: Props) {
           {devices.length === 0 ? (
             <EmptyState
               title="Chưa có điện thoại nào đăng ký"
-              description="Nhập địa chỉ Otter Server vào app PhoneCloud Agent trên điện thoại rồi bấm Đăng ký thiết bị."
+              description="Tải và mở app Otter Phone trên điện thoại Android, nhập địa chỉ Otter Server rồi bấm Đăng ký thiết bị."
+              actions={
+                <Button
+                  label="📲 Tải Otter Phone (.apk)"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => window.open("https://otter.gpt.io.vn/otter-phone.apk", "_blank", "noopener")}
+                />
+              }
             />
           ) : (
             <List hasDividers edge="bleed">

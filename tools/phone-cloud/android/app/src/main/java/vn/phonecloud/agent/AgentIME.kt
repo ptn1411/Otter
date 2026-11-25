@@ -30,7 +30,7 @@ class AgentIME : InputMethodService() {
 
     override fun onCreateInputView(): View {
         return TextView(this).apply {
-            text = "PhoneCloud Keyboard — nhập từ web điều khiển"
+            text = "Otter Keyboard — nhập tiếng Việt từ Otter"
             setPadding(24, 24, 24, 24)
         }
     }

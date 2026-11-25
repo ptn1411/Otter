@@ -3,17 +3,15 @@ package vn.phonecloud.agent
 import android.graphics.Rect
 import android.view.accessibility.AccessibilityNodeInfo
 
-/**
- * Bộ chọn phần tử giao diện theo cú pháp rút gọn kiểu XPath.
- * Hỗ trợ các dạng:
- *   //*[@text="OK"]
- *   //android.widget.Button[@resource-id="com.app:id/btn_ok"]
- *   //*[contains(@text,"Đăng")]
- *   //*[@content-desc="Quay lại"]
- *   //*[@class="android.widget.EditText"]
- *   //*   (mọi phần tử — dùng để dump cây giao diện)
- * Nhiều điều kiện cách nhau bằng " and ": //*[@text="OK" and @clickable="true"]
- */
+// Bộ chọn phần tử giao diện theo cú pháp rút gọn kiểu XPath.
+// Hỗ trợ các dạng:
+//   //*[@text="OK"]
+//   //android.widget.Button[@resource-id="com.app:id/btn_ok"]
+//   //*[contains(@text,"Đăng")]
+//   //*[@content-desc="Quay lại"]
+//   //*[@class="android.widget.EditText"]
+//   //*   (mọi phần tử — dùng để dump cây giao diện)
+// Nhiều điều kiện cách nhau bằng " and ": //*[@text="OK" and @clickable="true"]
 object Selector {
 
     data class Query(

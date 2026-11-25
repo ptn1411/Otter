@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#243242</color>
+    <color name="otter_bg">#0F172A</color>
+    <color name="otter_surface">#1E293B</color>
+    <color name="otter_emerald">#10B981</color>
+    <color name="otter_emerald_dark">#059669</color>
+    <color name="otter_text">#F8FAFC</color>
+    <color name="otter_muted">#94A3B8</color>
+</resources>

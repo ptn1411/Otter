@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PhoneCloud Agent</string>
+    <string name="app_name">Otter Phone</string>
+    <string name="a11y_desc">Cho phép trợ lý AI Otter đọc cây giao diện và thao tác chạm, vuốt, nhập liệu từ xa trên điện thoại của bạn.</string>
 </resources>

@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<Button>(R.id.btnIme).setOnClickListener {
             startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
-            toast("Bật PhoneCloud Keyboard rồi chọn làm bàn phím hiện tại")
+            toast("Bật Otter Keyboard rồi chọn làm bàn phím hiện tại")
         }
         findViewById<Button>(R.id.btnBattery).setOnClickListener {
             val i = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
@@ -160,8 +160,8 @@ class MainActivity : AppCompatActivity() {
         val sb = StringBuilder()
         sb.append("Dịch vụ: ").append(if (AgentService.running) "đang chạy" else "đã tắt").append('\n')
         if (AgentService.statusText.isNotEmpty()) sb.append("Trạng thái: ").append(AgentService.statusText).append('\n')
-        sb.append("Trợ năng: ").append(if (isAccessibilityOn()) "đã bật ✓" else "chưa bật ✗").append('\n')
-        sb.append("Bàn phím PhoneCloud: ").append(if (isImeCurrent()) "đang dùng ✓" else "chưa chọn ✗").append('\n')
+        sb.append("Trợ năng Otter: ").append(if (isAccessibilityOn()) "đã bật ✓" else "chưa bật ✗").append('\n')
+        sb.append("Bàn phím Otter Keyboard: ").append(if (isImeCurrent()) "đang dùng ✓" else "chưa chọn ✗").append('\n')
         sb.append("Bỏ tối ưu pin: ").append(if (isBatteryIgnored()) "đã bỏ ✓" else "chưa ✗")
         tvStatus.text = sb.toString()
     }

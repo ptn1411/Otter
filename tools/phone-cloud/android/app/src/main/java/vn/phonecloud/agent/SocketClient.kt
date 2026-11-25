@@ -1,5 +1,6 @@
 package vn.phonecloud.agent
 
+import android.accessibilityservice.AccessibilityService
 import android.app.ActivityManager
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -250,25 +251,37 @@ class SocketClient(
         }
         a11y.takeScreenshot(
             Display.DEFAULT_DISPLAY,
-            executor
-        ) { result ->
-            try {
-                val hw = result.hardwareBuffer
-                val bmp = Bitmap.wrapHardwareBuffer(hw, result.colorSpace)
-                if (bmp == null) {
-                    reply(taskId, false, null, "không tạo được bitmap")
-                } else {
-                    val soft = bmp.copy(Bitmap.Config.ARGB_8888, false)
-                    val out = ByteArrayOutputStream()
-                    soft.compress(Bitmap.CompressFormat.PNG, 100, out)
-                    reply(taskId, true, JSONObject().put(
-                        "pngBase64", Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
-                    ))
+            executor,
+            object : AccessibilityService.TakeScreenshotCallback {
+                override fun onSuccess(result: AccessibilityService.ScreenshotResult) {
+                    try {
+                        val hw = result.hardwareBuffer
+                        val bmp = Bitmap.wrapHardwareBuffer(hw, result.colorSpace)
+                        if (bmp == null) {
+                            reply(taskId, false, null, "không tạo được bitmap")
+                        } else {
+                            val soft = bmp.copy(Bitmap.Config.ARGB_8888, false)
+                            val out = ByteArrayOutputStream()
+                            soft.compress(Bitmap.CompressFormat.PNG, 100, out)
+                            reply(
+                                taskId,
+                                true,
+                                JSONObject().put(
+                                    "pngBase64",
+                                    Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
+                                )
+                            )
+                        }
+                        hw.close()
+                    } catch (e: Exception) {
+                        reply(taskId, false, null, e.message)
+                    }
                 }
-                hw.close()
-            } catch (e: Exception) {
-                reply(taskId, false, null, e.message)
+
+                override fun onFailure(errorCode: Int) {
+                    reply(taskId, false, null, "takeScreenshot thất bại (mã lỗi $errorCode)")
+                }
             }
-        }
+        )
     }
 }

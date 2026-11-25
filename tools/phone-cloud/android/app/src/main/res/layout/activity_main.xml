@@ -1,88 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@color/otter_bg"
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="PhoneCloud Agent"
-        android:textSize="22sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/tvInfo"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Chưa đăng ký thiết bị"
-        android:textSize="15sp" />
+        android:orientation="vertical"
+        android:padding="18dp">
 
-    <EditText
-        android:id="@+id/etServer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:hint="Địa chỉ server, vd: http://100.111.68.103:3100"
-        android:inputType="textUri" />
+        <!-- Header thương hiệu Otter -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingBottom="14dp">
 
-    <Button
-        android:id="@+id/btnRegister"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Đăng ký thiết bị (nhận ID + mật khẩu)" />
+            <ImageView
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/otter_logo" />
 
-    <Button
-        android:id="@+id/btnStart"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Bật dịch vụ điều khiển" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btnStop"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Tắt dịch vụ" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Otter Phone"
+                    android:textColor="@color/otter_text"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Quyền cần cấp:"
-        android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Điều khiển Android từ xa · Otter MCP v2.4"
+                    android:textColor="@color/otter_emerald"
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </LinearLayout>
 
-    <Button
-        android:id="@+id/btnAccessibility"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="1. Bật Trợ năng (Accessibility)" />
+        <!-- Khối kết nối Otter Daemon -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/otter_surface"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-    <Button
-        android:id="@+id/btnIme"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="2. Chọn bàn phím PhoneCloud Keyboard" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kết nối máy chủ Otter"
+                android:textColor="@color/otter_text"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/btnBattery"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="3. Bỏ tối ưu pin cho app" />
+            <TextView
+                android:id="@+id/tvInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="monospace"
+                android:text="Chưa đăng ký thiết bị"
+                android:textColor="@color/otter_muted"
+                android:textSize="14sp" />
 
-    <Button
-        android:id="@+id/btnOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="4. Quyền hiển thị trên app khác" />
+            <EditText
+                android:id="@+id/etServer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@color/otter_emerald"
+                android:hint="VD: http://100.66.170.39:1993 hoặc https://...trycloudflare.com"
+                android:inputType="textUri"
+                android:textColor="@color/otter_text"
+                android:textColorHint="@color/otter_muted"
+                android:textSize="14sp" />
 
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text=""
-        android:textSize="13sp" />
-</LinearLayout>
+            <Button
+                android:id="@+id/btnRegister"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="@color/otter_emerald"
+                android:text="Đăng ký thiết bị (nhận ID + mật khẩu)"
+                android:textAllCaps="false"
+                android:textColor="#062118"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnStart"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#2563EB"
+                    android:text="Bật điều khiển"
+                    android:textAllCaps="false"
+                    android:textColor="@color/otter_text" />
+
+                <Button
+                    android:id="@+id/btnStop"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#334155"
+                    android:text="Tắt dịch vụ"
+                    android:textAllCaps="false"
+                    android:textColor="@color/otter_text" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Khối cấp quyền hệ thống -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:background="@color/otter_surface"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4 quyền cần cấp một lần:"
+                android:textColor="@color/otter_text"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnAccessibility"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#334155"
+                android:text="1. Bật Trợ năng (Otter Phone Control)"
+                android:textAlignment="viewStart"
+                android:textAllCaps="false"
+                android:textColor="@color/otter_text" />
+
+            <Button
+                android:id="@+id/btnIme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#334155"
+                android:text="2. Bật &amp; chọn bàn phím Otter Keyboard"
+                android:textAlignment="viewStart"
+                android:textAllCaps="false"
+                android:textColor="@color/otter_text" />
+
+            <Button
+                android:id="@+id/btnBattery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#334155"
+                android:text="3. Bỏ tối ưu pin cho Otter Phone"
+                android:textAlignment="viewStart"
+                android:textAllCaps="false"
+                android:textColor="@color/otter_text" />
+
+            <Button
+                android:id="@+id/btnOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#334155"
+                android:text="4. Quyền hiển thị trên ứng dụng khác"
+                android:textAlignment="viewStart"
+                android:textAllCaps="false"
+                android:textColor="@color/otter_text" />
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:lineSpacingExtra="3dp"
+                android:text=""
+                android:textColor="@color/otter_muted"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

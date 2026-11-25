@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.PhoneCloud" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
+    <style name="Theme.PhoneCloud" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/otter_emerald</item>
+        <item name="colorPrimaryVariant">@color/otter_emerald_dark</item>
+        <item name="colorSecondary">@color/otter_emerald</item>
+        <item name="android:statusBarColor">@color/otter_bg</item>
+        <item name="android:navigationBarColor">@color/otter_bg</item>
+        <item name="android:windowBackground">@color/otter_bg</item>
+    </style>
 </resources>

@@ -95,7 +95,8 @@ const binaryFiles = [
   "otter-windows-x64.exe",
   "otter-linux-x64",
   "otter-darwin-arm64",
-  "otter-darwin-x64"
+  "otter-darwin-x64",
+  "otter-phone.apk"
 ];
 
 for (const bin of binaryFiles) {
@@ -125,7 +126,8 @@ sshCmd(`cd ${REMOTE_DIR} && tar -xzf tools.tar.gz && rm tools.tar.gz`);
 
 // 5. Cấu hình quyền và Symlink trên VPS
 console.log("\n[5/6] Cấu hình phân quyền & tạo Symlink...");
-sshCmd(`cd ${REMOTE_DIR} && rm -f otter-extension.zip && ln -sf otter-windows-x64.exe otter.exe && chmod +x otter-* setup.sh 2>/dev/null || true`);
+sshCmd(`cd ${REMOTE_DIR} && rm -f otter-extension.zip && ln -sf otter-windows-x64.exe otter.exe && chmod +x otter-windows-x64.exe otter-linux-x64 otter-darwin-* setup.sh 2>/dev/null || true`);
+sshCmd(`cd ${REMOTE_DIR} && chmod 644 otter-phone.apk 2>/dev/null || true`);
 sshCmd(`chown -R www-data:www-data ${REMOTE_DIR} && chmod -R u=rwX,go=rX ${REMOTE_DIR}`);
 
 // 6. Cập nhật Backend Otter Monitor Server (/opt/otter-server)
@@ -160,10 +162,20 @@ const releaseEntries = [
     url: "https://otter.gpt.io.vn/otter-windows-x64.exe",
     changelog: [
       `### Otter Daemon v${OTTER_VERSION}`,
-      "- Hợp nhất PhoneCloud 1.3 trực tiếp vào Otter Daemon (chung cổng 1993, SQLite, WebCodecs H.264 Studio & 20 công cụ MCP phone_*)",
-      "- Tích hợp Phòng ban 3D (Command Office) trực quan hóa đội ngũ AI Agent và điều phối hộp thư A2A trực tiếp theo thời gian thực",
-      "- Vá bảo mật toàn diện (khóa LFI /api/media/file, chặn path traversal /assets/*, chống giả mạo Cloudflare Tunnel header, giải phóng phiên MCP nhàn rỗi)",
-      "- Tối ưu hiệu năng & đồng bộ giao diện Sáng/Tối xuyên suốt Dashboard, Phòng ban 3D và trang chủ otter.gpt.io.vn (326 công cụ · 18 nhóm)",
+      "- Phát hành gói cài đặt **Otter Phone Android APK** (`otter-phone.apk`) đã ký số với biểu tượng Otter chính thức, giao diện Dark Emerald, dịch vụ **Otter Phone Control** & bàn phím **Otter Keyboard**",
+      "- Bổ sung khu vực tải trực tiếp `otter-phone.apk` trên trang chủ `otter.gpt.io.vn` và trong tab **PhoneCloud** của Otter Dashboard",
+      "- Tích hợp Relay H.264 WebCodecs + 20 công cụ MCP `phone_*` trên cùng cổng 1993, đồng bộ Phòng ban 3D A2A và 326 công cụ (18 nhóm)",
+    ].join("\n"),
+  },
+  {
+    component: "android-apk",
+    file: "otter-phone.apk",
+    url: "https://otter.gpt.io.vn/otter-phone.apk",
+    changelog: [
+      `### Otter Phone cho Android v${OTTER_VERSION}`,
+      "- Đổi tên ứng dụng thành **Otter Phone** (`vn.otter.phone`) kèm bộ biểu tượng Adaptive Icon chính thức của Otter",
+      "- Nâng cấp giao diện kết nối Dark Emerald trực quan, dịch vụ trợ năng **Otter Phone Control** và bàn phím tiếng Việt **Otter Keyboard**",
+      "- Hỗ trợ quay màn hình H.264 độ trễ thấp (360p–1080p) kết nối thẳng tới Otter Daemon qua LAN, Tailscale hoặc Cloudflare Quick Tunnel",
     ].join("\n"),
   },
   {
@@ -223,6 +235,7 @@ console.log("\n========================================================");
 console.log(" [✓] DEPLOY LÊN VPS THÀNH CÔNG!");
 console.log("========================================================");
 console.log(` - Trang chủ / Web: https://otter.gpt.io.vn`);
+console.log(` - Ứng dụng Android: https://otter.gpt.io.vn/otter-phone.apk`);
 console.log(` - Kịch bản cài đặt: https://otter.gpt.io.vn/setup.ps1`);
 console.log(` - Otter Monitor: https://license.gpt.io.vn`);
 console.log("========================================================\n");

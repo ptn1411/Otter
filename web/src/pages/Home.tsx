@@ -18,11 +18,12 @@ import { Switch } from "@astryxdesign/core/Switch";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Divider } from "@astryxdesign/core/Divider";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { fetchVersions, componentLabel, type VersionRecord } from "../api";
+import { fetchVersions, componentLabel, trackDownload, type VersionRecord } from "../api";
 import {
   ArrowRightIcon,
   CheckIcon,
   CpuIcon,
+  DownloadIcon,
   GlobeIcon,
   MonitorIcon,
   ShieldIcon,
@@ -729,7 +730,8 @@ export default function Home() {
               <Heading level={2}>Cài đặt trong 30 giây</Heading>
               <Text type="supporting">
                 Dán một dòng lệnh duy nhất để tải binary Otter đúng kiến trúc máy, khởi động dịch
-                vụ nền và mở Dashboard quản lý cục bộ.
+                vụ nền và mở Dashboard quản lý cục bộ — hoặc tải ứng dụng Otter Phone (.apk) để điều
+                khiển điện thoại Android từ xa.
               </Text>
               <VStack gap={3}>
                 <HStack gap={2} align="center">
@@ -744,6 +746,10 @@ export default function Home() {
                   <CheckIcon size={16} />
                   <Text>Hỗ trợ Windows x64, macOS (Apple Silicon & Intel) và Linux x64.</Text>
                 </HStack>
+                <HStack gap={2} align="center">
+                  <CheckIcon size={16} />
+                  <Text>Ứng dụng Otter Phone (.apk) đã ký số cho điện thoại Android 8.0+.</Text>
+                </HStack>
               </VStack>
             </VStack>
 
@@ -752,23 +758,108 @@ export default function Home() {
                 <SegmentedControlItem value="windows" label="Windows" />
                 <SegmentedControlItem value="macos" label="macOS" />
                 <SegmentedControlItem value="linux" label="Linux" />
+                <SegmentedControlItem value="android" label="Android APK" />
               </SegmentedControl>
 
-              <CodeBlock code={install.code} language={install.language} title={install.label} />
+              {os === "android" ? (
+                <>
+                  <Card padding={4}>
+                    <VStack gap={3}>
+                      <HStack justify="between" align="center" wrap="wrap" gap={2}>
+                        <Text weight="semibold">Ứng dụng Otter Phone (Android 8.0+)</Text>
+                        <Badge variant="success" label={`v${__OTTER_VERSION__} · APK đã ký số`} />
+                      </HStack>
+                      <Text type="supporting">
+                        Cài trực tiếp lên điện thoại Android để truyền màn hình H.264 độ trễ thấp,
+                        nhận thao tác chạm/vuốt qua <strong>Otter Phone Control</strong> và nhập
+                        tiếng Việt qua <strong>Otter Keyboard</strong>.
+                      </Text>
+                      <HStack gap={3} wrap="wrap">
+                        <Button
+                          label={`Tải Otter Phone APK (v${__OTTER_VERSION__})`}
+                          variant="primary"
+                          size="lg"
+                          icon={<DownloadIcon size={16} />}
+                          onClick={() => {
+                            trackDownload({
+                              component: "android-apk",
+                              platform: "android",
+                              version: __OTTER_VERSION__,
+                              source: "web-install",
+                            });
+                            window.open("https://otter.gpt.io.vn/otter-phone.apk", "_blank", "noopener");
+                          }}
+                        />
+                      </HStack>
+                    </VStack>
+                  </Card>
 
-              <Card padding={4}>
-                <VStack gap={1.5}>
-                  <Text type="supporting">
-                    <span className="otter-mono">✓ Xác minh SHA-256 hợp lệ ({install.label})</span>
-                  </Text>
-                  <Text type="supporting">
-                    <span className="otter-mono">✓ MCP Server: http://localhost:1993/mcp</span>
-                  </Text>
-                  <Text type="supporting">
-                    <span className="otter-mono">✓ Dashboard: http://localhost:1993/dashboard</span>
-                  </Text>
-                </VStack>
-              </Card>
+                  <CodeBlock
+                    code="https://otter.gpt.io.vn/otter-phone.apk"
+                    language="text"
+                    title="Liên kết tải trực tiếp (otter-phone.apk)"
+                  />
+
+                  <Card padding={4}>
+                    <VStack gap={1.5}>
+                      <Text type="supporting">
+                        <span className="otter-mono">✓ Bước 1: Mở tệp otter-phone.apk để cài Otter Phone</span>
+                      </Text>
+                      <Text type="supporting">
+                        <span className="otter-mono">✓ Bước 2: Dán địa chỉ Otter (:1993 hoặc Tunnel) → Đăng ký thiết bị</span>
+                      </Text>
+                      <Text type="supporting">
+                        <span className="otter-mono">✓ Bước 3: Bật Otter Phone Control & Otter Keyboard → Bật điều khiển</span>
+                      </Text>
+                    </VStack>
+                  </Card>
+                </>
+              ) : (
+                <>
+                  <CodeBlock code={install.code} language={install.language} title={install.label} />
+
+                  <Card padding={4}>
+                    <VStack gap={1.5}>
+                      <Text type="supporting">
+                        <span className="otter-mono">✓ Xác minh SHA-256 hợp lệ ({install.label})</span>
+                      </Text>
+                      <Text type="supporting">
+                        <span className="otter-mono">✓ MCP Server: http://localhost:1993/mcp</span>
+                      </Text>
+                      <Text type="supporting">
+                        <span className="otter-mono">✓ Dashboard: http://localhost:1993/dashboard</span>
+                      </Text>
+                    </VStack>
+                  </Card>
+
+                  <Card padding={3}>
+                    <HStack justify="between" align="center" wrap="wrap" gap={3}>
+                      <VStack gap={1}>
+                        <Text weight="semibold">Điều khiển thêm điện thoại Android?</Text>
+                        <Text type="supporting">
+                          Tải ứng dụng <strong>Otter Phone</strong> chính thức (
+                          <span className="otter-mono">otter-phone.apk</span>)
+                        </Text>
+                      </VStack>
+                      <Button
+                        label="Tải Otter Phone (.apk)"
+                        variant="secondary"
+                        size="sm"
+                        icon={<DownloadIcon size={14} />}
+                        onClick={() => {
+                          trackDownload({
+                            component: "android-apk",
+                            platform: "android",
+                            version: __OTTER_VERSION__,
+                            source: "web-install-companion",
+                          });
+                          window.open("https://otter.gpt.io.vn/otter-phone.apk", "_blank", "noopener");
+                        }}
+                      />
+                    </HStack>
+                  </Card>
+                </>
+              )}
 
               <Text type="supporting">
                 Otter điều khiển trình duyệt trực tiếp qua Chrome DevTools Protocol (CDP), không cần cài Extension.

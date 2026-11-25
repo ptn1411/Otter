@@ -132,7 +132,12 @@ export default function Updates() {
                       onClick={() => {
                         trackDownload({
                           component: v.component,
-                          platform: v.component === "extension" ? "chrome" : "unknown",
+                          platform:
+                            v.component === "android-apk"
+                              ? "android"
+                              : v.component === "extension"
+                                ? "chrome"
+                                : "unknown",
                           version: v.version,
                           source: "web-updates",
                         });
