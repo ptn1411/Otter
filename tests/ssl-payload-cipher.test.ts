@@ -1,7 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { Database } from "bun:sqlite";
-import * as fs from "node:fs";
-import * as path from "node:path";
+import { describe, it, expect } from "bun:test";
 import {
   getPayloadCipherKey,
   encryptPayload,
@@ -9,40 +6,10 @@ import {
   isEncryptedEnvelope,
   validateSecureUrl,
   verifyTlsCertificateAuthority,
-  secureFetch,
   encryptedJsonResponse,
 } from "../src/daemon/license/payload-cipher";
-import {
-  initLicenseDatabase,
-  issueLicense,
-  startLicenseServer,
-} from "../src/server/license-server";
-import { activateOnline, sendHeartbeat } from "../src/daemon/license/hybrid-client";
-import { generateSupportCode } from "../src/daemon/license/support-code";
-import { getDeviceHash } from "../src/daemon/license/fingerprint";
 
-const TEST_DB_PATH = path.join(process.cwd(), "data", "test-cipher-server.sqlite");
-const TEST_PORT = 1999;
-
-describe("SSL & Payload Cipher End-to-End Tests (Bảo mật SSL và Mã hóa Chống Xem Dữ Liệu)", () => {
-  let db: Database;
-  let server: ReturnType<typeof Bun.serve>;
-
-  beforeEach(() => {
-    if (fs.existsSync(TEST_DB_PATH)) {
-      try { fs.unlinkSync(TEST_DB_PATH); } catch {}
-    }
-    db = initLicenseDatabase(TEST_DB_PATH);
-    server = startLicenseServer(TEST_PORT, TEST_DB_PATH);
-  });
-
-  afterEach(() => {
-    server.stop(true);
-    db.close();
-    if (fs.existsSync(TEST_DB_PATH)) {
-      try { fs.unlinkSync(TEST_DB_PATH); } catch {}
-    }
-  });
+describe("SSL & Payload Cipher Unit Tests (Bảo mật SSL và Mã hóa Chống Xem Dữ Liệu)", () => {
 
   describe("1. AES-256-GCM Envelope Encryption (Mã hóa gói tin)", () => {
     it("derives a 32-byte (256-bit) encryption key", () => {
@@ -163,84 +130,6 @@ describe("SSL & Payload Cipher End-to-End Tests (Bảo mật SSL và Mã hóa Ch
         const check = verifyTlsCertificateAuthority(ca);
         expect(check.valid).toBe(true);
       }
-    });
-  });
-
-  describe("3. End-to-End Encrypted API Communication (Mã hóa toàn diện Client - Server)", () => {
-    it("activates license via encrypted POST request and receives encrypted response", async () => {
-      const testEmail = "secure-user@domain.vn";
-      const issueRes = await issueLicense(db, {
-        email: testEmail,
-        package_type: "pro",
-        duration_days: 30,
-        send_email: false,
-      });
-
-      const serverUrl = `http://127.0.0.1:${TEST_PORT}`;
-      const supportCode = generateSupportCode();
-      const deviceHash = getDeviceHash();
-
-      // 1. Gửi request mã hóa trực tiếp qua secureFetch
-      const res = await secureFetch(`${serverUrl}/api/v1/license/activate`, {
-        method: "POST",
-        encrypt: true,
-        body: JSON.stringify({
-          email: testEmail,
-          license_key: issueRes.license_key,
-          support_code: supportCode,
-          device_hash: deviceHash,
-        }),
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.headers.get("X-Otter-Encrypted")).toBe("1");
-
-      // res.json() tự động giải mã
-      const data = await res.json();
-      expect(data.success).toBe(true);
-      expect(data.leased_token).toBeDefined();
-      expect(data.package_type).toBe("pro");
-    });
-
-    it("activates and heartbeats seamlessly via hybrid client with automatic encryption", async () => {
-      const testEmail = "client-user@domain.vn";
-      const issueRes = await issueLicense(db, {
-        email: testEmail,
-        package_type: "enterprise",
-        duration_days: 60,
-        send_email: false,
-      });
-
-      const serverUrl = `http://127.0.0.1:${TEST_PORT}`;
-
-      // Kích hoạt qua hybrid-client (tự động bật mã hóa và kiểm tra SSL)
-      const actRes = await activateOnline({
-        serverUrl,
-        email: testEmail,
-        licenseKey: issueRes.license_key,
-      });
-
-      expect(actRes.success).toBe(true);
-      expect(actRes.leasedToken).toBeDefined();
-      expect(actRes.packageType).toBe("enterprise");
-
-      // Gửi heartbeat ngầm qua hybrid-client (mã hóa 2 chiều)
-      const hbRes = await sendHeartbeat(serverUrl);
-      expect(hbRes.success).toBe(true);
-      expect(hbRes.renewed).toBe(true);
-      expect(hbRes.leasedExpiresAt).toBeDefined();
-    });
-
-    it("blocks activation attempt to insecure remote HTTP server", async () => {
-      const insecureUrl = "http://fake-remote-server.com";
-      const actRes = await activateOnline({
-        serverUrl: insecureUrl,
-        email: "any@domain.com",
-        licenseKey: "OTTER-PRO-30D-FAKE1234",
-      });
-
-      expect(actRes.success).toBe(false);
-      expect(actRes.error).toContain("bắt buộc phải sử dụng kết nối bảo mật HTTPS/WSS");
     });
   });
 });

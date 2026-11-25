@@ -36,5 +36,6 @@ export {
   readAntigravityChat,
   controlAntigravity,
 } from "./antigravity-cdp-tools";
+export { registerPhoneTools, executePhoneTool, PHONE_TOOL_DEFS } from "./phone-tools";
 
 

@@ -2485,6 +2485,68 @@
           }
         }
       }
+    },
+    "/api/activity/v1/phone/devices": {
+      "get": {
+        "operationId": "phone_list_devices",
+        "summary": "Danh sách điện thoại Android kết nối qua PhoneCloud",
+        "description": "Liệt kê các điện thoại Android đã đăng ký trên Otter PhoneCloud (hoặc Relay ngoài), trạng thái online, độ phân giải và chất lượng luồng.",
+        "parameters": [
+          { "name": "api", "in": "query", "schema": { "type": "string" }, "description": "Địa chỉ Relay ngoài (tùy chọn)" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách điện thoại Android",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/phone/ui-tree": {
+      "get": {
+        "operationId": "phone_get_ui_tree",
+        "summary": "Đọc cây giao diện Accessibility đang hiện trên màn hình Android",
+        "description": "Trả về cấu trúc cây giao diện rút gọn kèm tâm phần tử center=(x,y), nhẹ token hơn chụp màn hình.",
+        "parameters": [
+          { "name": "device_id", "in": "query", "schema": { "type": "string" }, "description": "ID thiết bị 8 chữ số (tùy chọn)" },
+          { "name": "maxResults", "in": "query", "schema": { "type": "integer", "default": 100 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cây giao diện Android",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/api/activity/v1/phone/action": {
+      "post": {
+        "operationId": "phone_execute_action",
+        "summary": "Thực thi thao tác điều khiển điện thoại Android qua PhoneCloud",
+        "description": "Gọi bất kỳ công cụ PhoneCloud nào: phone_connect, phone_click_element, phone_find_element, phone_wait_for_element, phone_tap, phone_long_press, phone_swipe, phone_scroll, phone_type_text, phone_set_text, phone_press_key, phone_open_app, phone_clipboard, phone_screenshot, phone_set_quality.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tool": { "type": "string", "description": "Tên công cụ phone_* (vd: phone_click_element)" },
+                  "device_id": { "type": "string", "description": "ID thiết bị 8 chữ số (tùy chọn)" },
+                  "arguments": { "type": "object", "description": "Tham số của công cụ" }
+                },
+                "required": ["tool"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả thao tác trên điện thoại",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
     }
   }
 }

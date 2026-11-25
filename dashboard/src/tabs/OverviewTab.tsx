@@ -31,6 +31,7 @@ interface Props {
   busy: string | null;
   act: (key: string, fn: () => Promise<void>, okText?: string) => Promise<void>;
   onRefresh: () => void;
+  onNavigate?: (section: "phone" | "office" | "tools" | "a2a") => void;
 }
 
 export default function OverviewTab({
@@ -41,6 +42,7 @@ export default function OverviewTab({
   busy,
   act,
   onRefresh,
+  onNavigate,
 }: Props) {
   const [doctorResult, setDoctorResult] = useState<string | null>(null);
   const tunnelOrigin = tunnel?.url ? tunnel.url.replace(/\/+$/, "") : null;
@@ -161,6 +163,64 @@ export default function OverviewTab({
               <Text type="supporting">
                 {fullAccess ? "Truy cập mọi thư mục" : "Giới hạn workspace an toàn"}
               </Text>
+            </VStack>
+          </Card>
+        </Grid>
+      )}
+
+      {/* Không gian điều hành trực quan (PhoneCloud Android & Phòng ban 3D) */}
+      {health && (
+        <Grid columns={{ minWidth: 300, max: 2 }} gap={4}>
+          <Card padding={4}>
+            <VStack gap={3}>
+              <HStack justify="between" align="center" gap={2}>
+                <Text weight="semibold">PhoneCloud (Android)</Text>
+                <Badge
+                  variant={(health.phoneCloud?.online ?? 0) > 0 ? "success" : "neutral"}
+                  label={`${health.phoneCloud?.online ?? 0}/${health.phoneCloud?.devices ?? 0} máy online`}
+                />
+              </HStack>
+              <Text type="supporting">
+                Relay H.264 WebCodecs tích hợp sẵn, cây giao diện Accessibility và 20 công cụ MCP điều khiển điện thoại từ xa.
+              </Text>
+              {onNavigate && (
+                <HStack>
+                  <Button
+                    label="Mở PhoneCloud Studio"
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => onNavigate("phone")}
+                  />
+                </HStack>
+              )}
+            </VStack>
+          </Card>
+
+          <Card padding={4}>
+            <VStack gap={3}>
+              <HStack justify="between" align="center" gap={2}>
+                <Text weight="semibold">Phòng ban 3D (Command Office)</Text>
+                <Badge variant="info" label="A2A Live" />
+              </HStack>
+              <Text type="supporting">
+                Không gian 3D trực quan hóa đội ngũ AI Agent, theo dõi luồng giao nhận việc A2A và điều phối trực tiếp theo thời gian thực.
+              </Text>
+              {onNavigate && (
+                <HStack gap={2} wrap="wrap">
+                  <Button
+                    label="Vào Phòng ban 3D"
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => onNavigate("office")}
+                  />
+                  <Button
+                    label="Hộp thư A2A"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onNavigate("a2a")}
+                  />
+                </HStack>
+              )}
             </VStack>
           </Card>
         </Grid>
@@ -292,6 +352,8 @@ export default function OverviewTab({
             {[
               { label: "MCP Streamable HTTP", url: `${endpointBase}/mcp` },
               { label: "MCP SSE (Tương thích ngược)", url: `${endpointBase}/sse` },
+              { label: "PhoneCloud Relay (App Android)", url: endpointBase },
+              { label: "Phòng ban 3D (Toàn màn hình)", url: `${endpointBase}/dashboard/phong/` },
               { label: "OpenAPI Schema", url: `${endpointBase}/openapi.json` },
               { label: "Plan Dashboard (Standalone)", url: `${endpointBase}/plan-dashboard` },
             ].map((ep) => (

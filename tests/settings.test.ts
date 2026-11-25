@@ -67,7 +67,8 @@ describe("Settings Module", () => {
     const postRes = await handleActivityRoutes(postReq, new URL(postReq.url), "activity/v1");
     expect(postRes).not.toBeNull();
     const data = await postRes!.json();
-    expect(data.mode).toBe("auto");
+    // Otter hiện dùng CDP gốc duy nhất, mọi mode truyền vào được chuẩn hóa về "cdp".
+    expect(data.mode).toBe("cdp");
     expect(data.headless).toBe(true);
     expect(data.hud).toBe(false);
     expect(data.autoClose).toBe(false);

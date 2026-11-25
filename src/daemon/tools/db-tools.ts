@@ -97,8 +97,8 @@ export async function runDbm(argv: string[], timeoutSecs?: number): Promise<stri
   }, timeout * 1000);
   try {
     const [stdout, stderr] = await Promise.all([
-      new Response(proc.stdout).text(),
-      new Response(proc.stderr).text(),
+      proc.stdout && typeof proc.stdout !== "number" ? new Response(proc.stdout).text() : Promise.resolve(""),
+      proc.stderr && typeof proc.stderr !== "number" ? new Response(proc.stderr).text() : Promise.resolve(""),
     ]);
     const status = await proc.exited;
     if (timedOut) {
@@ -192,7 +192,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
     {},
     async () => {
       try {
-        return text(await runDbm(["--json", "profile", "list"]).trim());
+        return text((await runDbm(["--json", "profile", "list"])).trim());
       } catch (e: any) {
         return err(e.message);
       }
@@ -205,7 +205,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
     { name: z.string() },
     async ({ name }) => {
       try {
-        return text(await runDbm(["--json", "profile", "show", name]).trim());
+        return text((await runDbm(["--json", "profile", "show", name])).trim());
       } catch (e: any) {
         return err(e.message);
       }
@@ -242,7 +242,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
     },
     async ({ profile, timeoutSecs }) => {
       try {
-        return text(await runDbm([...globalFlags(profile, undefined, timeoutSecs), "test"]).trim());
+        return text((await runDbm([...globalFlags(profile, undefined, timeoutSecs), "test"])).trim());
       } catch (e: any) {
         return err(e.message);
       }
@@ -258,7 +258,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
     },
     async ({ profile, timeoutSecs }) => {
       try {
-        return text(await runDbm([...globalFlags(profile, undefined, timeoutSecs), "dbs"]).trim());
+        return text((await runDbm([...globalFlags(profile, undefined, timeoutSecs), "dbs"])).trim());
       } catch (e: any) {
         return err(e.message);
       }
@@ -274,7 +274,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
     },
     async ({ profile, timeoutSecs }) => {
       try {
-        return text(await runDbm([...globalFlags(profile, undefined, timeoutSecs), "tables"]).trim());
+        return text((await runDbm([...globalFlags(profile, undefined, timeoutSecs), "tables"])).trim());
       } catch (e: any) {
         return err(e.message);
       }
@@ -291,7 +291,7 @@ export function registerDbTools(mcp: McpServer, onActivity?: (event: any) => voi
     },
     async ({ profile, table, timeoutSecs }) => {
       try {
-        return text(await runDbm([...globalFlags(profile, undefined, timeoutSecs), "describe", table]).trim());
+        return text((await runDbm([...globalFlags(profile, undefined, timeoutSecs), "describe", table])).trim());
       } catch (e: any) {
         return err(e.message);
       }

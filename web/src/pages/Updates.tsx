@@ -35,7 +35,10 @@ export default function Updates() {
       .catch(() => setFailed(true));
   }, []);
 
-  useEffect(load, [load]);
+  useEffect(() => {
+    const t = window.setTimeout(() => load(), 0);
+    return () => window.clearTimeout(t);
+  }, [load]);
 
   const components = useMemo(() => {
     if (!versions) return [];

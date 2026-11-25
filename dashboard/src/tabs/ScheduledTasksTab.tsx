@@ -50,9 +50,14 @@ export default function ScheduledTasksTab({ busy, act }: Props) {
   }, []);
 
   useEffect(() => {
-    void loadTasks();
-    const id = setInterval(() => void loadTasks(), 5000);
-    return () => clearInterval(id);
+    const boot = setTimeout(() => void loadTasks(), 0);
+    const id = setInterval(() => {
+      if (!document.hidden) void loadTasks();
+    }, 5000);
+    return () => {
+      clearTimeout(boot);
+      clearInterval(id);
+    };
   }, [loadTasks]);
 
   const counts = {

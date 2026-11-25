@@ -126,6 +126,25 @@ export function MessageIcon(props: P) {
   );
 }
 
+export function BuildingIcon(props: P) {
+  return (
+    <svg {...base(props)}>
+      <rect x="4" y="3" width="16" height="18" rx="2" />
+      <path d="M9 21v-4h6v4" />
+      <path d="M8 7h.01M12 7h.01M16 7h.01M8 11h.01M12 11h.01M16 11h.01" />
+    </svg>
+  );
+}
+
+export function SmartphoneIcon(props: P) {
+  return (
+    <svg {...base(props)}>
+      <rect x="6" y="2" width="12" height="20" rx="2.5" />
+      <line x1="12" y1="18" x2="12.01" y2="18" />
+    </svg>
+  );
+}
+
 export function SettingsIcon(props: P) {
   return (
     <svg {...base(props)}>

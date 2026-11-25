@@ -116,7 +116,7 @@ export class AgentDesktopBridge {
       }
 
       let cmd = findAgentDesktopCommand();
-      if (!cmd) {
+      if (!cmd && process.env.NODE_ENV !== "test" && process.env.OTTER_NO_AUTO_INSTALL !== "1") {
         console.log("[AgentDesktop] Chưa tìm thấy agent-desktop, đang tự động cài đặt qua npm install -g agent-desktop...");
         try {
           const { setupAgentDesktop } = await import("../../tools/agent-desktop/setup-agent-desktop");

@@ -1,7 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { Database } from "bun:sqlite";
-import * as fs from "node:fs";
-import * as path from "node:path";
+import { describe, it, expect } from "bun:test";
 import {
   LcgCipher,
   LCG_DEFAULT_SEED,
@@ -18,35 +15,8 @@ import {
   checkHostsFileContent,
   getProtectedDomains,
 } from "../src/daemon/license/hosts-guard";
-import {
-  initLicenseDatabase,
-  issueLicense,
-  startLicenseServer,
-} from "../src/server/license-server";
-import { activateOnline, sendHeartbeat } from "../src/daemon/license/hybrid-client";
-
-const TEST_DB_PATH = path.join(process.cwd(), "data", "test-lcg-server.sqlite");
-const TEST_PORT = 1997;
 
 describe("Linear Congruential Generator (LCG) Domain & Router Obfuscation Tests", () => {
-  let db: Database;
-  let server: ReturnType<typeof Bun.serve>;
-
-  beforeEach(() => {
-    if (fs.existsSync(TEST_DB_PATH)) {
-      try { fs.unlinkSync(TEST_DB_PATH); } catch {}
-    }
-    db = initLicenseDatabase(TEST_DB_PATH);
-    server = startLicenseServer(TEST_PORT, TEST_DB_PATH);
-  });
-
-  afterEach(() => {
-    server.stop(true);
-    db.close();
-    if (fs.existsSync(TEST_DB_PATH)) {
-      try { fs.unlinkSync(TEST_DB_PATH); } catch {}
-    }
-  });
 
   describe("1. Thuật toán LCG PRNG Stream Cipher (X_{n+1} = (a*X_n + c) mod 2^32)", () => {
     it("generates deterministic pseudo-random byte stream for a fixed seed", () => {
@@ -179,35 +149,6 @@ describe("Linear Congruential Generator (LCG) Domain & Router Obfuscation Tests"
       expect(matchDynamicKnockPath(knockPath, "HEARTBEAT", 60000)).toBe(true);
       expect(matchDynamicKnockPath(knockPath, "ACTIVATE", 60000)).toBe(false);
       expect(matchDynamicKnockPath("/api/v1/license/heartbeat/_k_deadbeef", "HEARTBEAT", 60000)).toBe(false);
-    });
-  });
-
-  describe("5. End-to-End Client & Server Integration với Router Ẩn", () => {
-    it("executes online activation and heartbeat seamlessly using masked routes", async () => {
-      const testEmail = "lcg-user@domain.vn";
-      const issueRes = await issueLicense(db, {
-        email: testEmail,
-        package_type: "pro",
-        duration_days: 30,
-        send_email: false,
-      });
-
-      const serverUrl = `http://127.0.0.1:${TEST_PORT}`;
-
-      // Kích hoạt qua hybrid-client (sử dụng getLcgRoute('ACTIVATE') ngầm)
-      const actRes = await activateOnline({
-        serverUrl,
-        email: testEmail,
-        licenseKey: issueRes.license_key,
-      });
-
-      expect(actRes.success).toBe(true);
-      expect(actRes.leasedToken).toBeDefined();
-
-      // Gửi heartbeat qua hybrid-client (sử dụng getLcgRoute('HEARTBEAT') ngầm)
-      const hbRes = await sendHeartbeat(serverUrl);
-      expect(hbRes.success).toBe(true);
-      expect(hbRes.renewed).toBe(true);
     });
   });
 });

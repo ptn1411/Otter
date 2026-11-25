@@ -1,7 +1,23 @@
 import { describe, it, expect } from "bun:test";
 
+async function isPortOpen(url: string): Promise<boolean> {
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 0, method: "tools/list", params: {} }),
+      signal: AbortSignal.timeout(800),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+const gpmLive = await isPortOpen("http://localhost:19977/mcp");
+
 describe("GPM Automate MCP Server Integration", () => {
-  it("should connect to gpmautomate MCP on port 19977 directly", async () => {
+  it.skipIf(!gpmLive)("should connect to gpmautomate MCP on port 19977 directly", async () => {
     const res = await fetch("http://localhost:19977/mcp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -23,7 +39,7 @@ describe("GPM Automate MCP Server Integration", () => {
     expect(toolNames).toContain("submit_workflow");
   });
 
-  it("should be aggregated into Otter MCP Gateway", async () => {
+  it.skipIf(!gpmLive)("should be aggregated into Otter MCP Gateway", async () => {
     const res = await fetch("http://localhost:1993/api/mcp/servers");
     expect(res.ok).toBe(true);
     const data = await res.json() as any;
@@ -33,7 +49,7 @@ describe("GPM Automate MCP Server Integration", () => {
     expect(gpmAutomateServer.toolsCount).toBe(8);
   });
 
-  it("should execute get_action_catalog via Otter REST proxy", async () => {
+  it.skipIf(!gpmLive)("should execute get_action_catalog via Otter REST proxy", async () => {
     const res = await fetch("http://localhost:1993/api/mcp/ext/gpmautomate/get_action_catalog", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

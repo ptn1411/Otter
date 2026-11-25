@@ -41,7 +41,8 @@ export default function ToolsTab({
   }, []);
 
   useEffect(() => {
-    void loadServers();
+    const t = setTimeout(() => void loadServers(), 0);
+    return () => clearTimeout(t);
   }, [loadServers]);
 
   const filteredGroups = useMemo(() => {
@@ -101,6 +102,7 @@ export default function ToolsTab({
                   { id: "minimal", label: "Tối thiểu" },
                   { id: "code", label: "Chỉ Code" },
                   { id: "fb", label: "Chỉ Facebook" },
+                  { id: "phone", label: "Chỉ Điện thoại" },
                 ].map((p) => (
                   <Button
                     key={p.id}

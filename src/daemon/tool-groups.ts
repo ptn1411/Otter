@@ -35,6 +35,7 @@ export const TOOL_GROUPS: ToolGroupDef[] = [
   { id: "agent-desktop", nameVi: "Agent Desktop", nameEn: "Agent Desktop", descVi: "Quan sát và điều khiển giao diện desktop theo cấu trúc ngữ nghĩa (snapshot, click, type, refs)", descEn: "Semantic desktop observation and control (snapshot, click, type, refs)", toolCount: 75, estTokens: 4200 },
   { id: "browser", nameVi: "Trình duyệt", nameEn: "Browser", descVi: "Mở trang, đọc nội dung, bấm, gõ, cuộn, quản lý tab và profile Chrome", descEn: "Open pages, read content, click, type, scroll, manage tabs and Chrome profiles", toolCount: 15, estTokens: 804 },
   { id: "desktop", nameVi: "Màn hình Desktop", nameEn: "Desktop Control", descVi: "Chụp màn hình, điều khiển chuột và bàn phím, Computer Use Agent", descEn: "Screenshots, mouse and keyboard control, Computer Use Agent", toolCount: 6, estTokens: 305 },
+  { id: "phone", nameVi: "Điện thoại Android (PhoneCloud)", nameEn: "Android Phone (PhoneCloud)", descVi: "Điều khiển điện thoại Android từ xa: cây Accessibility, chạm, vuốt, gõ chữ, mở app, clipboard, chụp ảnh màn hình", descEn: "Remote Android phone control: Accessibility UI tree, tap, swipe, type, open apps, clipboard, screenshots", toolCount: 20, estTokens: 1180 },
   { id: "code", nameVi: "Code & Dự án", nameEn: "Code & Projects", descVi: "Tìm kiếm code, symbol, outline, git status, đồ thị codebase và kiến trúc", descEn: "Code search, symbols, outline, git status, codebase graph and architecture", toolCount: 13, estTokens: 1031 },
   { id: "fb", nameVi: "Facebook tự động", nameEn: "Facebook Automation", descVi: "Đăng bài, trả lời bình luận, tương tác feed, đăng nhóm theo lịch, đăng media, bán hàng Messenger", descEn: "Posting, comment replies, feed engagement, scheduled group posts, media posts, Messenger sales", toolCount: 58, estTokens: 4651 },
   { id: "meta", nameVi: "Meta Unified", nameEn: "Meta Unified", descVi: "Gọi các cầu nối Meta CLI: Facebook, Messenger, Instagram, Threads, Meta Ads", descEn: "Meta CLI bridges: Facebook, Messenger, Instagram, Threads, Meta Ads", toolCount: 16, estTokens: 723 },
@@ -58,6 +59,7 @@ export const TOOL_GROUP_PRESETS: Record<string, string[] | null> = {
   minimal: ["core", "browser"],
   code: ["core", "code", "agents", "skills"],
   fb: ["core", "browser", "fb", "meta"],
+  phone: ["core", "phone", "browser"],
 };
 
 // ---------------------------------------------------------------------------

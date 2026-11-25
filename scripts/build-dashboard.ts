@@ -5,7 +5,10 @@ import { execSync } from "node:child_process";
 const rootDir = path.resolve(import.meta.dir, "..");
 const dashDir = path.join(rootDir, "dashboard");
 const distDir = path.join(dashDir, "dist");
+const officeDir = path.join(rootDir, "office");
+const officeDistDir = path.join(officeDir, "dist");
 const deployDashDir = path.join(rootDir, "deploy", "dashboard");
+const deployOfficeDir = path.join(deployDashDir, "phong");
 const outFile = path.join(rootDir, "src", "daemon", "dashboard-assets.generated.ts");
 
 const MIME_MAP: Record<string, string> = {
@@ -18,6 +21,7 @@ const MIME_MAP: Record<string, string> = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".ico": "image/x-icon",
+  ".woff": "font/woff",
   ".woff2": "font/woff2",
 };
 
@@ -54,19 +58,38 @@ if (!(await exists(path.join(distDir, "index.html")))) {
   throw new Error(`Không tìm thấy bản build tại ${distDir}`);
 }
 
-// Đồng bộ ra deploy/dashboard/ để dùng khi chạy dev
+const hasOffice = await exists(path.join(officeDir, "package.json"));
+if (hasOffice) {
+  if (!embedOnly || !(await exists(path.join(officeDistDir, "index.html")))) {
+    if (!(await exists(path.join(officeDir, "node_modules")))) {
+      console.log("[Office] Đang cài dependencies trong office/ bằng pnpm...");
+      execSync("pnpm install", { cwd: officeDir, stdio: "inherit" });
+    }
+    console.log("[Office] Đang build office/ (pnpm build)...");
+    execSync("pnpm build", { cwd: officeDir, stdio: "inherit" });
+  }
+  if (!(await exists(path.join(officeDistDir, "index.html")))) {
+    throw new Error(`Không tìm thấy bản build Phòng ban tại ${officeDistDir}`);
+  }
+}
+
+// Đồng bộ ra deploy/dashboard/ (và deploy/dashboard/phong/) để dùng khi chạy dev
 await fs.rm(deployDashDir, { recursive: true, force: true });
 await fs.mkdir(deployDashDir, { recursive: true });
 await fs.cp(distDir, deployDashDir, { recursive: true, force: true });
+if (hasOffice) {
+  await fs.mkdir(deployOfficeDir, { recursive: true });
+  await fs.cp(officeDistDir, deployOfficeDir, { recursive: true, force: true });
+}
 
 // Nhúng toàn bộ file (nén gzip + base64) vào module TS để bun build --compile đóng gói thẳng vào binary otter
-const relFiles = await walkFiles(distDir);
+const relFiles = await walkFiles(deployDashDir);
 const entries: string[] = [];
 let rawTotal = 0;
 let gzTotal = 0;
 
 for (const rel of relFiles) {
-  const raw = new Uint8Array(await fs.readFile(path.join(distDir, rel)));
+  const raw = new Uint8Array(await fs.readFile(path.join(deployDashDir, rel)));
   const gz = Bun.gzipSync(raw, { level: 9 });
   rawTotal += raw.byteLength;
   gzTotal += gz.byteLength;

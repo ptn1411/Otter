@@ -64,7 +64,8 @@ export default function FbSalesTab({ busy, act }: Props) {
   }, []);
 
   useEffect(() => {
-    void loadAll();
+    const t = setTimeout(() => void loadAll(), 0);
+    return () => clearTimeout(t);
   }, [loadAll]);
 
   return (

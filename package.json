@@ -1,6 +1,6 @@
 {
   "name": "otter",
-  "version": "2.3.6",
+  "version": "2.4.0",
   "description": "ChatGPT that uses your computer. Otter runs locally, reads the open page, drives the browser and desktop, and checks your servers. One command to install.",
   "license": "MIT",
   "author": "PHAM THANH NAM (@ptn1411)",

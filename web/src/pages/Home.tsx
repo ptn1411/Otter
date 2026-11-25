@@ -92,6 +92,19 @@ const SCENARIOS: Scenario[] = [
     result: "Đã đọc giao diện cửa sổ ứng dụng và đối chiếu số liệu cục bộ.",
     latency: "103 ms",
   },
+  {
+    id: "phone",
+    label: "Android",
+    group: "phone · PhoneCloud 20 tools",
+    prompt: "Mở Zalo trên điện thoại Android, đọc cây giao diện và gửi tin nhắn xác nhận.",
+    calls: [
+      { tool: "phone_open_app", arg: 'packageName="com.zing.zalo"', ms: 38 },
+      { tool: "phone_get_ui_tree", arg: "maxResults=60", ms: 44 },
+      { tool: "phone_set_text", arg: 'text="Đã xác nhận đơn hàng!"', ms: 29 },
+    ],
+    result: "Đã mở ứng dụng trên điện thoại Android từ xa và điền tin nhắn qua Accessibility.",
+    latency: "111 ms",
+  },
 ];
 
 interface ToolGroup {
@@ -128,6 +141,14 @@ const TOOL_GROUPS: ToolGroup[] = [
     estTokens: 520,
     desc: "Chụp màn hình, liệt kê cửa sổ, thao tác chuột, bàn phím và CUA trên Windows/macOS.",
     samples: ["desktop_take_screenshot", "desktop_mouse_action", "cua_execute_tool"],
+  },
+  {
+    id: "phone",
+    label: "PhoneCloud (Android)",
+    count: 20,
+    estTokens: 1180,
+    desc: "Điều khiển điện thoại Android từ xa qua H.264 WebCodecs, cây Accessibility, chạm/vuốt/nhập chữ và mở ứng dụng.",
+    samples: ["phone_get_ui_tree", "phone_click_element", "phone_open_app"],
   },
   {
     id: "agent-desktop",
@@ -203,13 +224,32 @@ const TOOL_GROUPS: ToolGroup[] = [
   },
   {
     id: "gpm",
-    label: "GPM Login & Antigravity CDP",
-    count: 10,
-    estTokens: 760,
-    desc: "Khởi chạy hồ sơ trình duyệt antidetect GPM Login và điều khiển phiên Antigravity qua CDP.",
-    samples: ["gpm_start_profile", "gpm_test_xpath", "agy_run_task"],
+    label: "GPM Login",
+    count: 6,
+    estTokens: 358,
+    desc: "Khởi chạy hồ sơ trình duyệt antidetect GPM Login và sinh kịch bản GPM Automate V3.",
+    samples: ["gpm_start_profile", "gpm_test_xpath", "gpm_generate_script"],
+  },
+  {
+    id: "antigravity",
+    label: "Antigravity IDE",
+    count: 4,
+    estTokens: 414,
+    desc: "Điều khiển trực tiếp Antigravity IDE qua Chrome DevTools Protocol và đọc hội thoại.",
+    samples: ["agy_status", "agy_run_task", "agy_read_chat"],
+  },
+  {
+    id: "muse",
+    label: "Cầu nối Muse & Motion",
+    count: 2,
+    estTokens: 142,
+    desc: "Phối hợp tác nhân đối tác Muse AI và tra cứu tài nguyên chuyển động Motion.",
+    samples: ["ask_muse_agent", "motion_read_doc"],
   },
 ];
+
+const TOTAL_TOOLS = TOOL_GROUPS.reduce((sum, g) => sum + g.count, 0);
+const TOTAL_GROUPS = 18; // Đồng bộ với src/daemon/tool-groups.ts
 
 const INSTALL_COMMANDS: Record<string, { label: string; code: string; language: string }> = {
   windows: {
@@ -347,12 +387,13 @@ export default function Home() {
     return { tools, tokens };
   }, [enabledGroups]);
 
-  function applyPreset(preset: "all" | "code" | "fb" | "minimal") {
+  function applyPreset(preset: "all" | "code" | "fb" | "phone" | "minimal") {
     const keep: Record<string, Set<string>> = {
       all: new Set(TOOL_GROUPS.map((g) => g.id)),
-      code: new Set(["code", "browser", "db", "vps"]),
-      fb: new Set(["browser", "fb", "meta", "social"]),
-      minimal: new Set(["code", "browser"]),
+      code: new Set(["core", "code", "agents", "skills"]),
+      fb: new Set(["core", "browser", "fb", "meta"]),
+      phone: new Set(["core", "phone", "browser"]),
+      minimal: new Set(["core", "browser"]),
     };
     const set = keep[preset];
     setEnabledGroups(Object.fromEntries(TOOL_GROUPS.map((g) => [g.id, set.has(g.id)])));
@@ -371,7 +412,7 @@ export default function Home() {
                 </Heading>
                 <p className="otter-lead">
                   Otter chạy cục bộ ở cổng <span className="otter-mono">1993</span> và nối ChatGPT
-                  trực tiếp với Chrome (CDP), terminal, mã nguồn và desktop qua giao thức MCP. Bạn
+                  trực tiếp với Chrome (CDP), điện thoại Android (PhoneCloud), terminal, mã nguồn và desktop qua giao thức MCP. Bạn
                   ra lệnh bằng tiếng Việt, Otter thực thi ngay trên máy bạn.
                 </p>
                 <HStack gap={3} wrap="wrap">
@@ -383,7 +424,7 @@ export default function Home() {
                     onClick={() => document.getElementById("cai-dat")?.scrollIntoView({ behavior: "smooth" })}
                   />
                   <Button
-                    label="Xem 229 công cụ"
+                    label={`Xem ${TOTAL_TOOLS} công cụ`}
                     variant="secondary"
                     size="lg"
                     onClick={() => document.getElementById("tinh-nang")?.scrollIntoView({ behavior: "smooth" })}
@@ -418,7 +459,7 @@ export default function Home() {
                     </HStack>
                     <HStack gap={2} align="center">
                       <Badge variant="success" label={`MCP ${__OTTER_VERSION__}`} />
-                      <Badge variant="neutral" label="229 tools" />
+                      <Badge variant="neutral" label={`${TOTAL_TOOLS} tools`} />
                     </HStack>
                   </HStack>
 
@@ -467,7 +508,7 @@ export default function Home() {
                   <Divider />
                   <HStack padding={3} justify="between" wrap="wrap" gap={2}>
                     <Text type="supporting"><span className="otter-mono">{scenario.group}</span></Text>
-                    <Text type="supporting"><span className="otter-mono">16 nhóm công cụ</span></Text>
+                    <Text type="supporting"><span className="otter-mono">{TOTAL_GROUPS} nhóm công cụ</span></Text>
                   </HStack>
                 </VStack>
               </Card>
@@ -523,7 +564,7 @@ export default function Home() {
                       <Badge variant="success" label=":1993" />
                     </HStack>
                     <Text type="supporting">
-                      Xác thực token riêng từng client, kiểm soát 16 nhóm công cụ và tự cập nhật SHA-256.
+                      Xác thực token riêng từng client, kiểm soát {TOTAL_GROUPS} nhóm công cụ, Phòng ban 3D A2A và tự cập nhật SHA-256.
                     </Text>
                     <svg width="100%" height="10" viewBox="0 0 220 10" fill="none" aria-hidden="true">
                       <line x1="0" y1="5" x2="220" y2="5" stroke="currentColor" strokeOpacity="0.18" strokeWidth="1.5" />
@@ -550,7 +591,7 @@ export default function Home() {
                       </HStack>
                       <HStack gap={2} align="center">
                         <MonitorIcon size={15} />
-                        <Text type="supporting">Desktop & Meta CLI</Text>
+                        <Text type="supporting">Desktop, PhoneCloud Android & Meta CLI</Text>
                       </HStack>
                     </VStack>
                   </VStack>
@@ -593,7 +634,7 @@ export default function Home() {
         <div className="otter-wrap" id="tinh-nang">
           <VStack gap={6}>
             <VStack gap={2} maxWidth={680}>
-              <Heading level={2}>229 công cụ, bật tắt độc lập theo nhóm</Heading>
+              <Heading level={2}>{TOTAL_TOOLS} công cụ, bật tắt độc lập theo nhóm</Heading>
               <Text type="supporting">
                 Thử lọc hoặc bật/tắt các nhóm bên dưới như trong Dashboard thật của Otter để xem
                 ngay lượng ngữ cảnh (token) tiết kiệm được cho mỗi phiên AI.
@@ -619,6 +660,7 @@ export default function Home() {
                       <Button label="Tất cả" variant="secondary" size="sm" onClick={() => applyPreset("all")} />
                       <Button label="Chỉ Code" variant="secondary" size="sm" onClick={() => applyPreset("code")} />
                       <Button label="Chỉ Facebook" variant="secondary" size="sm" onClick={() => applyPreset("fb")} />
+                      <Button label="Chỉ Điện thoại" variant="secondary" size="sm" onClick={() => applyPreset("phone")} />
                       <Button label="Tối thiểu" variant="secondary" size="sm" onClick={() => applyPreset("minimal")} />
                     </HStack>
                   </VStack>

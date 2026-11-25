@@ -21,8 +21,10 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
     const tailscaleIp = getTailscaleIp();
     const { getExternalServersState } = await import("../mcp-gateway");
     const { getSocialBotStatus } = await import("../social-bot");
+    const { getPhoneRelayHealth } = await import("../phone-cloud");
     const ext = getExternalServersState();
     const social = getSocialBotStatus();
+    const phone = getPhoneRelayHealth();
     return jsonResponse({
       status: "ok",
       service: "otter-daemon",
@@ -33,6 +35,11 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
       tailscaleIp: tailscaleIp || null,
       tunnelStatus: tunnel.status,
       socialBotConnected: social.connected,
+      phoneCloud: {
+        devices: phone.devices,
+        online: phone.online,
+        viewers: phone.viewers,
+      },
       externalMcpServers: {
         total: ext.length,
         connected: ext.filter((s) => s.status === "connected").length,
@@ -205,9 +212,22 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
     }
   }
 
-  // 4. Static assets (Logo, Banner)
+  // 4. Static assets (Logo, Banner) — chặn path traversal ra ngoài assets/
   if (url.pathname.startsWith("/assets/")) {
-    const filePath = path.join(".", url.pathname);
+    let rel = "";
+    try {
+      rel = decodeURIComponent(url.pathname.slice("/assets/".length));
+    } catch {
+      return new Response("Bad Request", { status: 400, headers: corsHeaders });
+    }
+    if (!rel || rel.includes("..") || rel.startsWith("/") || rel.includes("\\")) {
+      return new Response("Forbidden", { status: 403, headers: corsHeaders });
+    }
+    const assetsRoot = path.resolve("assets");
+    const filePath = path.resolve(assetsRoot, rel);
+    if (!filePath.startsWith(assetsRoot + path.sep)) {
+      return new Response("Forbidden", { status: 403, headers: corsHeaders });
+    }
     const file = Bun.file(filePath);
     if (await file.exists()) {
       const ext = path.extname(filePath).toLowerCase();
@@ -269,9 +289,14 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
   //     không có thì phục vụ trực tiếp từ asset đã nhúng sẵn trong binary otter.
   //     Nếu cả hai đều trống thì rơi xuống Dashboard HTML inline cũ ở mục 6.
   if (url.pathname === "/dashboard" || url.pathname.startsWith("/dashboard/")) {
-    const rel = url.pathname === "/dashboard" || url.pathname === "/dashboard/"
+    let rel = url.pathname === "/dashboard" || url.pathname === "/dashboard/"
       ? "index.html"
       : url.pathname.slice("/dashboard/".length);
+    if (rel === "phong" || rel === "phong/") {
+      rel = "phong/index.html";
+    } else if (rel.endsWith("/")) {
+      rel = `${rel}index.html`;
+    }
     // Chặn path traversal: chỉ phục vụ file tương đối an toàn
     if (rel && !rel.includes("..") && !rel.startsWith("/") && !rel.includes("\\")) {
       const dashPath = path.join(process.cwd(), "deploy", "dashboard", rel);
@@ -285,6 +310,8 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
                             ext === ".json" ? "application/json" :
                             ext === ".png" ? "image/png" :
                             ext === ".jpg" || ext === ".jpeg" ? "image/jpeg" :
+                            ext === ".ico" ? "image/x-icon" :
+                            ext === ".woff" ? "font/woff" :
                             ext === ".woff2" ? "font/woff2" : "application/octet-stream";
         return new Response(dashFile, {
           headers: { "Content-Type": contentType, ...corsHeaders }
@@ -296,7 +323,7 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
         : undefined;
       if (embedded) {
         const gzBytes = Uint8Array.from(Buffer.from(embedded.gzipBase64, "base64"));
-        const cacheControl = rel.startsWith("assets/")
+        const cacheControl = rel.startsWith("assets/") || rel.startsWith("phong/assets/")
           ? "public, max-age=31536000, immutable"
           : "no-cache";
         const acceptsGzip = (req.headers.get("accept-encoding") || "").toLowerCase().includes("gzip");
@@ -378,7 +405,7 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
             <div style="display:flex; gap:8px; align-items:center;">
               <span class="badge" data-i18n="badge_online">ONLINE</span>
-              <span class="${lic.licensed ? 'badge' : 'badge-warn'}">🔒 <span data-i18n="${lic.licensed ? 'lic_ok' : 'lic_no'}">${lic.licensed ? 'BẢN QUYỀN: ' + (lic.payload?.license_type?.toUpperCase() || 'OK') : 'CHƯA KÍCH HOẠT'}</span></span>
+              <span class="badge">🔓 MIT OPEN SOURCE</span>
               <span class="${fullAccess ? 'badge' : 'badge-warn'}">⚡ <span>${fullAccess ? 'FULL ACCESS' : 'RESTRICTED'}</span></span>
             </div>
             <div style="display:flex; gap:6px;">
@@ -387,7 +414,7 @@ export async function handleSystemRoutes(req: Request, url: URL, port: number): 
             </div>
           </div>
 
-          <h2 data-i18n="heading">🦦 Otter Pro Agent & Browser Controller</h2>
+          <h2 data-i18n="heading">🦦 Otter Agent — Desktop, Browser & PhoneCloud Controller</h2>
           <p><span data-i18n="running_on">Máy chủ Otter Daemon đang hoạt động trên cổng</span> <strong>${port}</strong>.</p>
           
           <div class="tunnel-box">

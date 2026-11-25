@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { getTailscaleIp, ensureAuthToken } from "./security";
+import { getTailscaleIp, ensureAuthToken, assertSafePath } from "./security";
 import { initDatabase } from "./db";
 import { initSettings, onSettingsChange } from "./settings";
 import { createMcpServer } from "./mcp";
@@ -20,6 +20,7 @@ import {
 } from "./mcp-gateway";
 import {
   corsHeaders,
+  getCorsHeaders,
   handleCorsPreflight,
   checkAuth,
   handleSystemRoutes,
@@ -37,10 +38,17 @@ import {
   handleChromeRoutes,
   handlePageLoopRoutes,
   handleScheduledTasksRoutes,
+  handlePhoneCloudRoutes,
   handleA2aRoutes,
   matchDaemonRoute,
   matchDaemonRoutePrefix
 } from "./routes";
+import {
+  tryUpgradePhoneSocketIo,
+  onPhoneWsOpen,
+  onPhoneWsMessage,
+  onPhoneWsClose,
+} from "./phone-cloud";
 import { startScheduledTaskRunner } from "./scheduled-tasks";
 import { startTelemetryHeartbeat } from "./telemetry";
 
@@ -107,11 +115,15 @@ Ví dụ lệnh thực tế:
       process.exit(0);
     }
 
+    if (!driverExe) {
+      console.error("\x1b[31m[!] Chưa tìm thấy cua-driver trên máy. Chạy 'bun run setup:cua' để cài đặt.\x1b[0m");
+      process.exit(1);
+    }
+
     if (sub === "serve") {
       const extraArgs = process.argv.slice(4);
       console.log(`[*] Đang khởi động CUA Daemon (${driverExe})...`);
-      const proc = spawn({
-        cmd: [driverExe, "serve", ...extraArgs],
+      const proc = spawn([driverExe, "serve", ...extraArgs], {
         stdout: "inherit",
         stderr: "inherit",
         stdin: "inherit"
@@ -190,8 +202,7 @@ Ví dụ lệnh thực tế:
 
     // Default: forward directly to cua-driver (status, stop, autostart, doctor, permissions, etc.)
     const restArgs = process.argv.slice(3);
-    const proc = spawn({
-      cmd: [driverExe, ...restArgs],
+    const proc = spawn([driverExe, ...restArgs], {
       stdout: "inherit",
       stderr: "inherit",
       stdin: "inherit"
@@ -220,6 +231,10 @@ const PORT = Number(process.env.PORT || 1993);
 const db = initDatabase();
 
 interface WsClientData {
+  kind?: "activity" | "phonecloud";
+  sid?: string;
+  isUpgrade?: boolean;
+  clientIp?: string;
   conversationUrl?: string;
   conversationId?: string;
   cursor?: number;
@@ -336,12 +351,14 @@ const sseSessions = new Map<string, SseSession>();
 interface StreamableSession {
   transport: WebStandardStreamableHTTPServerTransport;
   mcp: any;
+  lastSeenAt: number;
 }
 const streamableSessions = new Map<string, StreamableSession>();
+const STREAMABLE_SESSION_TTL_MS = 2 * 60 * 60 * 1000; // 2 giờ không hoạt động thì giải phóng RAM
 
 async function handleStreamableRequest(req: Request) {
   const sessionId = req.headers.get("mcp-session-id");
-  let session = sessionId ? streamableSessions.get(sessionId) : undefined;
+  const session = sessionId ? streamableSessions.get(sessionId) : undefined;
 
   if (!session) {
     const transport = new WebStandardStreamableHTTPServerTransport({
@@ -350,13 +367,24 @@ async function handleStreamableRequest(req: Request) {
     const mcpInstance = createMcpServer(handleMcpActivity);
     await mcpInstance.connect(transport);
     const response = await transport.handleRequest(req);
-    if (transport.sessionId) {
-      streamableSessions.set(transport.sessionId, { transport, mcp: mcpInstance });
+    const sid = transport.sessionId;
+    if (sid) {
+      const prevOnClose = transport.onclose;
+      transport.onclose = () => {
+        streamableSessions.delete(sid);
+        try { prevOnClose?.(); } catch {}
+      };
+      streamableSessions.set(sid, { transport, mcp: mcpInstance, lastSeenAt: Date.now() });
     }
     return response;
   }
 
-  return await session.transport.handleRequest(req);
+  session.lastSeenAt = Date.now();
+  const response = await session.transport.handleRequest(req);
+  if (req.method === "DELETE" && sessionId) {
+    streamableSessions.delete(sessionId);
+  }
+  return response;
 }
 
 // Khởi tạo Gateway kết nối các MCP server bên ngoài từ mcp_config.json
@@ -382,6 +410,15 @@ setInterval(() => {
     }
   } catch (err: any) {
     console.warn("[Loop] Sweeper failed:", err?.message ?? err);
+  }
+
+  // Giải phóng các phiên Streamable HTTP MCP đã nhàn rỗi quá 2 giờ để tránh rò rỉ bộ nhớ
+  const cutoff = Date.now() - STREAMABLE_SESSION_TTL_MS;
+  for (const [sid, session] of streamableSessions) {
+    if (session.lastSeenAt < cutoff) {
+      streamableSessions.delete(sid);
+      void session.transport.close().catch(() => {});
+    }
   }
 }, 60_000);
 
@@ -423,11 +460,13 @@ const server = Bun.serve<WsClientData>({
       url.pathname === "/api/health" ||
       url.pathname === "/activity" ||
       url.pathname === "/dashboard" ||
+      url.pathname === "/dashboard/" ||
       url.pathname.startsWith("/dashboard/assets/") ||
+      url.pathname === "/dashboard/phong" ||
+      url.pathname.startsWith("/dashboard/phong/") ||
       url.pathname === "/dashboard/favicon.svg" ||
       url.pathname === "/dashboard/icons.svg" ||
       url.pathname.startsWith("/storage/tasks/") ||
-      url.pathname === "/api/media/file" ||
       url.pathname.startsWith("/storage/media/") ||
       url.pathname === "/openapi.json" ||
       matchDaemonRoute(url.pathname, "MCP_SERVERS") ||
@@ -442,7 +481,13 @@ const server = Bun.serve<WsClientData>({
       url.pathname === "/.well-known/openid-configuration" ||
       url.pathname === "/oauth/authorize" ||
       url.pathname === "/oauth/token" ||
-      url.pathname === "/oauth/register";
+      url.pathname === "/oauth/register" ||
+      url.pathname === "/socket.io" ||
+      url.pathname.startsWith("/socket.io/") ||
+      url.pathname === "/api/device/register" ||
+      url.pathname === "/api/device/config" ||
+      url.pathname === "/api/control/connect" ||
+      url.pathname === "/api/control/settings";
 
     if (!isPublicPath) {
       const clientIp = server.requestIP(req)?.address;
@@ -541,9 +586,12 @@ const server = Bun.serve<WsClientData>({
       }
     }
 
-    // 6. WebSocket Stream Upgrade
+    // 6. WebSocket Stream Upgrade (Otter Activity Stream & PhoneCloud Socket.IO v4)
+    const phoneUpgrade = tryUpgradePhoneSocketIo(req, url, server);
+    if (phoneUpgrade !== null) return phoneUpgrade;
+
     if (matchDaemonRoute(url.pathname, "ACT_STREAM")) {
-      const upgraded = server.upgrade(req, { data: {} });
+      const upgraded = server.upgrade(req, { data: { kind: "activity" } });
       if (upgraded) return undefined;
       return new Response("WebSocket Upgrade Failed", { status: 400 });
     }
@@ -597,58 +645,88 @@ const server = Bun.serve<WsClientData>({
     const a2aRes = await handleA2aRoutes(req, url, db);
     if (a2aRes) return a2aRes;
 
-    // 8. Serve local media files (images, videos)
+    const phoneRes = await handlePhoneCloudRoutes(
+      req,
+      url,
+      db,
+      server.requestIP(req)?.address,
+      handleMcpActivity
+    );
+    if (phoneRes) return phoneRes;
+
+    // 8. Serve local media files (chỉ định dạng ảnh/video/âm thanh hợp lệ + đã qua kiểm tra xác thực & assertSafePath)
     if (url.pathname === "/api/media/file" && req.method === "GET") {
+      const reqCors = getCorsHeaders(req);
       const filePath = url.searchParams.get("path");
       if (!filePath) {
         return new Response(JSON.stringify({ error: "Thiếu tham số 'path'" }), {
           status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders }
+          headers: { "Content-Type": "application/json", ...reqCors }
+        });
+      }
+      const MEDIA_MIMES: Record<string, string> = {
+        ".mp4": "video/mp4",
+        ".webm": "video/webm",
+        ".mov": "video/quicktime",
+        ".mkv": "video/x-matroska",
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".webp": "image/webp",
+        ".gif": "image/gif",
+        ".mp3": "audio/mpeg",
+        ".wav": "audio/wav",
+      };
+      const ext = path.extname(filePath).toLowerCase();
+      const mime = MEDIA_MIMES[ext];
+      if (!mime) {
+        return new Response(JSON.stringify({ error: "Chỉ cho phép truy xuất tệp media (ảnh, video, âm thanh)" }), {
+          status: 403,
+          headers: { "Content-Type": "application/json", ...reqCors }
         });
       }
       try {
-        const file = Bun.file(filePath);
+        const safePath = assertSafePath(filePath);
+        const file = Bun.file(safePath);
         if (!(await file.exists())) {
           return new Response(JSON.stringify({ error: "Không tìm thấy tệp tin trên ổ đĩa" }), {
             status: 404,
-            headers: { "Content-Type": "application/json", ...corsHeaders }
+            headers: { "Content-Type": "application/json", ...reqCors }
           });
         }
-        const ext = path.extname(filePath).toLowerCase();
-        let mime = "application/octet-stream";
-        if (ext === ".mp4") mime = "video/mp4";
-        else if (ext === ".webm") mime = "video/webm";
-        else if (ext === ".mov") mime = "video/quicktime";
-        else if (ext === ".mkv") mime = "video/x-matroska";
-        else if (ext === ".png") mime = "image/png";
-        else if (ext === ".jpg" || ext === ".jpeg") mime = "image/jpeg";
-        else if (ext === ".webp") mime = "image/webp";
-
         return new Response(file, {
           headers: {
             "Content-Type": mime,
-            "Access-Control-Allow-Origin": "*",
             "Cache-Control": "no-cache",
-            ...corsHeaders
+            ...reqCors
           }
         });
       } catch (err: any) {
+        const isDenied = String(err?.message || "").includes("Truy cập bị từ chối");
         return new Response(JSON.stringify({ error: err.message }), {
-          status: 500,
-          headers: { "Content-Type": "application/json", ...corsHeaders }
+          status: isDenied ? 403 : 500,
+          headers: { "Content-Type": "application/json", ...reqCors }
         });
       }
     }
 
-    return new Response("Not Found", { status: 404, headers: corsHeaders });
+    return new Response("Not Found", { status: 404, headers: getCorsHeaders(req) });
   },
 
   websocket: {
     open(ws) {
+      if (ws.data?.kind === "phonecloud") {
+        onPhoneWsOpen(ws);
+        return;
+      }
       activeSockets.add(ws);
       console.log("[WS] Client connected");
     },
     message(ws, msg) {
+      if (ws.data?.kind === "phonecloud") {
+        onPhoneWsMessage(ws, msg);
+        return;
+      }
       try {
         const data = JSON.parse(typeof msg === "string" ? msg : new TextDecoder().decode(msg));
         if (data.type === "browser_action_result") {
@@ -747,6 +825,10 @@ const server = Bun.serve<WsClientData>({
       }
     },
     close(ws) {
+      if (ws.data?.kind === "phonecloud") {
+        onPhoneWsClose(ws);
+        return;
+      }
       activeSockets.delete(ws);
       console.log("[WS] Client disconnected");
     }

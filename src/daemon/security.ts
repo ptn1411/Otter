@@ -287,10 +287,18 @@ export function isTrustedHostOrIp(hostOrIp: string | null | undefined): boolean 
   return false;
 }
 
+let tailscaleIpCache: { value: string | null; expiresAt: number } | null = null;
+const TAILSCALE_CACHE_TTL_MS = 30_000;
+
 /**
- * Tự động tìm IP Tailscale của máy tính hiện tại qua network interfaces
+ * Tự động tìm IP Tailscale của máy tính hiện tại qua network interfaces (cache 30s).
  */
 export function getTailscaleIp(): string | null {
+  const now = Date.now();
+  if (tailscaleIpCache && tailscaleIpCache.expiresAt > now) {
+    return tailscaleIpCache.value;
+  }
+  let found: string | null = null;
   try {
     const nets = os.networkInterfaces();
     for (const [name, addrs] of Object.entries(nets)) {
@@ -299,16 +307,26 @@ export function getTailscaleIp(): string | null {
       for (const a of addrs) {
         if (a.internal) continue;
         if (isTsInterface && (a.family === "IPv4" || (a.family as any) === 4)) {
-          return a.address;
+          found = a.address;
+          break;
         }
         const parts = a.address.split(".").map(Number);
         if (parts.length === 4 && parts[0] === 100 && parts[1] >= 64 && parts[1] <= 127) {
-          return a.address;
+          found = a.address;
+          break;
         }
       }
+      if (found) break;
     }
   } catch {}
-  return null;
+  tailscaleIpCache = { value: found, expiresAt: now + TAILSCALE_CACHE_TTL_MS };
+  return found;
+}
+
+function timingSafeTokenEqual(a: string, b: string): boolean {
+  const ha = crypto.createHash("sha256").update(a).digest();
+  const hb = crypto.createHash("sha256").update(b).digest();
+  return crypto.timingSafeEqual(ha, hb);
 }
 
 /**
@@ -326,7 +344,7 @@ export function isRequestAuthorized(req: Request, url: URL, clientIp?: string): 
   const authHeader = req.headers.get("authorization");
   if (authHeader && authHeader.trim().startsWith("Bearer ")) {
     const provided = authHeader.trim().slice(7).trim();
-    if (token && provided === token) {
+    if (token && timingSafeTokenEqual(provided, token)) {
       return true;
     }
     // Access token OAuth cấp riêng cho từng client (thu hồi được từng client).
@@ -337,23 +355,38 @@ export function isRequestAuthorized(req: Request, url: URL, clientIp?: string): 
 
   // Kiểm tra Query Parameter
   const tokenParam = url.searchParams.get("token");
-  if (tokenParam && token && tokenParam.trim() === token) {
-    return true;
-  }
-  if (tokenParam && validateOAuthAccessToken(tokenParam.trim())) {
-    return true;
+  if (tokenParam) {
+    const trimmedParam = tokenParam.trim();
+    if (token && timingSafeTokenEqual(trimmedParam, token)) {
+      return true;
+    }
+    if (validateOAuthAccessToken(trimmedParam)) {
+      return true;
+    }
   }
 
-  // Kiểm tra host và client xuất xứ
-  const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || url.host;
-  const forwardedFor = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const realIp = req.headers.get("x-real-ip")?.trim();
-  const effectiveClientIp = clientIp || forwardedFor || realIp || "";
+  // Request đi qua Cloudflare Tunnel / proxy công khai (có cf-connecting-ip hoặc cf-ray)
+  // KHÔNG BAO GIỜ được miễn xác thực kể cả khi socket local là 127.0.0.1.
+  if (req.headers.get("cf-connecting-ip") || req.headers.get("cf-ray")) {
+    return false;
+  }
 
-  // Nếu cả host VÀ client IP (nếu có) thuộc Tailscale / Localhost / Private LAN:
-  // Được coi là truy cập mạng tin cậy an toàn
-  const isHostTrusted = isTrustedHostOrIp(host);
-  const isClientTrusted = effectiveClientIp ? isTrustedHostOrIp(effectiveClientIp) : isHostTrusted;
+  // Kiểm tra toàn bộ host header: chỉ cần một host không tin cậy (vd Host là tunnel
+  // còn X-Forwarded-Host bị giả mạo thành localhost) là từ chối.
+  const hostCandidates = [
+    req.headers.get("host"),
+    req.headers.get("x-forwarded-host"),
+    url.host,
+  ].filter((v): v is string => Boolean(v && v.trim()));
+  const isHostTrusted = hostCandidates.length > 0 && hostCandidates.every((h) => isTrustedHostOrIp(h));
+
+  // Kiểm tra toàn bộ địa chỉ IP nguồn (socket + proxy headers)
+  const ipCandidates = [
+    clientIp,
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+    req.headers.get("x-real-ip")?.trim(),
+  ].filter((v): v is string => Boolean(v && v.trim()));
+  const isClientTrusted = ipCandidates.length > 0 ? ipCandidates.every((ip) => isTrustedHostOrIp(ip)) : isHostTrusted;
   const isTrustedNetwork = isHostTrusted && isClientTrusted;
 
   if (!isTrustedNetwork) {

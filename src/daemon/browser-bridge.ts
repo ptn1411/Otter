@@ -67,24 +67,29 @@ export class BrowserBridge {
   /**
    * Gửi một hành động tới trình duyệt qua CDP
    */
-  async execute(action: string, params: any = {}): Promise<any> {
-    if (params?.cdpPort || params?.port) {
-      const p = Number(params.cdpPort || params.port);
+  async execute(action: string, params: any = {}, timeoutMs?: number): Promise<any> {
+    const effectiveParams =
+      timeoutMs !== undefined && params && typeof params === "object" && params.timeoutMs === undefined
+        ? { ...params, timeoutMs }
+        : params;
+
+    if (effectiveParams?.cdpPort || effectiveParams?.port) {
+      const p = Number(effectiveParams.cdpPort || effectiveParams.port);
       if (Number.isFinite(p) && p > 0) cdpBridge.setPort(p);
     }
-    if (params?.wsEndpoint) {
-      cdpBridge.setWsEndpoint(String(params.wsEndpoint));
+    if (effectiveParams?.wsEndpoint) {
+      cdpBridge.setWsEndpoint(String(effectiveParams.wsEndpoint));
     }
 
     if (action === "close" || action === "close_browser") {
-      return cdpBridge.closeBrowser(params?.cdpPort || params?.port || cdpBridge.getPort());
+      return cdpBridge.closeBrowser(effectiveParams?.cdpPort || effectiveParams?.port || cdpBridge.getPort());
     }
 
     const cdpAvailable = await cdpBridge.isAvailable();
 
     if (cdpAvailable) {
       try {
-        return await cdpBridge.execute(action, params);
+        return await cdpBridge.execute(action, effectiveParams);
       } catch (err: any) {
         // Tự phục hồi bằng ensureCdpChrome khi gặp lỗi mất kết nối lúc mở trang mới
         const msg = String(err?.message || err || "");
@@ -94,7 +99,7 @@ export class BrowserBridge {
           console.warn(`[BrowserBridge] CDP lỗi kết nối (${msg}), thử tự phục hồi...`);
           const launched = await cdpBridge.ensureCdpChrome();
           if (launched) {
-            return await cdpBridge.execute(action, params);
+            return await cdpBridge.execute(action, effectiveParams);
           }
         }
         throw err;
@@ -108,7 +113,7 @@ export class BrowserBridge {
       autoLaunchAttempted = true;
       const launched = await cdpBridge.ensureCdpChrome();
       if (launched) {
-        return cdpBridge.execute(action, params);
+        return cdpBridge.execute(action, effectiveParams);
       }
     }
 

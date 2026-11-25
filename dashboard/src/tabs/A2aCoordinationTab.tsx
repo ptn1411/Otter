@@ -63,9 +63,14 @@ export default function A2aCoordinationTab({ busy, act }: Props) {
   }, []);
 
   useEffect(() => {
-    void loadData();
-    const timer = setInterval(() => void loadData(), 5000);
-    return () => clearInterval(timer);
+    const boot = setTimeout(() => void loadData(), 0);
+    const timer = setInterval(() => {
+      if (!document.hidden) void loadData();
+    }, 5000);
+    return () => {
+      clearTimeout(boot);
+      clearInterval(timer);
+    };
   }, [loadData]);
 
   const handleSendTask = async () => {

@@ -67,7 +67,8 @@ export default function SettingsTab({ busy, act }: Props) {
   }, []);
 
   useEffect(() => {
-    void loadSettings();
+    const t = setTimeout(() => void loadSettings(), 0);
+    return () => clearTimeout(t);
   }, [loadSettings]);
 
   const handleSaveAll = () => {

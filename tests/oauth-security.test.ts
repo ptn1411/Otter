@@ -15,6 +15,7 @@ import { handleOAuthRoutes } from "../src/daemon/routes/oauth-routes";
 import { isRequestAuthorized } from "../src/daemon/security";
 import { validateOAuthAccessToken, revokeOAuthClient } from "../src/daemon/oauth-store";
 import { clearLicenseRateLimits } from "../src/daemon/license/rate-limit";
+import { closeSharedDatabase } from "../src/daemon/db";
 
 const BASE = "https://testuser.otter.gpt.io.vn";
 
@@ -220,11 +221,15 @@ describe("OAuth security (bản sửa 2026-11-21)", () => {
   });
 
   afterAll(() => {
-    fs.rmSync(tmpHome, { recursive: true, force: true });
-    // Khôi phục env để không làm bẩn các file test khác khi chạy chung suite.
+    // Luôn khôi phục env và đóng DB trước khi xóa tmpHome để tránh EBUSY trên Windows
+    // hoặc làm rò rỉ OTTER_HOME sang các file test chạy sau.
     if (prevOtterHome === undefined) delete process.env.OTTER_HOME;
     else process.env.OTTER_HOME = prevOtterHome;
     if (prevApiKey === undefined) delete process.env.OTTER_API_KEY;
     else process.env.OTTER_API_KEY = prevApiKey;
+    closeSharedDatabase();
+    try {
+      fs.rmSync(tmpHome, { recursive: true, force: true });
+    } catch {}
   });
 });

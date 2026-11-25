@@ -35,7 +35,7 @@ export function getDefaultDatabasePath(): string {
 
 export function initDatabase(dbPath: string = getDefaultDatabasePath()): Database {
   const db = new Database(dbPath, { create: true });
-  db.exec("PRAGMA journal_mode = WAL;");
+  db.exec("PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA busy_timeout = 5000; PRAGMA temp_store = MEMORY;");
 
   db.run(`
     CREATE TABLE IF NOT EXISTS conversation_scopes (
@@ -659,6 +659,24 @@ export function initDatabase(dbPath: string = getDefaultDatabasePath()): Databas
   if (!loopColumns.has("context_budget")) db.exec(`ALTER TABLE page_loops ADD COLUMN context_budget INTEGER NOT NULL DEFAULT 90000`);
   if (!loopColumns.has("context_used_estimate")) db.exec(`ALTER TABLE page_loops ADD COLUMN context_used_estimate INTEGER NOT NULL DEFAULT 0`);
 
+  // PhoneCloud (2026-11-25): Quản lý thiết bị Android điều khiển từ xa (H.264 WebCodecs + Accessibility + MCP)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS phone_devices (
+      device_id TEXT PRIMARY KEY,
+      password TEXT NOT NULL,
+      device_key TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL DEFAULT '',
+      quality INTEGER NOT NULL DEFAULT 720,
+      fps INTEGER NOT NULL DEFAULT 30,
+      screen_width INTEGER NOT NULL DEFAULT 0,
+      screen_height INTEGER NOT NULL DEFAULT 0,
+      orientation TEXT NOT NULL DEFAULT 'portrait',
+      last_seen_at INTEGER,
+      created_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_phone_devices_key ON phone_devices(device_key);
+  `);
+
   seedDefaultCustomCommands(db);
 
   return db;
@@ -782,6 +800,21 @@ function seedDefaultCustomCommands(db: Database): void {
    - Cách 3: Nạp mảng danh sách bài viết -> Dùng tool 'fb_queue_media_list' với mảng items cụ thể.
    - Cách 4: Tạo video qua Muse AI rồi đăng -> Dùng tool 'fb_queue_muse_video' với prompt yêu cầu Muse tạo video, sau đó tải về và lập lịch đăng.
 3. Kiểm tra tiến độ hàng đợi qua tool 'fb_media_list_queue'.`
+    },
+    {
+      id: "cmd-phone-cloud",
+      slash: "/phone",
+      icon: "📲",
+      category: "PhoneCloud Android",
+      title: "Điều khiển điện thoại Android từ xa qua PhoneCloud",
+      description: "Đọc cây giao diện Accessibility, bấm nút, vuốt, nhập chữ, mở app và chụp màn hình điện thoại Android",
+      is_pinned: 1,
+      prompt_template: `Hãy điều khiển điện thoại Android của tôi qua PhoneCloud theo quy trình tiết kiệm token và chính xác:
+1. Gọi 'phone_list_devices' để kiểm tra các điện thoại Android đang online trên Otter Relay.
+2. Chọn máy bằng 'phone_connect' (chỉ cần device_id nếu máy nối trực tiếp vào Otter).
+3. LUÔN ưu tiên gọi 'phone_get_ui_tree' hoặc 'phone_find_element' (theo text/id/contentDescription) để đọc cấu trúc màn hình thay vì chụp ảnh liên tục.
+4. Thao tác bằng 'phone_click_element', 'phone_set_text', 'phone_type_text', 'phone_scroll', 'phone_swipe', 'phone_press_key' hoặc 'phone_open_app'.
+5. Dùng 'phone_wait_for_element' sau khi chuyển màn hình, và chỉ gọi 'phone_screenshot' khi cần kiểm tra hình ảnh trực quan.`
     }
   ];
 
@@ -805,10 +838,25 @@ function seedDefaultCustomCommands(db: Database): void {
 }
 
 let sharedDb: Database | null = null;
+let sharedDbPath: string | null = null;
 
 export function getDatabase(dbPath: string = getDefaultDatabasePath()): Database {
+  if (sharedDb && sharedDbPath !== dbPath) {
+    try { sharedDb.close(); } catch {}
+    sharedDb = null;
+    sharedDbPath = null;
+  }
   if (!sharedDb) {
     sharedDb = initDatabase(dbPath);
+    sharedDbPath = dbPath;
   }
   return sharedDb;
+}
+
+export function closeSharedDatabase(): void {
+  if (sharedDb) {
+    try { sharedDb.close(); } catch {}
+    sharedDb = null;
+    sharedDbPath = null;
+  }
 }

@@ -216,4 +216,46 @@ describe("Security & Hardening Tests", () => {
 
     setAuthToken(null);
   });
+
+  it("blocks Cloudflare Tunnel header spoofing (X-Forwarded-Host: localhost + 127.0.0.1 socket)", () => {
+    setAuthToken(null);
+
+    // 1. Spoofed X-Forwarded-Host: localhost while real Host is trycloudflare.com
+    const spoofedHostReq = new Request("https://demo-tunnel.trycloudflare.com/api/bookmarks", {
+      headers: {
+        host: "demo-tunnel.trycloudflare.com",
+        "x-forwarded-host": "localhost:1993",
+      },
+    });
+    expect(isRequestAuthorized(spoofedHostReq, new URL(spoofedHostReq.url), "127.0.0.1")).toBe(false);
+
+    // 2. Cloudflare headers present (cf-connecting-ip / cf-ray) even if host looks local
+    const cfHeaderReq = new Request("http://127.0.0.1:1993/api/bookmarks", {
+      headers: {
+        host: "127.0.0.1:1993",
+        "cf-connecting-ip": "203.0.113.42",
+        "cf-ray": "abc123-SGN",
+      },
+    });
+    expect(isRequestAuthorized(cfHeaderReq, new URL(cfHeaderReq.url), "127.0.0.1")).toBe(false);
+
+    // 3. Public X-Forwarded-For behind localhost proxy must also require token
+    const proxyReq = new Request("http://127.0.0.1:1993/api/bookmarks", {
+      headers: {
+        host: "127.0.0.1:1993",
+        "x-forwarded-for": "198.51.100.7, 127.0.0.1",
+      },
+    });
+    expect(isRequestAuthorized(proxyReq, new URL(proxyReq.url), "127.0.0.1")).toBe(false);
+  });
+
+  it("blocks path traversal on public /assets/ static route", async () => {
+    const { handleSystemRoutes } = await import("../src/daemon/routes/system-routes");
+    for (const badPath of ["/assets/..%2Fpackage.json", "/assets/..%5Cpackage.json", "/assets/sub/..%2F..%2Fpackage.json"]) {
+      const url = new URL(`http://127.0.0.1:1993${badPath}`);
+      const res = await handleSystemRoutes(new Request(url), url, 1993);
+      expect(res).not.toBeNull();
+      expect(res!.status).toBe(403);
+    }
+  });
 });

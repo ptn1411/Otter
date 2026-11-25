@@ -99,6 +99,7 @@ export interface HealthInfo {
   tailscaleIp: string | null;
   tunnelStatus: string;
   socialBotConnected: boolean;
+  phoneCloud?: { devices: number; online: number; viewers: number };
   externalMcpServers: { total: number; connected: number };
 }
 
@@ -372,4 +373,33 @@ export interface FbListenerStatus {
   active: boolean;
   replyCount?: number;
   lastRepliedTo?: string | null;
+}
+
+export interface PhoneRelayHealth {
+  ok: boolean;
+  devices: number;
+  online: number;
+  viewers: number;
+  frames: number;
+  dropped: number;
+  mbps: number;
+  allowPublicRegister: boolean;
+  activeDeviceId: string | null;
+  uptimeSec: number;
+}
+
+export interface PhoneDeviceAdminItem {
+  device_id: string;
+  password: string;
+  name: string;
+  online: boolean;
+  quality: number;
+  fps: number;
+  screenWidth: number;
+  screenHeight: number;
+  orientation: string;
+  lastSeenAt: number | null;
+  created_at: string;
+  viewers: number;
+  hasKeyframe: boolean;
 }

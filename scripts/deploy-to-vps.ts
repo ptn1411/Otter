@@ -109,18 +109,16 @@ for (const bin of binaryFiles) {
   }
 }
 
-// 4. Nén và tải lên toàn bộ thư mục tools/
-console.log("\n[4/5] Đồng bộ thư mục tools/ (skill.exe, cua, vps-ssh, db-manager)...");
+// 4. Nén và tải lên toàn bộ thư mục tools/ (luôn đóng gói mới để chứa các tool vừa cập nhật)
+console.log("\n[4/5] Đồng bộ thư mục tools/ (skill.exe, cua, vps-ssh, db-manager, phone-cloud)...");
 const toolsArchive = path.join(LOCAL_DEPLOY, "tools.tar.gz");
-try {
-  await fs.access(toolsArchive);
-} catch {
-  console.log("[*] Đang tạo tools.tar.gz...");
-  execSync(`tar -czf "${toolsArchive}" -C "${LOCAL_DEPLOY}" tools`, { stdio: "inherit" });
-}
+await fs.unlink(toolsArchive).catch(() => {});
+console.log("[*] Đang tạo tools.tar.gz mới nhất...");
+execSync(`tar -czf "${toolsArchive}" -C "${LOCAL_DEPLOY}" tools`, { stdio: "inherit" });
 
 console.log("[*] Uploading tools.tar.gz...");
 scpUpload(toolsArchive, `${REMOTE_DIR}/tools.tar.gz`);
+await fs.unlink(toolsArchive).catch(() => {});
 
 console.log("[*] Giải nén tools trên VPS...");
 sshCmd(`cd ${REMOTE_DIR} && tar -xzf tools.tar.gz && rm tools.tar.gz`);
@@ -162,10 +160,10 @@ const releaseEntries = [
     url: "https://otter.gpt.io.vn/otter-windows-x64.exe",
     changelog: [
       `### Otter Daemon v${OTTER_VERSION}`,
-      "- Nhúng sẵn Dashboard quản trị (React + Astryx) trực tiếp trong binary, hỗ trợ chế độ tối tương phản cao",
-      "- Tích hợp đăng nhập Firebase Auth (Google & Email) và bỏ hoàn toàn khóa bản quyền (100% mã nguồn mở MIT)",
-      "- Nâng cấp tự động cập nhật: hỗ trợ đa nền tảng (Windows / Linux / macOS) kèm xác minh SHA-256 và giải phóng cổng an toàn trước khi khởi động lại",
-      "- Đồng bộ toàn bộ công cụ quản trị (MCP, Chrome/CDP, GPM Studio, Plans & Fleet, Lịch chạy, FB Sales) vào một Dashboard duy nhất",
+      "- Hợp nhất PhoneCloud 1.3 trực tiếp vào Otter Daemon (chung cổng 1993, SQLite, WebCodecs H.264 Studio & 20 công cụ MCP phone_*)",
+      "- Tích hợp Phòng ban 3D (Command Office) trực quan hóa đội ngũ AI Agent và điều phối hộp thư A2A trực tiếp theo thời gian thực",
+      "- Vá bảo mật toàn diện (khóa LFI /api/media/file, chặn path traversal /assets/*, chống giả mạo Cloudflare Tunnel header, giải phóng phiên MCP nhàn rỗi)",
+      "- Tối ưu hiệu năng & đồng bộ giao diện Sáng/Tối xuyên suốt Dashboard, Phòng ban 3D và trang chủ otter.gpt.io.vn (326 công cụ · 18 nhóm)",
     ].join("\n"),
   },
   {

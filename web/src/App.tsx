@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { TopNav, TopNavHeading, TopNavItem } from "@astryxdesign/core/TopNav";
 import { Section } from "@astryxdesign/core/Section";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -10,8 +10,9 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { useAuth } from "./auth";
 import { OtterMark } from "./components/Icons";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Updates from "./pages/Updates";
+
+const Login = lazy(() => import("./pages/Login"));
+const Updates = lazy(() => import("./pages/Updates"));
 
 type Route = "home" | "login" | "updates";
 
@@ -90,9 +91,11 @@ export default function App({
       />
 
       <main style={{ flex: 1 }}>
-        {route === "home" && <Home />}
-        {route === "login" && <Login />}
-        {route === "updates" && <Updates />}
+        <Suspense fallback={null}>
+          {route === "home" && <Home />}
+          {route === "login" && <Login />}
+          {route === "updates" && <Updates />}
+        </Suspense>
       </main>
 
       <Section paddingBlock={8} paddingInline={6} dividers={["top"]}>

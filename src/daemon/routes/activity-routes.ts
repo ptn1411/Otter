@@ -37,6 +37,7 @@ import {
   readAntigravityChat,
   controlAntigravity,
 } from "../tools/antigravity-cdp-tools";
+import { executePhoneTool } from "../tools/phone-tools";
 import {
   getToolGroupsState,
   setToolGroupsEnabled,
@@ -1251,6 +1252,42 @@ export async function handleActivityRoutes(
         format: "GPM Automate V3 (.NET JSON)",
         pasteReadyJson: jsonString
       });
+    } catch (err: any) {
+      return errorResponse(err.message, 500);
+    }
+  }
+
+  // 12. PhoneCloud Android Control API Routes
+  if (url.pathname === "/api/activity/v1/phone/devices" && req.method === "GET") {
+    try {
+      const api = url.searchParams.get("api") || undefined;
+      const res = await executePhoneTool("phone_list_devices", { api }, handleMcpActivity);
+      return jsonResponse(res);
+    } catch (err: any) {
+      return errorResponse(err.message, 500);
+    }
+  }
+
+  if (url.pathname === "/api/activity/v1/phone/ui-tree" && (req.method === "GET" || req.method === "POST")) {
+    try {
+      const body: any = req.method === "POST" ? await req.json().catch(() => ({})) : {};
+      const device_id = body.device_id || url.searchParams.get("device_id") || undefined;
+      const maxResults = body.maxResults || Number(url.searchParams.get("maxResults")) || 100;
+      const tree = await executePhoneTool("phone_get_ui_tree", { device_id, maxResults }, handleMcpActivity);
+      return jsonResponse({ ok: true, tree });
+    } catch (err: any) {
+      return errorResponse(err.message, 500);
+    }
+  }
+
+  if (url.pathname === "/api/activity/v1/phone/action" && req.method === "POST") {
+    try {
+      const body: any = await req.json();
+      const rawTool = String(body.tool || body.action || "").trim();
+      if (!rawTool) return errorResponse("Thiếu tham số 'tool' (vd: phone_click_element, phone_tap, phone_set_text)", 400);
+      const toolName = rawTool.startsWith("phone_") ? rawTool : `phone_${rawTool}`;
+      const result = await executePhoneTool(toolName, body.arguments || body.args || body, handleMcpActivity);
+      return jsonResponse({ ok: true, tool: toolName, result });
     } catch (err: any) {
       return errorResponse(err.message, 500);
     }

@@ -1,4 +1,4 @@
-export { corsHeaders, handleCorsPreflight, jsonResponse, errorResponse, checkAuth } from "./common";
+export { corsHeaders, getCorsHeaders, handleCorsPreflight, jsonResponse, errorResponse, checkAuth } from "./common";
 export { handleA2aRoutes } from "./a2a-routes";
 export { handleSystemRoutes } from "./system-routes";
 export { handleMcpRoutes } from "./mcp-routes";
@@ -15,4 +15,5 @@ export { handleFleetRoutes } from "./fleet-routes";
 export { handleChromeRoutes } from "./chrome-routes";
 export { handlePageLoopRoutes } from "./page-loop-routes";
 export { handleScheduledTasksRoutes } from "./scheduled-tasks-routes";
+export { handlePhoneCloudRoutes } from "./phone-cloud-routes";
 export * from "./lcg-routes";

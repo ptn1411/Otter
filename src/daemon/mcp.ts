@@ -38,6 +38,7 @@ import {
   registerA2aTools,
   registerAntigravityCdpTools,
   registerMetaTools,
+  registerPhoneTools,
   registerToolGroupsTools
 } from "./tools";
 
@@ -191,6 +192,10 @@ export function createMcpServer(onActivity?: (event: any) => void): McpServer {
   // qua Reverse RPC trên localhost (Phase #22/#23)
   setGroup("meta");
   registerMetaTools(mcp, onActivity);
+
+  // 22. PhoneCloud — Điều khiển điện thoại Android từ xa (H.264 WebCodecs + Accessibility + 20 tools)
+  setGroup("phone");
+  registerPhoneTools(mcp, onActivity);
 
   // Áp trạng thái bật/tắt nhóm (Dashboard) và theo dõi phiên để áp trực tiếp
   // khi người dùng đổi trạng thái (xem tool-groups.ts).

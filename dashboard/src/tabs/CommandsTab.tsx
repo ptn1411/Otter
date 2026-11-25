@@ -30,7 +30,8 @@ export default function CommandsTab({ busy, act }: Props) {
   }, []);
 
   useEffect(() => {
-    void loadCommands();
+    const t = setTimeout(() => void loadCommands(), 0);
+    return () => clearTimeout(t);
   }, [loadCommands]);
 
   return (

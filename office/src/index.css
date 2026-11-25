@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-600.css";
+@import "@fontsource/ibm-plex-sans/latin-700.css";
+@import "@fontsource/ibm-plex-sans/vietnamese-400.css";
+@import "@fontsource/ibm-plex-sans/vietnamese-600.css";
+@import "@fontsource/ibm-plex-sans/vietnamese-700.css";
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #121721;
+  font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  color: #f8fafc;
+}
+
+button,
+input {
+  font: inherit;
+  touch-action: manipulation;
+}
+
+input,
+textarea {
+  font-size: 16px;
+}
+
+.panel-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.panel-scroll::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.7);
+  border-radius: 99px;
+}

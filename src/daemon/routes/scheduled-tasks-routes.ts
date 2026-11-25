@@ -9,17 +9,14 @@ import {
   updateScheduledTaskStatus
 } from "../scheduled-tasks";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+import { getCorsHeaders } from "./common";
 
 export async function handleScheduledTasksRoutes(
   req: Request,
   url: URL,
   db: Database
 ): Promise<Response | null> {
+  const corsHeaders = getCorsHeaders(req);
   // 1. Phục vụ ảnh chụp màn hình bằng chứng: GET /storage/tasks/:filename
   if (url.pathname.startsWith("/storage/tasks/") && req.method === "GET") {
     const filename = path.basename(url.pathname);

@@ -56,6 +56,7 @@ import {
   readAntigravityChat,
   controlAntigravity
 } from "../tools/antigravity-cdp-tools";
+import { executePhoneTool, PHONE_TOOL_DEFS } from "../tools/phone-tools";
 import {
   getToolGroupsState,
   setToolGroupsEnabled,
@@ -410,6 +411,15 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
         }
         const bots = listBots();
         return jsonResponse({ ok: true, total: bots.length, bots });
+      }
+
+      if (toolName.startsWith("phone_")) {
+        try {
+          const res = await executePhoneTool(toolName, body.arguments || body.args || body, handleMcpActivity);
+          return jsonResponse(typeof res === "object" && res !== null ? res : { ok: true, result: res });
+        } catch (err: any) {
+          return errorResponse(err.message, 400);
+        }
       }
     }
 
@@ -804,7 +814,13 @@ export async function handleMcpRoutes(req: Request, url: URL, handleMcpActivity:
           qualifiedName: "otter_core_a2a_list_bots",
           title: "Danh sách Bot Persona",
           description: "Liệt kê danh sách các Bot Persona trong mạng lưới A2A, khả năng kỹ thuật và hiện diện."
-        }
+        },
+        ...PHONE_TOOL_DEFS.map((t) => ({
+          name: t.name,
+          qualifiedName: `otter_core_${t.name}`,
+          title: t.title,
+          description: t.description,
+        }))
       ];
 
     const builtInServer = {

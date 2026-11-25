@@ -88,7 +88,7 @@ export function registerDesktopTools(mcp: McpServer, onActivity?: (event: any) =
     async ({ keys }) => {
       try {
         const msg = await keyboardAction(keys);
-        onActivity?.({ type: "desktop_action", action, keys });
+        onActivity?.({ type: "desktop_action", action: "keyboard", keys });
         return {
           content: [{ type: "text", text: msg }]
         };
